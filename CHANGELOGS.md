@@ -2,6 +2,13 @@
 
 Mọi sự thay đổi của dự án Gymbros sẽ được ghi lại tại đây.
 
+## [0.2.1] - 2025-11-28
+
+### Enhanced
+
+- Cải thiện độ mượt mà khi chuyển màn hình giữa Sign-In và Sign-Up.
+- Đồng bộ màu nền giữa app và hệ thống (light/dark mode).
+
 ## [0.2.0] - 2025-11-28
 
 ### Added
