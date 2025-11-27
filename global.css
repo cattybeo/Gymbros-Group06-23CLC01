@@ -1,4 +1,4 @@
-/* This file adds the requisite utility classes for Tailwind to work. */
+/* global.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

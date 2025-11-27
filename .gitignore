@@ -25,6 +25,7 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+yarn-lock.*
 
 # macOS
 .DS_Store
@@ -33,9 +34,11 @@ yarn-error.*
 # local env files
 # Disable temporarily
 # .env*.local 
+secrets/
 
 # typescript
 *.tsbuildinfo
+node_modules/
 
 # generated native folders
 /ios
