@@ -33,7 +33,12 @@
     },
     "plugins": [
       "expo-router",
-      "@react-native-google-signin/google-signin"
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.985952096028-jnf0efo1nuupeul5jo7188aqrb48rekm"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
