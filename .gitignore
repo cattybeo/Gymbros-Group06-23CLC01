@@ -51,4 +51,6 @@ node_modules/
 
 # Docs
 /docs_need_to_work
+/design_references
 .env
+/scripts

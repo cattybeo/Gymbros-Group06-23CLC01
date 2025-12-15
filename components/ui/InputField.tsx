@@ -27,16 +27,16 @@ export default function InputField({
 
   return (
     <View className="mb-4">
-      <Text className="text-gray-700 mb-2 font-medium">{label}</Text>
+      <Text className="text-gray-400 mb-2 font-medium">{label}</Text>
       {/* Container for input and icon */}
       <View
-        className={`w-full bg-gray-100 rounded-xl border flex-row items-center px-4 ${
-          error ? "border-red-500" : "border-gray-200"
-        } focus:border-blue-500`}
+        className={`w-full bg-surface rounded-xl border flex-row items-center px-4 ${
+          error ? "border-red-500" : "border-gray-700"
+        } focus:border-primary`}
       >
         <TextInput
-          className="flex-1 py-4 text-gray-900 h-full"
-          placeholderTextColor="#9CA3AF"
+          className="flex-1 py-4 text-white h-full"
+          placeholderTextColor="#6B7280"
           secureTextEntry={isPasswordField && !isPasswordVisible}
           {...props} // Truyền tất cả các props còn lại (onChangeText, value, secureTextEntry...)
         />
