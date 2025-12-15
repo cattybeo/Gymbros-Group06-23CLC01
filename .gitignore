@@ -51,3 +51,4 @@ node_modules/
 
 # Docs
 /docs_need_to_work
+.env
