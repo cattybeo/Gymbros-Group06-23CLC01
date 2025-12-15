@@ -27,7 +27,32 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
         }}
       />
-      {/* Sau này sẽ thêm trang mới vào đây */}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="membership"
+        options={{
+          title: "Membership",
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="credit-card" color={color} />
+          ),
+        }}
+      />
+      {/* Reserved for v0.3.0
+      <Tabs.Screen
+        name="classes"
+        options={{
+          title: "Classes",
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="calendar" color={color} />
+          ),
+        }}
+      /> */}
     </Tabs>
   );
 }

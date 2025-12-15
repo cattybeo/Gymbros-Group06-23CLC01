@@ -22,9 +22,12 @@ expo-env.d.ts
 .metro-health-check*
 
 # debug
+*.lock
+package-lock.json
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+yarn-lock.*
 
 # macOS
 .DS_Store
@@ -33,9 +36,11 @@ yarn-error.*
 # local env files
 # Disable temporarily
 # .env*.local 
+secrets/
 
 # typescript
 *.tsbuildinfo
+node_modules/
 
 # generated native folders
 /ios
@@ -43,3 +48,6 @@ yarn-error.*
 
 # vscode
 .vscode/
+
+# Docs
+/docs_need_to_work
