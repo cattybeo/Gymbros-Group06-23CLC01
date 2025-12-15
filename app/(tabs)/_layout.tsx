@@ -17,6 +17,13 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarInactiveTintColor: "#6B7280", // Gray-500
+        tabBarStyle: {
+          backgroundColor: "#1E1E1E", // Surface color (Dark Grey)
+          borderTopColor: "#1E1E1E", // Hide top border
+          paddingBottom: 5,
+          height: 60,
+        },
         headerShown: false, // Ẩn Header mặc định để dùng Header riêng của từng trang
       }}
     >

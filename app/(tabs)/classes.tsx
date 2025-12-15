@@ -98,10 +98,10 @@ export default function ClassesScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50 pt-12 px-4">
+    <View className="flex-1 bg-background pt-12 px-4">
       <View className="mb-6">
-        <Text className="text-3xl font-bold text-gray-900">Lịch Tập</Text>
-        <Text className="text-gray-500 mt-1">Các lớp học sắp diễn ra</Text>
+        <Text className="text-3xl font-bold text-white">Lịch Tập</Text>
+        <Text className="text-gray-400 mt-1">Các lớp học sắp diễn ra</Text>
       </View>
 
       <FlatList

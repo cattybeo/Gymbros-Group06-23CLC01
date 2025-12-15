@@ -39,10 +39,10 @@ export default function SignUp() {
   }
 
   return (
-    <View className="flex-1 bg-white px-6 justify-center">
+    <View className="flex-1 bg-background px-6 justify-center">
       <View className="items-center mb-8">
-        <Text className="text-3xl font-bold text-gray-900">Tạo tài khoản</Text>
-        <Text className="text-gray-500 mt-2">Tham gia cộng đồng Gymbros</Text>
+        <Text className="text-3xl font-bold text-white">Tạo tài khoản</Text>
+        <Text className="text-gray-400 mt-2">Tham gia cộng đồng Gymbros</Text>
       </View>
 
       <View>
@@ -68,9 +68,9 @@ export default function SignUp() {
       </View>
 
       <View className="flex-row justify-center mt-8">
-        <Text className="text-gray-500">Đã có tài khoản? </Text>
+        <Text className="text-gray-400">Đã có tài khoản? </Text>
         <TouchableOpacity onPress={() => router.back()}>
-          <Text className="text-blue-600 font-bold">Đăng nhập</Text>
+          <Text className="text-primary font-bold">Đăng nhập</Text>
         </TouchableOpacity>
       </View>
     </View>

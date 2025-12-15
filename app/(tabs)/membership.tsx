@@ -67,10 +67,10 @@ export default function MembershipScreen() {
   }
 
   return (
-    <View className="flex-1 bg-gray-50 pt-12 px-4">
+    <View className="flex-1 bg-background pt-12 px-4">
       <View className="mb-6">
-        <Text className="text-3xl font-bold text-gray-900">Gói Hội Viên</Text>
-        <Text className="text-gray-500 mt-1">
+        <Text className="text-3xl font-bold text-white">Gói Hội Viên</Text>
+        <Text className="text-gray-400 mt-1">
           Chọn gói tập phù hợp với mục tiêu của bạn
         </Text>
       </View>

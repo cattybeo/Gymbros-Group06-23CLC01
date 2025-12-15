@@ -30,9 +30,9 @@ export default function GoogleSignInButton() {
     return (
       <TouchableOpacity
         disabled
-        className="w-full bg-white border border-gray-200 p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
+        className="w-full bg-surface border border-gray-700 p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
       >
-        <ActivityIndicator size="small" color="#0000ff" />
+        <ActivityIndicator size="small" color="#FFA500" />
       </TouchableOpacity>
     );
   }
@@ -40,7 +40,7 @@ export default function GoogleSignInButton() {
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="w-full bg-white border border-gray-200 p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
+      className="w-full bg-surface border border-gray-700 p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
       disabled={loading}
     >
       <Image
@@ -48,7 +48,7 @@ export default function GoogleSignInButton() {
         className="w-6 h-6 mr-3"
         resizeMode="contain"
       />
-      <Text className="text-gray-700 font-bold text-base">Google</Text>
+      <Text className="text-white font-bold text-base">Google</Text>
     </TouchableOpacity>
   );
 }
