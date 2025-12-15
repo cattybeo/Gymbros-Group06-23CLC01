@@ -6,18 +6,21 @@ Dự án phát triển ứng dụng quản lý phòng Gym (Mobile App & Admin We
 
 - **Framework:** React Native (Expo SDK 54)
 - **Routing:** Expo Router (File-based routing)
-- **Styling:** NativeWind v2 (Tailwind CSS)
+- **Styling:** NativeWind v4 (Tailwind CSS)
 - **Database & Auth:** Supabase
 - **Language:** TypeScript
+- **External OAuth:** Google Sign-In
 
 ---
 
-## Hướng dẫn Cài đặt 
+## Hướng dẫn Cài đặt
 
 ### 1. Yêu cầu tiên quyết
+
 - Node.js (Khuyên dùng bản LTS 18 hoặc 20).
 - Git.
-- Điện thoại cài sẵn app **Expo Go**.
+- Android Studio (để chạy Emulator) hoặc điện thoại Android thật.
+- EAS CLI: `npm install -g eas-cli`
 
 ### 2. Clone dự án & Cài đặt thư viện
 
@@ -29,7 +32,7 @@ git clone https://github.com/duckmankie/Gymbros-Group06-23CLC01.git
 cd gymbros
 
 # Lưu ý: Nếu chưa có Yarn, cài đặt Yarn qua Corepack
-# npm install -g corepack 
+# npm install -g corepack
 # Hoặc npm install -g yarn
 
 # Kích hoạt Corepack để dùng Yarn (Nếu chưa có)
@@ -41,30 +44,85 @@ yarn install
 ```
 
 ### 3. Cấu hình biến môi trường
+
 1. Copy file `.env.example` thành `.env`.
-2. Liên hệ Leader để lấy API Key của Supabase và điền vào file `.env`.
+2. Liên hệ Leader để lấy các API Key và điền vào file `.env`:
+   - `EXPO_PUBLIC_SUPABASE_URL`
+   - `EXPO_PUBLIC_SUPABASE_KEY`
+   - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
 
 ---
 
 ## Cách chạy dự án
 
-### Quy tắc quan trọng 
+### Quy tắc quan trọng
+
 1. **KHÔNG commit file `package-lock.json`**. Nếu thấy nó xuất hiện, hãy xóa ngay lập tức. Chỉ dùng `yarn.lock`.
+2. **Dự án sử dụng Development Build**, không chạy được trên Expo Go.
 
 ### Lệnh khởi chạy
 
-```bash
-# 1. Xóa cache (Nên chạy mỗi khi pull code mới về hoặc cài thêm lib)
-npx expo start --clear
-# Hoặc yarn start --clear
+#### Cách 1: Dùng EAS Build (Khuyến nghị - Không cần cài Android Studio/Xcode)
 
-# 2. Chạy bình thường
-yarn start
+**Yêu cầu:** Tài khoản Expo (miễn phí)
+
+```bash
+# Đăng nhập EAS (lần đầu)
+eas login
 ```
-* Sau khi QR Code hiện lên:
-    * **Android:** Bấm `a` (nếu dùng máy ảo) hoặc quét QR bằng app Expo Go.
-    * **iOS:** Bấm `i` (nếu dùng máy Mac + Simulator) hoặc quét QR.
-    * **Web:** Bấm `w`.
+
+**Android:**
+
+```bash
+# Build development cho Android
+eas build --profile development --platform android
+
+# Sau khi build xong (~10-15 phút), tải APK từ link và cài lên Emulator/Điện thoại
+# Rồi chạy:
+npx expo start --dev-client
+```
+
+**iOS:** (Cần tài khoản Apple Developer - $99/năm)
+
+```bash
+# Build development cho iOS
+eas build --profile development --platform ios
+
+# Sau khi build xong, cài file .ipa lên Simulator hoặc TestFlight
+# Rồi chạy:
+npx expo start --dev-client
+```
+
+---
+
+#### Cách 2: Build Local (Không cần EAS)
+
+**Android:** (Cần Android Studio)
+
+```bash
+# Build và cài app lên Emulator (lần đầu, mất 5-10 phút)
+npx expo run:android
+
+# Những lần sau chỉ cần chạy:
+npx expo start --dev-client
+```
+
+**iOS:** (Cần macOS + Xcode)
+
+```bash
+# Build và cài app lên Simulator (lần đầu, mất 5-10 phút)
+npx expo run:ios
+
+# Những lần sau chỉ cần chạy:
+npx expo start --dev-client
+```
+
+### Lưu ý quan trọng
+
+- **Chỉ cần build lại** khi thêm/xóa native module (package có code Java/Swift).
+- **Code TypeScript/JavaScript** thay đổi → Hot Reload tự động, không cần build lại.
+- Mở app đã cài trên Emulator → Nó sẽ tự kết nối với Metro Bundler.
+- **iOS trên Windows/Linux:** Chỉ có thể dùng EAS Build (build trên cloud của Expo).
 
 ---
 
