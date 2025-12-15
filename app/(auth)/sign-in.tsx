@@ -33,14 +33,14 @@ export default function SignIn() {
   }
 
   return (
-    <View className="flex-1 bg-white px-6 justify-center">
+    <View className="flex-1 bg-background px-6 justify-center">
       {/* Header / Logo */}
       <View className="items-center mb-8">
-        <View className="w-20 h-20 bg-blue-100 rounded-full items-center justify-center mb-4">
+        <View className="w-20 h-20 bg-surface rounded-full items-center justify-center mb-4 border border-primary">
           <Text className="text-4xl">💪</Text>
         </View>
-        <Text className="text-3xl font-bold text-gray-900">Welcome Back!</Text>
-        <Text className="text-gray-500 mt-2">
+        <Text className="text-3xl font-bold text-white">Welcome Back!</Text>
+        <Text className="text-gray-400 mt-2">
           Đăng nhập để tiếp tục tập luyện
         </Text>
       </View>
@@ -74,18 +74,18 @@ export default function SignIn() {
 
       {/* Footer Nav */}
       <View className="flex-row justify-center mt-8">
-        <Text className="text-gray-500">Chưa có tài khoản? </Text>
+        <Text className="text-gray-400">Chưa có tài khoản? </Text>
         <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
-          <Text className="text-blue-600 font-bold">Đăng ký ngay</Text>
+          <Text className="text-primary font-bold">Đăng ký ngay</Text>
         </TouchableOpacity>
       </View>
 
       {/* OAuth Buttons */}
       <View className="mt-8">
         <View className="flex-row items-center mb-6">
-          <View className="flex-1 h-[2px] bg-gray-200" />
-          <Text className="mx-4 text-gray-400">Hoặc tiếp tục với</Text>
-          <View className="flex-1 h-[2px] bg-gray-200" />
+          <View className="flex-1 h-[1px] bg-gray-700" />
+          <Text className="mx-4 text-gray-500">Hoặc tiếp tục với</Text>
+          <View className="flex-1 h-[1px] bg-gray-700" />
         </View>
 
         <GoogleSignInButton />

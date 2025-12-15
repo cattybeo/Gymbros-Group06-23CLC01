@@ -3,7 +3,6 @@
     "name": "Gymbros",
     "slug": "gymbros",
     "version": "0.2.1",
-    "version": "0.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "gymbros",
@@ -17,8 +16,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gymbros"
-      "supportsTablet": true,
-      "bundleIdentifier": "com.gymbros"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,8 +23,6 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.gymbros"
       "predictiveBackGestureEnabled": false,
       "package": "com.gymbros"
     },
@@ -55,16 +50,6 @@
       "eas": {
         "projectId": "0f626a5f-ec7e-4a73-838b-252391880172"
       }
-    },
-    "owner": "anonytc"
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "0f626a5f-ec7e-4a73-838b-252391880172"
-      }
-    },
-    "owner": "anonytc"
+    }
   }
 }
-
