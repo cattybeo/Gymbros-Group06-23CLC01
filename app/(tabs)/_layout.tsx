@@ -43,7 +43,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* Reserved for v0.3.0
       <Tabs.Screen
         name="classes"
         options={{
@@ -52,7 +51,7 @@ export default function TabLayout() {
             <TabBarIcon name="calendar" color={color} />
           ),
         }}
-      /> */}
+      />
     </Tabs>
   );
 }

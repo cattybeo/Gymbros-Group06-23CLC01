@@ -16,22 +16,21 @@ export interface UserMembership {
   status: "active" | "expired";
 }
 
-// Reserved for v0.3.0
-// export interface GymClass {
-//   id: string;
-//   name: string;
-//   description: string | null;
-//   trainer_id: string | null;
-//   start_time: string;
-//   end_time: string;
-//   capacity: number;
-//   image_slug: string;
-// }
+export interface GymClass {
+  id: string;
+  name: string;
+  description: string | null;
+  trainer_id: string | null;
+  start_time: string;
+  end_time: string;
+  capacity: number;
+  image_slug: string;
+}
 
-// export interface Booking {
-//   id: string;
-//   user_id: string;
-//   class_id: string;
-//   booking_date: string;
-//   status: string;
-// }
+export interface Booking {
+  id: string;
+  user_id: string;
+  class_id: string;
+  booking_date: string;
+  status: string;
+}
