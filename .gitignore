@@ -23,6 +23,7 @@ expo-env.d.ts
 
 # debug
 *.lock
+package-lock.json
 npm-debug.*
 yarn-debug.*
 yarn-error.*
