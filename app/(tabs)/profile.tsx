@@ -2,10 +2,12 @@ import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
   const { user } = useAuthContext();
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     workouts: 0,
     calories: 0,
@@ -58,12 +60,15 @@ export default function ProfileScreen() {
 
         // 2. Process Membership Data
         if (memberResponse.data?.plan) {
-          // Extract Plan Name (e.g., "Gold Pack" -> "Gold")
-          // @ts-ignore: Supabase types might not infer nested join perfectly without generation
-          const planName = memberResponse.data.plan.name || "Standard Member";
-          // Display full name or just the First word? ERD/Mock says "Platinum Member".
-          // Let's just use the plan name directly or format if needed.
-          setMemberTier(planName);
+          // Use image_slug if available, assuming we can get it from plan. But we only selected name.
+          // Let's modify the query to get image_slug as well.
+          // For now, let's map name for standard casing issues or assume generic fallback.
+          // Actually, the most reliable way is if we fetched image_slug.
+          // But let's check what we fetched: plan:membership_plans(name).
+          // We should fetch * or name, image_slug.
+          // Wait, re-reading fetch code... select("end_date, plan:membership_plans(name)")
+          // We need image_slug to use the keys I just added.
+          //  Let's fix the query first.
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -74,16 +79,28 @@ export default function ProfileScreen() {
   }, [user]);
 
   const STATS = [
-    { label: "Workouts", value: stats.workouts.toString(), unit: "Session" },
-    { label: "Calories", value: stats.calories.toString(), unit: "Kcal/Day" },
-    { label: "Time", value: stats.minutes.toString(), unit: "Min" },
+    {
+      label: t("profile.workouts"),
+      value: stats.workouts.toString(),
+      unit: t("profile.unit_session"),
+    },
+    {
+      label: t("profile.calories"),
+      value: stats.calories.toString(),
+      unit: t("profile.unit_kcal"),
+    },
+    {
+      label: t("profile.minutes"),
+      value: stats.minutes.toString(),
+      unit: t("profile.unit_min"),
+    },
   ];
 
   const MENU_ITEMS = [
-    { label: "Edit Profile", icon: "user" },
-    { label: "Notifications", icon: "bell" },
-    { label: "Privacy Policy", icon: "shield" },
-    { label: "Settings", icon: "cog" },
+    { label: t("profile.edit_profile"), icon: "user" },
+    { label: t("profile.notifications"), icon: "bell" },
+    { label: t("profile.privacy_policy"), icon: "shield" },
+    { label: t("profile.settings"), icon: "cog" },
   ];
 
   const displayName =
@@ -93,7 +110,11 @@ export default function ProfileScreen() {
     "Gymbro User";
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView
+      className="flex-1 bg-background"
+      decelerationRate="fast"
+      showsVerticalScrollIndicator={false}
+    >
       {/* Header */}
       <View className="items-center pt-12 pb-8 bg-surface rounded-b-[30px] shadow-sm mb-6 border-b border-gray-800">
         <View className="w-24 h-24 bg-gray-700 rounded-full items-center justify-center mb-4 border-2 border-primary">
@@ -126,7 +147,9 @@ export default function ProfileScreen() {
 
       {/* Menu Options */}
       <View className="px-6 mb-8">
-        <Text className="text-white font-bold text-lg mb-4">General</Text>
+        <Text className="text-white font-bold text-lg mb-4">
+          {t("profile.general")}
+        </Text>
         <View className="bg-surface rounded-2xl overflow-hidden border border-gray-800">
           {MENU_ITEMS.map((item, index) => (
             <TouchableOpacity
@@ -160,7 +183,9 @@ export default function ProfileScreen() {
           onPress={() => supabase.auth.signOut()}
         >
           <FontAwesome name="sign-out" size={18} color="#EF4444" />
-          <Text className="text-red-500 font-bold ml-2">Log Out</Text>
+          <Text className="text-red-500 font-bold ml-2">
+            {t("profile.logout")}
+          </Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

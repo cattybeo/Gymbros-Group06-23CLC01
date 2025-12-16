@@ -2,6 +2,22 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.6.1] - 2025-12-16
+
+### Cải thiện (Improvements)
+
+- **Trải nghiệm người dùng (UX)**:
+  - Tối ưu cuộn danh sách (`ScrollView`, `FlatList`) với `decelerationRate="fast"` giúp cảm giác lướt "đầm" và mượt hơn.
+  - Sửa lỗi hiển thị nút "Đăng Ký" bị xuống dòng trên thẻ thành viên.
+- **Đa ngôn ngữ (i18n)**:
+  - Hoàn tất dịch thuật cho thanh Tab Bar (Trang chủ, Hồ sơ, Gói tập, Lịch tập).
+  - Áp dụng đa ngôn ngữ cho tên các Gói tập (Gói Bạc, Gói Vàng...) dựa trên `image_slug`.
+  - Dịch đơn vị đo lường trong Profile (Buổi, Kcal/Ngày, Phút).
+
+### Sửa lỗi (Bug Fixes)
+
+- **Membership**: Khắc phục lỗi hiển thị trạng thái "Đăng ký ngay" thay vì "Nâng gói" đối với các hạng thẻ cao hơn.
+
 ## [0.6.0] - 2025-12-16
 
 ### Thêm mới

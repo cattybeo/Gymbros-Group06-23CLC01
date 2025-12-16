@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { StripeProvider } from "@stripe/stripe-react-native";
 import { Tabs } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -15,6 +16,7 @@ function TabBarIcon(props: {
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
 
   return (
     <StripeProvider
@@ -36,21 +38,21 @@ export default function TabLayout() {
         <Tabs.Screen
           name="index"
           options={{
-            title: "Home",
+            title: t("navigation.home"),
             tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
-            title: "Profile",
+            title: t("navigation.profile"),
             tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
           }}
         />
         <Tabs.Screen
           name="membership"
           options={{
-            title: "Membership",
+            title: t("navigation.membership"),
             tabBarIcon: ({ color }) => (
               <TabBarIcon name="credit-card" color={color} />
             ),
@@ -59,7 +61,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="classes"
           options={{
-            title: "Classes",
+            title: t("navigation.classes"),
             tabBarIcon: ({ color }) => (
               <TabBarIcon name="calendar" color={color} />
             ),
