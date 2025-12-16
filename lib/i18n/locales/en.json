@@ -36,12 +36,15 @@
     "weight_placeholder": "e.g. 70",
     "height_label": "Height (cm)",
     "height_placeholder": "e.g. 175",
-    "next_button": "Next"
+    "next_button": "Next",
+    "password_incorrect": "Incorrect old password"
   },
   "common": {
     "error": "Error",
     "missing_info": "Please fill in all fields.",
-    "success": "Success"
+    "success": "Success",
+    "save": "Save Changes",
+    "cancel": "Cancel"
   },
   "membership": {
     "title": "Membership Plans",
@@ -87,7 +90,9 @@
     "unit_kcal": "Kcal/Day",
     "unit_min": "Min",
     "tier_standard": "Standard Member",
-    "update_success_msg": "Profile updated successfully!"
+    "update_success_msg": "Profile updated successfully!",
+    "email_change_notice": "Email cannot be changed directly.",
+    "change_password_success": "Password changed successfully!"
   },
   "plans": {
     "silver_pack": "Silver Pack",
