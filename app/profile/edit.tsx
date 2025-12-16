@@ -83,7 +83,7 @@ export default function EditProfileScreen() {
               <Text className="text-gray-400">{user?.email}</Text>
             </View>
             <Text className="text-gray-500 text-xs mt-1 italic">
-              Email cannot be changed directly.
+              {t("profile.email_change_notice")}
             </Text>
           </View>
         </View>

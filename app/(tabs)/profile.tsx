@@ -127,6 +127,11 @@ export default function ProfileScreen() {
       icon: "user",
       action: () => router.push("/profile/edit"),
     },
+    {
+      label: t("auth.change_password"),
+      icon: "lock",
+      action: () => router.push("/profile/change-password"),
+    },
     { label: t("profile.notifications"), icon: "bell" },
     { label: t("profile.privacy_policy"), icon: "shield" },
     { label: t("profile.settings"), icon: "cog" },
