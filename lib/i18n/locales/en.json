@@ -42,5 +42,59 @@
     "error": "Error",
     "missing_info": "Please fill in all fields.",
     "success": "Success"
+  },
+  "membership": {
+    "title": "Membership Plans",
+    "subtitle": "Choose a plan that fits your goal",
+    "buy_now": "Subscribe Now",
+    "current": "Current Plan",
+    "upgrade": "Upgrade",
+    "no_downgrade": "Downgrade Not Supported",
+    "processing": "Processing...",
+    "month": "Month",
+    "empty_list": "No plans available at the moment."
+  },
+  "home": {
+    "welcome": "Welcome back,",
+    "quick_access": "Quick Access",
+    "workout": "Workout",
+    "diet": "Diet",
+    "shop": "Shop",
+    "blog": "Blog",
+    "recent_activity": "Recent Activity",
+    "member_name": "MEMBER NAME",
+    "tier": {
+      "standard": "STANDARD MEMBER",
+      "silver": "SILVER MEMBER",
+      "gold": "GOLD MEMBER",
+      "platinum": "PLATINUM MEMBER"
+    }
+  },
+  "profile": {
+    "workouts": "Workouts",
+    "calories": "Calories",
+    "minutes": "Minutes",
+    "edit_profile": "Edit Profile",
+    "notifications": "Notifications",
+    "privacy_policy": "Privacy Policy",
+    "settings": "Settings",
+    "general": "General",
+    "logout": "Log Out",
+    "unit_session": "Session",
+    "unit_kcal": "Kcal/Day",
+    "unit_min": "Min",
+    "tier_standard": "Standard Member"
+  },
+  "plans": {
+    "silver_pack": "Silver Pack",
+    "gold_pack": "Gold Pack",
+    "platinum_pack": "Platinum Pack",
+    "standard": "Standard Pack"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "membership": "Membership",
+    "classes": "Classes"
   }
 }

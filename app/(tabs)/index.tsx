@@ -1,9 +1,18 @@
+import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
 import { useAuthContext } from "@/lib/AuthContext";
-import { supabase } from "@/lib/supabase"; // Import supabase
+import { supabase } from "@/lib/supabase";
 import { FontAwesome } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react"; // Import useEffect, useState
-import { Dimensions, Image, ScrollView, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import {
+  Dimensions,
+  Image,
+  ScrollView,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 import {
   BarcodeCreatorView,
   BarcodeFormat,
@@ -13,6 +22,9 @@ export default function HomeScreen() {
   const { user } = useAuthContext();
   const screenWidth = Dimensions.get("window").width;
   const [memberTier, setMemberTier] = useState("STANDARD MEMBER"); // Default state
+  const { t } = useTranslation();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   // Fetch Tier
   useEffect(() => {
@@ -35,11 +47,47 @@ export default function HomeScreen() {
     fetchTier();
   }, [user]);
 
+  // Tier Styling Logic
+  const getTierStyle = (tier: string) => {
+    if (tier.includes("SILVER")) {
+      return {
+        text: "text-gray-300",
+        icon: colors.silver,
+        bg: "bg-gray-400",
+        label: t("home.tier.silver"),
+      };
+    }
+    if (tier.includes("GOLD")) {
+      return {
+        text: "text-yellow-500",
+        icon: colors.gold,
+        bg: "bg-yellow-500",
+        label: t("home.tier.gold"),
+      };
+    }
+    if (tier.includes("PLATINUM")) {
+      return {
+        text: "text-cyan-400",
+        icon: colors.platinum,
+        bg: "bg-cyan-400",
+        label: t("home.tier.platinum"),
+      };
+    }
+    return {
+      text: "text-primary",
+      icon: colors.tint,
+      bg: "bg-primary",
+      label: t("home.tier.standard"),
+    };
+  };
+
+  const tierStyle = getTierStyle(memberTier);
+
   const MENU_ITEMS = [
-    { name: "Workout", icon: "bicycle" },
-    { name: "Diet", icon: "leaf" },
-    { name: "Shop", icon: "shopping-cart" },
-    { name: "Blog", icon: "newspaper-o" },
+    { name: t("home.workout"), icon: "bicycle" },
+    { name: t("home.diet"), icon: "leaf" },
+    { name: t("home.shop"), icon: "shopping-cart" },
+    { name: t("home.blog"), icon: "newspaper-o" },
   ];
 
   return (
@@ -51,7 +99,7 @@ export default function HomeScreen() {
     >
       {/* Header */}
       <View className="pt-12 px-6 mb-6">
-        <Text className="text-gray-400 text-sm">Welcome back,</Text>
+        <Text className="text-gray-400 text-sm">{t("home.welcome")}</Text>
         <Text className="text-white text-2xl font-bold">
           {user?.email?.split("@")[0] || "Gymbro"}
         </Text>
@@ -61,23 +109,29 @@ export default function HomeScreen() {
       <View className="px-6 mb-8">
         <View className="bg-surface rounded-2xl p-6 border border-gray-800 shadow-sm relative overflow-hidden">
           {/* Card Bg Decoration */}
-          <View className="absolute top-0 right-0 w-32 h-32 bg-primary opacity-10 rounded-bl-full translate-x-10 -translate-y-10" />
+          <View
+            className={`absolute top-0 right-0 w-32 h-32 ${tierStyle.bg} opacity-10 rounded-bl-full translate-x-10 -translate-y-10`}
+          />
 
           <View className="flex-row justify-between items-start mb-6">
             <View>
-              <Text className="text-primary font-bold text-lg tracking-widest">
+              <Text
+                className={`${tierStyle.text} font-bold text-lg tracking-widest`}
+              >
                 GYMBROS
               </Text>
               <Text className="text-gray-500 text-xs tracking-wider">
-                {memberTier}
+                {tierStyle.label}
               </Text>
             </View>
-            <FontAwesome name="diamond" size={24} color="#FFA500" />
+            <FontAwesome name="diamond" size={24} color={tierStyle.icon} />
           </View>
 
           <View className="flex-row justify-between items-end mb-6">
             <View>
-              <Text className="text-gray-400 text-xs mb-1">MEMBER NAME</Text>
+              <Text className="text-gray-400 text-xs mb-1">
+                {t("home.member_name")}
+              </Text>
               <Text className="text-white font-bold text-lg uppercase">
                 {user?.email?.split("@")[0] || "MEMBER"}
               </Text>
@@ -114,14 +168,18 @@ export default function HomeScreen() {
             <Text className="text-white font-bold text-xl w-2/3">
               TRANSFORM YOUR BODY WITH POWER PUMP
             </Text>
-            <Text className="text-primary font-bold mt-2">JOIN NOW &rarr;</Text>
+            <Text style={{ color: colors.tint }} className="font-bold mt-2">
+              JOIN NOW &rarr;
+            </Text>
           </View>
         </View>
       </View>
 
       {/* Grid Menu */}
       <View className="px-6 mb-8">
-        <Text className="text-white font-bold text-lg mb-4">Quick Access</Text>
+        <Text className="text-white font-bold text-lg mb-4">
+          {t("home.quick_access")}
+        </Text>
         <View className="flex-row flex-wrap justify-between">
           {MENU_ITEMS.map((item, index) => (
             <View
@@ -132,7 +190,7 @@ export default function HomeScreen() {
                 <FontAwesome
                   name={item.icon as any}
                   size={20}
-                  color="#FFA500"
+                  color={colors.tint}
                 />
               </View>
               <Text className="text-gray-300 font-medium">{item.name}</Text>
@@ -144,7 +202,7 @@ export default function HomeScreen() {
       {/* Recent Activity */}
       <View className="px-6 pb-20">
         <Text className="text-white font-bold text-lg mb-4">
-          Recent Activity
+          {t("home.recent_activity")}
         </Text>
         <View className="bg-surface rounded-xl p-4 border border-gray-800 flex-row items-center">
           <View className="w-10 h-10 bg-green-900/50 rounded-full items-center justify-center mr-4">

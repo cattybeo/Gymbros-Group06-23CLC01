@@ -10,6 +10,17 @@ Dự án phát triển ứng dụng quản lý phòng Gym (Mobile App & Admin We
 - **Database & Auth:** Supabase
 - **Language:** TypeScript
 - **External OAuth:** Google Sign-In
+- **Payment:** Stripe (Native Payment Sheet)
+- **i18n:** React-i18next (English/Vietnamese)
+
+## Tính năng Chính (Đã hoàn thiện)
+
+- **Authentication:** Đăng nhập/Đăng ký, Google OAuth, Quên mật khẩu.
+- **Membership:** Xem gói tập, Thanh toán qua Stripe, Nâng cấp gói.
+- **Classes:** Xem lịch tập, Đặt chỗ (Booking).
+- **Profile:** Theo dõi chỉ số cơ thể (BMI/BMR), Lịch sử tập luyện.
+- **Home:** Dashboard tổng quan, Barcode thành viên, Tin tức.
+- **Setting:** Chuyển đổi ngôn ngữ, Dark Mode (Giao diện cao cấp).
 
 ---
 

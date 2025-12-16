@@ -42,5 +42,59 @@
     "error": "Lỗi",
     "missing_info": "Vui lòng điền đầy đủ thông tin.",
     "success": "Thành công"
+  },
+  "membership": {
+    "title": "Gói Hội Viên",
+    "subtitle": "Chọn gói tập phù hợp với mục tiêu của bạn",
+    "buy_now": "Đăng Ký Ngay",
+    "current": "Đang sử dụng",
+    "upgrade": "Nâng gói",
+    "no_downgrade": "Không hỗ trợ hạ gói",
+    "processing": "Đang xử lý...",
+    "month": "Tháng",
+    "empty_list": "Chưa có gói tập nào được mở bán."
+  },
+  "home": {
+    "welcome": "Chào mừng trở lại,",
+    "quick_access": "Truy cập nhanh",
+    "workout": "Tập luyện",
+    "diet": "Dinh dưỡng",
+    "shop": "Cửa hàng",
+    "blog": "Tin tức",
+    "recent_activity": "Hoạt động gần đây",
+    "member_name": "TÊN HỘI VIÊN",
+    "tier": {
+      "standard": "HỘI VIÊN TIÊU CHUẨN",
+      "silver": "HỘI VIÊN BẠC",
+      "gold": "HỘI VIÊN VÀNG",
+      "platinum": "HỘI VIÊN BẠCH KIM"
+    }
+  },
+  "profile": {
+    "workouts": "Buổi tập",
+    "calories": "Kcal/Ngày",
+    "minutes": "Phút",
+    "edit_profile": "Chỉnh sửa hồ sơ",
+    "notifications": "Thông báo",
+    "privacy_policy": "Chính sách bảo mật",
+    "settings": "Cài đặt",
+    "general": "Chung",
+    "logout": "Đăng xuất",
+    "unit_session": "Buổi",
+    "unit_kcal": "Kcal/Ngày",
+    "unit_min": "Phút",
+    "tier_standard": "Thành Viên Tiêu Chuẩn"
+  },
+  "plans": {
+    "silver_pack": "Gói Bạc",
+    "gold_pack": "Gói Vàng",
+    "platinum_pack": "Gói Bạch Kim",
+    "standard": "Gói Tiêu Chuẩn"
+  },
+  "navigation": {
+    "home": "Trang chủ",
+    "profile": "Hồ sơ",
+    "membership": "Gói tập",
+    "classes": "Lịch tập"
   }
 }
