@@ -96,5 +96,25 @@
     "profile": "Hồ sơ",
     "membership": "Gói tập",
     "classes": "Lịch tập"
+  },
+  "classes": {
+    "title": "Lịch Tập",
+    "subtitle": "Các lớp học sắp diễn ra",
+    "trainer": "HLV",
+    "duration": "Thời gian",
+    "minutes": "phút",
+    "capacity": "Sĩ số",
+    "slots": "chỗ",
+    "book_now": "Đặt ngay",
+    "booked": "Đã đặt",
+    "full": "Hết chỗ",
+    "booking_success": "Thành công",
+    "booking_success_msg": "Đặt lịch thành công!",
+    "booking_error": "Lỗi đặt lịch",
+    "login_required": "Vui lòng đăng nhập để đặt lịch.",
+    "membership_required": "Cần có gói Hội viên",
+    "membership_required_msg": "Bạn cần đăng ký gói hội viên để đặt lịch.",
+    "already_booked": "Bạn đã đặt lịch lớp này rồi.",
+    "empty_list": "Không có lớp học nào sắp tới."
   }
 }

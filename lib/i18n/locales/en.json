@@ -96,5 +96,25 @@
     "profile": "Profile",
     "membership": "Membership",
     "classes": "Classes"
+  },
+  "classes": {
+    "title": "Classes",
+    "subtitle": "Upcoming classes",
+    "trainer": "Trainer",
+    "duration": "Duration",
+    "minutes": "min",
+    "capacity": "Capacity",
+    "slots": "slots",
+    "book_now": "Book Now",
+    "booked": "Booked",
+    "full": "Full",
+    "booking_success": "Success",
+    "booking_success_msg": "Booking successful!",
+    "booking_error": "Booking Error",
+    "login_required": "Please login to book a class.",
+    "membership_required": "Membership Required",
+    "membership_required_msg": "You need an active membership to book classes.",
+    "already_booked": "You have already booked this class.",
+    "empty_list": "No upcoming classes found."
   }
 }
