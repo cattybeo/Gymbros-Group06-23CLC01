@@ -1,15 +1,69 @@
-# Changelog
+# Nhật ký thay đổi (Changelog)
 
-## [0.2.2] - 2025-12-16
+Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
-### Added
-
-- **UI/UX**: Implemented `SafeAreaView` across Welcome, SignIn, and PersonalSpecs screens to support edge-to-edge Android devices and prevent overlap with system bars.
-- **Animations**: Added `react-native-reanimated` entry effects (FadeInDown, FadeInUp) to SignIn and Welcome screens for a premium feel.
+## [0.5.1] - 2025-12-16
 
 ### Fixed
 
-- **Barcode**: Resolved `NaN` viewBox crash on Android by replacing `maxWidth` with fixed `width` and adding conditional rendering.
-- **Navigation**: Fixed route registration for `(onboarding)` group in root layout to resolve runtime warnings.
-- **Network**: Resolved Metro connection issues on Android Emulator.
-- **Dependencies**: Fixed NDK corruption and AGP version mismatches.
+- Fixed Barcode Render Error by correcting named exports for `react-native-barcode-creator`.
+- Fixed "White Rectangle" issue on Barcode by making it full width and setting explicit colors.
+- Fixed System Navigator overlapping Tab Layout on Android.
+
+### Added
+
+- Implemented full i18n support for Sign Up screen (`sign-up.tsx`).
+- Connected Profile Screen to real data (`body_indices` for BMR, `profiles` for Member Tier).
+
+## [v0.5.0] - 2025-12-16
+
+### Thêm mới
+
+- **Đa ngôn ngữ (i18n)**: Tích hợp `i18next` và `expo-localization`. Hỗ trợ chuyển đổi Anh - Việt.
+- **Giao diện**: Refactor các màn hình Welcome, SignIn, PersonalSpecs để hỗ trợ đa ngôn ngữ.
+
+### Sửa lỗi
+
+- **Build**: Khắc phục lỗi `native module 'ExpoLocalization' not found` bằng cách rebuild native app.
+
+## [v0.4.0] - 2025-12-15
+
+### Thêm mới
+
+- **Giao diện Dark Premium**: Cập nhật toàn bộ giao diện ứng dụng sang tông màu Tối/Cam sang trọng.
+- **Màn hình chính (Home)**:
+  - Thẻ thành viên điện tử với Mã vạch động (Code128).
+  - Banner quảng cáo ("Power Pump").
+  - Menu lưới truy cập nhanh (Workout, Diet, Shop, Blog).
+  - Mục Hoạt động gần đây.
+- **Màn hình cá nhân (Profile)**:
+  - Header mới với Avatar và Hạng thành viên.
+  - Dashboard thống kê (Số buổi tập, Calo, Thời gian).
+  - Menu Cài đặt.
+- **Hỗ trợ Mã vạch**: Tích hợp thư viện `react-native-barcode-svg` để tạo mã vạch động.
+
+### Thay đổi
+
+- **Màu sắc**: Cập nhật cấu hình trong `tailwind.config.js` và `Colors.ts` sang `#121212` (Nền), `#1E1E1E` (Surface), `#FFA500` (Chủ đạo).
+- **Điều hướng**: Thanh Tab Bar dưới cùng được cập nhật theo theme tối (Nền tối, Không viền, Active màu Cam).
+- **Màn hình Xác thực**: Đăng nhập (SignIn) và Đăng ký (SignUp) chuyển sang giao diện tối.
+- **Components**: `MembershipCard`, `ClassCard`, `Button`, `InputField`, `GoogleSignInButton` được refactor sang Dark Mode.
+
+## [v0.3.0] - 2025-12-15
+
+### Thêm mới
+
+- **Tính năng Lớp học**:
+  - Bảng `classes` trong Supabase.
+  - Bảng `bookings` trong Supabase.
+  - Giao diện Đặt lớp (`classes.tsx`, `ClassCard.tsx`).
+  - Logic Đặt lịch (Kiểm tra Hội viên + Kiểm tra trùng lặp).
+
+## [v0.2.0] - 2025-12-15
+
+### Thêm mới
+
+- **Tính năng Hội viên**:
+  - Bảng `membership_plans` trong Supabase.
+  - Bảng `user_memberships` trong Supabase.
+  - Giao diện Mua gói tập (`membership.tsx`, `MembershipCard.tsx`).
