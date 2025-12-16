@@ -9,13 +9,20 @@ export default function SignUp() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSignUp() {
-    if (!email || !password) {
+    if (!email || !password || !confirmPassword) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
       return;
     }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Lỗi", "Mật khẩu xác nhận không khớp");
+      return;
+    }
+
     setLoading(true);
 
     // 1. Gọi Supabase Sign Up
@@ -59,6 +66,13 @@ export default function SignUp() {
           placeholder="••••••"
           value={password}
           onChangeText={setPassword}
+          secureTextEntry
+        />
+        <InputField
+          label="Nhập lại Mật khẩu"
+          placeholder="••••••"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
           secureTextEntry
         />
 

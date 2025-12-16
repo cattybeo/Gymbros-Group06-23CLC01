@@ -58,6 +58,19 @@ create table public.bookings (
   status text default 'confirmed'
 );
 
+-- 5. Body Indices (Onboarding & Body Metrics)
+create table public.body_indices (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) not null,
+  height decimal(5,2), -- cm
+  weight decimal(5,2), -- kg
+  age int,
+  gender text, -- 'Male', 'Female', 'Other'
+  goal text, -- 'Lose Weight', 'Build Muscle', etc.
+  record_day date default current_date,
+  created_at timestamp with time zone default now()
+);
+
 -- RLS for Bookings
 alter table public.bookings enable row level security;
 create policy "Users can view own bookings" on public.bookings for select using (auth.uid() = user_id);
