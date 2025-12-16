@@ -22,29 +22,51 @@ export default function HomeScreen() {
   const { user } = useAuthContext();
   const screenWidth = Dimensions.get("window").width;
   const [memberTier, setMemberTier] = useState("STANDARD MEMBER"); // Default state
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
-  // Fetch Tier
+  const [recentActivity, setRecentActivity] = useState<any>(null);
+
+  // Fetch Member Tier & Recent Activity
   useEffect(() => {
     if (!user) return;
-    const fetchTier = async () => {
-      const { data } = await supabase
-        .from("user_memberships")
-        .select("end_date, plan:membership_plans(name)")
-        .eq("user_id", user.id)
-        .gte("end_date", new Date().toISOString())
-        .order("end_date", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+    const fetchData = async () => {
+      try {
+        const [tierResponse, activityResponse] = await Promise.all([
+          // 1. Fetch Tier
+          supabase
+            .from("user_memberships")
+            .select("end_date, plan:membership_plans(name)")
+            .eq("user_id", user.id)
+            .gte("end_date", new Date().toISOString())
+            .order("end_date", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+          // 2. Fetch Recent Activity (Latest Booking)
+          supabase
+            .from("bookings")
+            .select("booking_date, class:classes(name)")
+            .eq("user_id", user.id)
+            .order("booking_date", { ascending: false })
+            .limit(1)
+            .maybeSingle(),
+        ]);
 
-      if (data?.plan) {
-        // @ts-ignore
-        setMemberTier(data.plan.name.toUpperCase());
+        if (tierResponse.data?.plan) {
+          // @ts-ignore
+          setMemberTier(tierResponse.data.plan.name.toUpperCase());
+        }
+
+        if (activityResponse.data) {
+          setRecentActivity(activityResponse.data);
+        }
+      } catch (error) {
+        console.error("Error fetching home data:", error);
       }
     };
-    fetchTier();
+
+    fetchData();
   }, [user]);
 
   // Tier Styling Logic
@@ -204,15 +226,50 @@ export default function HomeScreen() {
         <Text className="text-white font-bold text-lg mb-4">
           {t("home.recent_activity")}
         </Text>
-        <View className="bg-surface rounded-xl p-4 border border-gray-800 flex-row items-center">
-          <View className="w-10 h-10 bg-green-900/50 rounded-full items-center justify-center mr-4">
-            <FontAwesome name="check" size={16} color="#4ADE80" />
+        {recentActivity ? (
+          <View className="bg-surface rounded-xl p-4 border border-gray-800 flex-row items-center">
+            <View
+              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
+                new Date(recentActivity.booking_date) > new Date()
+                  ? "bg-blue-900/50"
+                  : "bg-green-900/50"
+              }`}
+            >
+              <FontAwesome
+                name={
+                  new Date(recentActivity.booking_date) > new Date()
+                    ? "calendar"
+                    : "check"
+                }
+                size={16}
+                color={
+                  new Date(recentActivity.booking_date) > new Date()
+                    ? "#60A5FA"
+                    : "#4ADE80"
+                }
+              />
+            </View>
+            <View>
+              <Text className="text-white font-medium">
+                {recentActivity.class?.name || "Group Class"}
+              </Text>
+              <Text className="text-gray-500 text-xs">
+                {new Date(recentActivity.booking_date) > new Date()
+                  ? t("home.upcoming_class")
+                  : t("home.completed_class")}{" "}
+                •{" "}
+                {new Date(recentActivity.booking_date).toLocaleDateString(
+                  i18n.language === "vi" ? "vi-VN" : "en-US",
+                  { weekday: "short", day: "numeric", month: "numeric" }
+                )}
+              </Text>
+            </View>
           </View>
-          <View>
-            <Text className="text-white font-medium">Check-in Success</Text>
-            <Text className="text-gray-500 text-xs">Today, 09:30 AM</Text>
-          </View>
-        </View>
+        ) : (
+          <Text className="text-gray-500 text-center italic">
+            {t("home.no_activity")}
+          </Text>
+        )}
       </View>
     </ScrollView>
   );
