@@ -19,12 +19,16 @@ export default function HomeScreen() {
     if (!user) return;
     const fetchTier = async () => {
       const { data } = await supabase
-        .from("profiles")
-        .select("tier")
-        .eq("id", user.id)
+        .from("Membership")
+        .select("type, end_date")
+        .eq("user_id", user.id)
+        .gte("end_date", new Date().toISOString())
+        .order("end_date", { ascending: false })
+        .limit(1)
         .single();
-      if (data?.tier) {
-        setMemberTier(data.tier.toUpperCase());
+
+      if (data?.type) {
+        setMemberTier(data.type.toUpperCase());
       }
     };
     fetchTier();

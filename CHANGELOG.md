@@ -4,16 +4,16 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 
 ## [0.5.1] - 2025-12-16
 
-### Fixed
+### Sửa lỗi
 
-- Fixed Barcode Render Error by correcting named exports for `react-native-barcode-creator`.
-- Fixed "White Rectangle" issue on Barcode by making it full width and setting explicit colors.
-- Fixed System Navigator overlapping Tab Layout on Android.
+- Sửa lỗi hiển thị Barcode bằng cách cập nhật named exports cho thư viện `react-native-barcode-creator`.
+- Khắc phục lỗi "Hình chữ nhật trắng" trên Barcode bằng cách chỉnh full-width và thiết lập màu nền/màu vạch cụ thể.
+- Sửa lỗi System Navigator che khuất Tab Bar trên Android.
 
-### Added
+### Thêm mới
 
-- Implemented full i18n support for Sign Up screen (`sign-up.tsx`).
-- Connected Profile Screen to real data (`body_indices` for BMR, `profiles` for Member Tier).
+- Triển khai đa ngôn ngữ (i18n) hoàn chỉnh cho màn hình Đăng ký (`sign-up.tsx`).
+- Kết nối màn hình Profile với dữ liệu thật (`body_indices` để tính BMR, `membership` để lấy hạng thành viên).
 
 ## [v0.5.0] - 2025-12-16
 
