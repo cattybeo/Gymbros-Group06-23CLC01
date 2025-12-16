@@ -2,12 +2,14 @@ import ClassCard from "@/components/ClassCard";
 import { supabase } from "@/lib/supabase";
 import { GymClass } from "@/lib/types";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, FlatList, Text, View } from "react-native";
 
 export default function ClassesScreen() {
   const [classes, setClasses] = useState<GymClass[]>([]);
   const [loading, setLoading] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchClasses();
@@ -23,7 +25,7 @@ export default function ClassesScreen() {
       .order("start_time", { ascending: true });
 
     if (error) {
-      Alert.alert("Lỗi", "Không thể tải danh sách lớp học");
+      Alert.alert(t("common.error"), t("classes.empty_list")); // Or a generic fetch error if we had one
       console.error(error);
     } else {
       setClasses(data || []);
@@ -37,7 +39,7 @@ export default function ClassesScreen() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      Alert.alert("Yêu cầu", "Vui lòng đăng nhập để đặt lịch.");
+      Alert.alert(t("auth.login_button"), t("classes.login_required"));
       return;
     }
 
@@ -55,8 +57,8 @@ export default function ClassesScreen() {
 
       if (memError || !memberships || memberships.length === 0) {
         Alert.alert(
-          "Chưa có gói tập",
-          "Bạn cần đăng ký gói hội viên (Membership) để đặt lịch lớp học."
+          t("classes.membership_required"),
+          t("classes.membership_required_msg")
         );
         setBookingId(null);
         return;
@@ -71,7 +73,7 @@ export default function ClassesScreen() {
         .single();
 
       if (existingBooking) {
-        Alert.alert("Thông báo", "Bạn đã đặt lịch cho lớp này rồi.");
+        Alert.alert(t("common.error"), t("classes.already_booked"));
         setBookingId(null);
         return;
       }
@@ -87,11 +89,11 @@ export default function ClassesScreen() {
       if (bookError) throw bookError;
 
       Alert.alert(
-        "Thành công! ✅",
-        "Đặt lịch thành công, hãy đến đúng giờ nhé!"
+        t("classes.booking_success"),
+        t("classes.booking_success_msg")
       );
     } catch (error: any) {
-      Alert.alert("Lỗi", "Đặt lịch thất bại: " + error.message);
+      Alert.alert(t("classes.booking_error"), error.message);
     } finally {
       setBookingId(null);
     }
@@ -100,8 +102,10 @@ export default function ClassesScreen() {
   return (
     <View className="flex-1 bg-background pt-12 px-4">
       <View className="mb-6">
-        <Text className="text-3xl font-bold text-white">Lịch Tập</Text>
-        <Text className="text-gray-400 mt-1">Các lớp học sắp diễn ra</Text>
+        <Text className="text-3xl font-bold text-white">
+          {t("classes.title")}
+        </Text>
+        <Text className="text-gray-400 mt-1">{t("classes.subtitle")}</Text>
       </View>
 
       <FlatList
@@ -119,7 +123,7 @@ export default function ClassesScreen() {
         ListEmptyComponent={
           !loading ? (
             <Text className="text-center text-gray-500 mt-10">
-              Không có lớp học nào sắp tới.
+              {t("classes.empty_list")}
             </Text>
           ) : null
         }

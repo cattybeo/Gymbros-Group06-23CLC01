@@ -1,5 +1,6 @@
 import { GYM_IMAGES } from "@/constants/Images";
 import { GymClass } from "@/lib/types";
+import { useTranslation } from "react-i18next";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface ClassCardProps {
@@ -13,13 +14,17 @@ export default function ClassCard({
   onBook,
   isBooking,
 }: ClassCardProps) {
+  const { t, i18n } = useTranslation();
   const startTime = new Date(gymClass.start_time);
   const endTime = new Date(gymClass.end_time);
 
+  // use i18n.language. 'vi' maps to 'vi-VN', 'en' maps to 'en-US' basically.
+  const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
+
   const formatTime = (date: Date) =>
-    date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
+    date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
   const formatDate = (date: Date) =>
-    date.toLocaleDateString("vi-VN", {
+    date.toLocaleDateString(locale, {
       weekday: "long",
       day: "numeric",
       month: "numeric",
@@ -50,7 +55,7 @@ export default function ClassCard({
 
           <View className="self-start bg-gray-700 px-2 py-1 rounded-md mt-1">
             <Text className="text-xs font-semibold text-gray-300">
-              {gymClass.capacity} slot
+              {gymClass.capacity} {t("classes.slots")}
             </Text>
           </View>
         </View>
@@ -70,7 +75,7 @@ export default function ClassCard({
         disabled={isBooking}
       >
         <Text className="text-white font-bold">
-          {isBooking ? "Đang đặt..." : "Đặt Lịch Ngay"}
+          {isBooking ? t("classes.booked") : t("classes.book_now")}
         </Text>
       </TouchableOpacity>
     </View>
