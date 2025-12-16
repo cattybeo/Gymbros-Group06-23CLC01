@@ -1,4 +1,5 @@
 import { AuthProvider, useAuthContext } from "@/lib/AuthContext";
+import { supabase } from "@/lib/supabase";
 import "../global.css";
 
 import { configureGoogleSignIn } from "@/lib/GoogleAuth";
@@ -69,14 +70,33 @@ function RootLayoutNav() {
     if (isLoading) return; // Chờ load xong trạng thái Auth
 
     const inAuthGroup = segments[0] === "(auth)"; // Kiểm tra xem có trong nhóm auth không
+    const inOnboardingGroup = segments[0] === "(onboarding)"; // Kiểm tra xem có trong nhóm onboarding không
 
-    if (session && inAuthGroup) {
-      // Case 1: Đã đăng nhập nhưng lại đang đứng ở trang Login/Register
-      router.replace("/(tabs)"); // Chuyển vào trong App chính
-    } else if (!session && !inAuthGroup) {
-      // Case 2: Chưa đăng nhập nhưng đang đứng ngoài trang Login/Register
-      router.replace("/(auth)/sign-in"); // Chuyển về trang Login
-    }
+    const checkOnboarding = async () => {
+      if (session) {
+        // Kiểm tra xem user đã có chỉ số cơ thể chưa
+        const { data, error } = await supabase
+          .from("body_indices")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .single();
+
+        const hasBodyIndices = !!data;
+
+        if (!hasBodyIndices && !inOnboardingGroup) {
+          // Case 0: Đã login nhưng chưa có chỉ số -> Vào Onboarding
+          router.replace("/(onboarding)/welcome");
+        } else if (hasBodyIndices && (inAuthGroup || inOnboardingGroup)) {
+          // Case 1: Đã login và có chỉ số -> Vào App chính
+          router.replace("/(tabs)");
+        }
+      } else if (!session && !inAuthGroup) {
+        // Case 2: Chưa đăng nhập -> Vào trang Login
+        router.replace("/(auth)/sign-in");
+      }
+    };
+
+    checkOnboarding();
   }, [session, segments, isLoading, loaded]);
 
   // Nếu chưa load font hoặc đang check session -> Hiện thị Splash Screen
@@ -98,6 +118,14 @@ function RootLayoutNav() {
         }}
       >
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="onboarding/welcome"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="onboarding/personal-specs"
+          options={{ headerShown: false }}
+        />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>

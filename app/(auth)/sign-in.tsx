@@ -75,7 +75,7 @@ export default function SignIn() {
       {/* Footer Nav */}
       <View className="flex-row justify-center mt-8">
         <Text className="text-gray-400">Chưa có tài khoản? </Text>
-        <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
+        <TouchableOpacity onPress={() => router.push("/sign-up")}>
           <Text className="text-primary font-bold">Đăng ký ngay</Text>
         </TouchableOpacity>
       </View>
