@@ -1,6 +1,7 @@
 import MembershipCard from "@/components/MembershipCard";
 import { supabase } from "@/lib/supabase";
 import { MembershipPlan } from "@/lib/types";
+import { useStripe } from "@stripe/stripe-react-native";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, Text, View } from "react-native";
 
@@ -25,6 +26,8 @@ export default function MembershipScreen() {
     setLoading(false);
   }
 
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+
   async function handleBuy(planId: string) {
     // Check login
     const {
@@ -37,7 +40,67 @@ export default function MembershipScreen() {
 
     setPurchasingId(planId);
 
-    // Calculate dates
+    try {
+      // 1. Call Edge Function to create PaymentIntent
+      const { data, error: functionError } = await supabase.functions.invoke(
+        "payment-sheet",
+        {
+          body: { planId, userId: user.id },
+        }
+      );
+
+      if (functionError) {
+        throw new Error(
+          "Edge Function Error: " +
+            (functionError.message || JSON.stringify(functionError))
+        );
+      }
+
+      if (!data?.paymentIntent || !data?.ephemeralKey || !data?.customer) {
+        throw new Error("Invalid response from payment-sheet function");
+      }
+
+      const { paymentIntent, ephemeralKey, customer } = data;
+
+      // 2. Initialize Payment Sheet
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: "Gymbros",
+        customerId: customer,
+        customerEphemeralKeySecret: ephemeralKey,
+        paymentIntentClientSecret: paymentIntent,
+        defaultBillingDetails: {
+          name: user.user_metadata?.name || "Gymbros Member",
+        },
+      });
+
+      if (initError) {
+        throw new Error("Init Payment Sheet Error: " + initError.message);
+      }
+
+      // 3. Present Payment Sheet
+      const { error: paymentError } = await presentPaymentSheet();
+
+      if (paymentError) {
+        if (paymentError.code === "Canceled") {
+          // User canceled, just return
+          setPurchasingId(null);
+          return;
+        }
+        throw new Error("Payment Failed: " + paymentError.message);
+      }
+
+      // 4. Payment Success! Activate Membership
+      // Ideally, a Webhook handles this. For MVP, we insert client-side.
+      await activateMembership(user.id, planId);
+    } catch (e: any) {
+      console.error(e);
+      Alert.alert("Lỗi thanh toán", e.message || "Đã có lỗi xảy ra.");
+    } finally {
+      setPurchasingId(null);
+    }
+  }
+
+  async function activateMembership(userId: string, planId: string) {
     const plan = plans.find((p) => p.id === planId);
     if (!plan) return;
 
@@ -45,23 +108,23 @@ export default function MembershipScreen() {
     const endDate = new Date();
     endDate.setMonth(endDate.getMonth() + plan.duration_months);
 
-    // Insert to user_memberships
     const { error } = await supabase.from("user_memberships").insert({
-      user_id: user.id,
+      user_id: userId,
       plan_id: planId,
       start_date: startDate.toISOString(),
       end_date: endDate.toISOString(),
       status: "active",
     });
 
-    setPurchasingId(null);
-
     if (error) {
-      Alert.alert("Thất bại", "Mua gói tập không thành công: " + error.message);
+      Alert.alert(
+        "Lỗi kích hoạt",
+        "Thanh toán thành công nhưng lỗi kích hoạt: " + error.message
+      );
     } else {
       Alert.alert(
         "Thành công! 🎉",
-        `Bạn đã đăng ký thành công gói ${plan.name}.`
+        `Bạn đã thanh toán và đăng ký thành công gói ${plan.name}.`
       );
     }
   }
