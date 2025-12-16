@@ -39,9 +39,12 @@ export default function ProfileScreen() {
             .maybeSingle(), // Use maybeSingle to avoid error if no membership
         ]);
 
-        // 1. Process Body Data
+        // 1. Process Body Data & Real Stats
+        let bmr = 0;
+        let totalSessions = 0;
+        let totalMinutes = 0;
+
         if (bodyResponse.data) {
-          let bmr = 0;
           const { weight, height, age, gender } = bodyResponse.data;
 
           if (weight && height && age) {
@@ -51,12 +54,33 @@ export default function ProfileScreen() {
               bmr = 10 * weight + 6.25 * height - 5 * age - 161;
             }
           }
-
-          setStats((prev) => ({
-            ...prev,
-            calories: Math.round(bmr),
-          }));
         }
+
+        // Fetch Bookings + Classes for Stats (Client-side aggregation for now)
+        // Note: For large scale, use RPC or optimized query.
+        const { data: bookingsData } = await supabase
+          .from("bookings")
+          .select("class:classes(start_time, end_time)")
+          .eq("user_id", user.id)
+          .eq("status", "confirmed");
+
+        if (bookingsData) {
+          totalSessions = bookingsData.length;
+          bookingsData.forEach((booking: any) => {
+            if (booking.class) {
+              const start = new Date(booking.class.start_time).getTime();
+              const end = new Date(booking.class.end_time).getTime();
+              const durationMin = (end - start) / (1000 * 60);
+              totalMinutes += durationMin;
+            }
+          });
+        }
+
+        setStats({
+          workouts: totalSessions,
+          calories: Math.round(bmr),
+          minutes: Math.round(totalMinutes),
+        });
 
         // 2. Process Membership Data
         if (memberResponse.data?.plan) {
