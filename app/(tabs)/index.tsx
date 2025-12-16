@@ -19,16 +19,17 @@ export default function HomeScreen() {
     if (!user) return;
     const fetchTier = async () => {
       const { data } = await supabase
-        .from("Membership")
-        .select("type, end_date")
+        .from("user_memberships")
+        .select("end_date, plan:membership_plans(name)")
         .eq("user_id", user.id)
         .gte("end_date", new Date().toISOString())
         .order("end_date", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (data?.type) {
-        setMemberTier(data.type.toUpperCase());
+      if (data?.plan) {
+        // @ts-ignore
+        setMemberTier(data.plan.name.toUpperCase());
       }
     };
     fetchTier();

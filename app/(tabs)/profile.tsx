@@ -17,55 +17,56 @@ export default function ProfileScreen() {
     if (!user) return;
 
     const fetchData = async () => {
-      // 1. Fetch Body Indices for Stats
-      const { data: bodyData } = await supabase
-        .from("body_indices")
-        .select("weight, height, age, gender")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
+      try {
+        // Parallel Fetch using Promise.all
+        const [bodyResponse, memberResponse] = await Promise.all([
+          supabase
+            .from("body_indices")
+            .select("weight, height, age, gender")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1)
+            .single(),
+          supabase
+            .from("user_memberships")
+            .select("end_date, plan:membership_plans(name)")
+            .eq("user_id", user.id)
+            .gte("end_date", new Date().toISOString())
+            .order("end_date", { ascending: false })
+            .limit(1)
+            .maybeSingle(), // Use maybeSingle to avoid error if no membership
+        ]);
 
-      if (bodyData) {
-        let bmr = 0;
-        const { weight, height, age, gender } = bodyData;
+        // 1. Process Body Data
+        if (bodyResponse.data) {
+          let bmr = 0;
+          const { weight, height, age, gender } = bodyResponse.data;
 
-        if (weight && height && age) {
-          if (gender === "Male") {
-            bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-          } else {
-            bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+          if (weight && height && age) {
+            if (gender === "Male") {
+              bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+              bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
           }
+
+          setStats((prev) => ({
+            ...prev,
+            calories: Math.round(bmr),
+          }));
         }
 
-        setStats((prev) => ({
-          ...prev,
-          calories: Math.round(bmr),
-        }));
-      }
-
-      // 2. Fetch Profile Tier from Membership table (ERD compliant)
-      const { data: memberData } = await supabase
-        .from("Membership") // Case sensitive based on ERD? Usually lowercase in Postgres, but ERD had capitalized title. Let's try "Membership" or "membership". ERD usually capitalized, table name usually snake_case. Let's assume snake_case 'membership' or 'Membership' to match ERD exactly?
-        // Wait, Supabase usually uses lowercase. The previous code didn't fail on 'body_indices'.
-        // Let's use "Membership" to be safe or try both if possible? No, 'membership' is standard.
-        // Actually, looking at ERD.md strings (e.g. "Body_Index", "Chat_Group"), they are Camel/Pascal.
-        // But `body_indices` in my previous code worked (or didn't error).
-        // I will try "Membership" as per User's "Deploy to avoid mismatch".
-        // Actually, in `personal-specs.tsx` it used `body_indices`.
-        // I'll stick to what I see likely: `Membership`. If it fails, I'll allow default.
-        .select("type, end_date")
-        .eq("user_id", user.id)
-        .gte("end_date", new Date().toISOString()) // Only active memberships
-        .order("end_date", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (memberData?.type) {
-        setMemberTier(memberData.type);
-      } else {
-        // Fallback to check if they have ANY membership record even if expired?
-        // Or just keep "Standard Member" default.
+        // 2. Process Membership Data
+        if (memberResponse.data?.plan) {
+          // Extract Plan Name (e.g., "Gold Pack" -> "Gold")
+          // @ts-ignore: Supabase types might not infer nested join perfectly without generation
+          const planName = memberResponse.data.plan.name || "Standard Member";
+          // Display full name or just the First word? ERD/Mock says "Platinum Member".
+          // Let's just use the plan name directly or format if needed.
+          setMemberTier(planName);
+        }
+      } catch (error) {
+        console.error("Error fetching profile data:", error);
       }
     };
 
