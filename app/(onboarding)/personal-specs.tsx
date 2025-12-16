@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PersonalSpecsScreen() {
   const router = useRouter();
@@ -53,8 +54,8 @@ export default function PersonalSpecsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background px-6 pt-12">
-      <View className="mb-8">
+    <SafeAreaView className="flex-1 bg-background px-6">
+      <View className="mb-8 mt-4">
         <Text className="text-3xl font-bold text-white mb-2">
           Tell us about yourself
         </Text>
@@ -66,7 +67,7 @@ export default function PersonalSpecsScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Gender Selection */}
         <Text className="text-gray-400 mb-2 font-bold">Gender</Text>
-        <View className="flex-row justify-between mb-6">
+        <View className="flex-row justify-between gap-2 mb-6">
           {(["Male", "Female", "Other"] as const).map((g) => (
             <TouchableOpacity
               key={g}
@@ -116,6 +117,6 @@ export default function PersonalSpecsScreen() {
       <View className="mb-8 mt-4">
         <Button title="Next" onPress={handleNext} isLoading={loading} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

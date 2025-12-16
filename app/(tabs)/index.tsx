@@ -52,12 +52,14 @@ export default function HomeScreen() {
             </View>
             {/* Barcode */}
             <View className="bg-white p-2 rounded-md items-center justify-center">
-              <Barcode
-                value={user?.id || "12345678"}
-                format="CODE128"
-                maxWidth={100}
-                height={30}
-              />
+              {user && (
+                <Barcode
+                  value={user.id}
+                  format="CODE128"
+                  singleBarWidth={100}
+                  height={30}
+                />
+              )}
             </View>
           </View>
         </View>
