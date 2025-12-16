@@ -125,7 +125,7 @@ export default function ProfileScreen() {
     {
       label: t("profile.edit_profile"),
       icon: "user",
-      action: () => router.push("/profile-edit"),
+      action: () => router.push("/profile/edit"),
     },
     { label: t("profile.notifications"), icon: "bell" },
     { label: t("profile.privacy_policy"), icon: "shield" },
