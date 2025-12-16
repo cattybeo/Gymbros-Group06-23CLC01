@@ -2,6 +2,20 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.6.2] - 2025-12-17
+
+### Thay ổi (Changes)
+
+- **Lịch tập (Classes)**:
+  - Hoàn thiện i18n cho màn hình `ClassesScreen` và `ClassCard`.
+  - Hiển thị thông báo (Alert) bằng ngôn ngữ đã chọn.
+- **Trang chủ (Home)**:
+  - "Hoạt động gần đây" (Recent Activity) giờ hiển thị dữ liệu thật từ booking mới nhất.
+- **Hồ sơ (Profile)**:
+  - Thống kê (Workouts, Minutes) được tính toán từ lịch sử booking thực tế.
+  - Thêm tính năng "Chỉnh sửa hồ sơ" (`Edit Profile`) để cập nhật Họ tên.
+  - Refactor cấu trúc thư mục: `app/profile/edit.tsx`.
+
 ## [v0.6.1] - 2025-12-16
 
 ### Cải thiện (Improvements)
