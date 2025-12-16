@@ -24,7 +24,12 @@
     "password_mismatch": "Mật khẩu xác nhận không khớp",
     "sign_up_failed": "Đăng ký thất bại",
     "sign_up_success_msg": "Tài khoản đã được tạo! Vui lòng kiểm tra email để xác thực.",
-    "confirm_password_label": "Nhập lại Mật khẩu"
+    "confirm_password_label": "Nhập lại Mật khẩu",
+    "name_label": "Họ và Tên",
+    "old_password": "Mật khẩu cũ",
+    "new_password": "Mật khẩu mới",
+    "change_password": "Đổi Mật Khẩu",
+    "password_incorrect": "Mật khẩu cũ không chính xác"
   },
   "onboarding": {
     "title": "Cho chúng tôi biết về bạn",
@@ -41,7 +46,9 @@
   "common": {
     "error": "Lỗi",
     "missing_info": "Vui lòng điền đầy đủ thông tin.",
-    "success": "Thành công"
+    "success": "Thành công",
+    "save": "Lưu thay đổi",
+    "cancel": "Hủy"
   },
   "membership": {
     "title": "Gói Hội Viên",
@@ -87,7 +94,9 @@
     "unit_kcal": "Kcal/Ngày",
     "unit_min": "Phút",
     "tier_standard": "Thành Viên Tiêu Chuẩn",
-    "update_success_msg": "Cập nhật hồ sơ thành công!"
+    "update_success_msg": "Cập nhật hồ sơ thành công!",
+    "email_change_notice": "Email không thể thay đổi trực tiếp.",
+    "change_password_success": "Đổi mật khẩu thành công!"
   },
   "plans": {
     "silver_pack": "Gói Bạc",
