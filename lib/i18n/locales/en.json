@@ -1,0 +1,46 @@
+{
+  "welcome": {
+    "title": "Welcome to Gymbros",
+    "subtitle": "Training For Everyone",
+    "description": "Helping you to keep fit and healthy. Monitor your progress and achieve your goals.",
+    "get_started": "Get Started"
+  },
+  "auth": {
+    "welcome_back": "Welcome Back!",
+    "login_subtitle": "Login to continue training",
+    "email_label": "Email",
+    "email_placeholder": "Enter your email",
+    "password_label": "Password",
+    "password_placeholder": "••••••",
+    "login_button": "Log In",
+    "no_account": "Don't have an account?",
+    "register_now": "Register now",
+    "or_continue": "Or continue with",
+    "sign_up_title": "Create Account",
+    "sign_up_subtitle": "Start your journey today",
+    "register_button": "Register",
+    "has_account": "Already have an account?",
+    "login_now": "Log In now",
+    "password_mismatch": "Passwords do not match",
+    "sign_up_failed": "Sign up failed",
+    "sign_up_success_msg": "Account created! Please check your email to verify.",
+    "confirm_password_label": "Confirm Password"
+  },
+  "onboarding": {
+    "title": "Tell us about yourself",
+    "subtitle": "This helps us tailor the experience to your body type.",
+    "gender_label": "Gender",
+    "age_label": "Age",
+    "age_placeholder": "e.g. 25",
+    "weight_label": "Weight (kg)",
+    "weight_placeholder": "e.g. 70",
+    "height_label": "Height (cm)",
+    "height_placeholder": "e.g. 175",
+    "next_button": "Next"
+  },
+  "common": {
+    "error": "Error",
+    "missing_info": "Please fill in all fields.",
+    "success": "Success"
+  }
+}

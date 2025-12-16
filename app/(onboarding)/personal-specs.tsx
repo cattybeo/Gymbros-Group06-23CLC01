@@ -3,11 +3,13 @@ import InputField from "@/components/ui/InputField";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PersonalSpecsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
@@ -16,7 +18,7 @@ export default function PersonalSpecsScreen() {
 
   async function handleNext() {
     if (!height || !weight || !age) {
-      Alert.alert("Missing Info", "Please fill in all fields.");
+      Alert.alert(t("common.error"), t("common.missing_info"));
       return;
     }
 
@@ -28,7 +30,7 @@ export default function PersonalSpecsScreen() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert("Error", "User not found. Please login again.");
+        Alert.alert(t("common.error"), "User not found. Please login again.");
         return;
       }
 
@@ -47,7 +49,7 @@ export default function PersonalSpecsScreen() {
       // Navigate to Home
       router.replace("/(tabs)");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      Alert.alert(t("common.error"), error.message);
     } finally {
       setLoading(false);
     }
@@ -57,16 +59,16 @@ export default function PersonalSpecsScreen() {
     <SafeAreaView className="flex-1 bg-background px-6">
       <View className="mb-8 mt-4">
         <Text className="text-3xl font-bold text-white mb-2">
-          Tell us about yourself
+          {t("onboarding.title")}
         </Text>
-        <Text className="text-gray-400">
-          This helps us tailor the experience to your body type.
-        </Text>
+        <Text className="text-gray-400">{t("onboarding.subtitle")}</Text>
       </View>
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Gender Selection */}
-        <Text className="text-gray-400 mb-2 font-bold">Gender</Text>
+        <Text className="text-gray-400 mb-2 font-bold">
+          {t("onboarding.gender_label")}
+        </Text>
         <View className="flex-row justify-between gap-2 mb-6">
           {(["Male", "Female", "Other"] as const).map((g) => (
             <TouchableOpacity
@@ -90,24 +92,24 @@ export default function PersonalSpecsScreen() {
         </View>
 
         <InputField
-          label="Age"
-          placeholder="e.g. 25"
+          label={t("onboarding.age_label")}
+          placeholder={t("onboarding.age_placeholder")}
           value={age}
           onChangeText={setAge}
           keyboardType="numeric"
         />
 
         <InputField
-          label="Weight (kg)"
-          placeholder="e.g. 70"
+          label={t("onboarding.weight_label")}
+          placeholder={t("onboarding.weight_placeholder")}
           value={weight}
           onChangeText={setWeight}
           keyboardType="numeric"
         />
 
         <InputField
-          label="Height (cm)"
-          placeholder="e.g. 175"
+          label={t("onboarding.height_label")}
+          placeholder={t("onboarding.height_placeholder")}
           value={height}
           onChangeText={setHeight}
           keyboardType="numeric"
@@ -115,7 +117,11 @@ export default function PersonalSpecsScreen() {
       </ScrollView>
 
       <View className="mb-8 mt-4">
-        <Button title="Next" onPress={handleNext} isLoading={loading} />
+        <Button
+          title={t("onboarding.next_button")}
+          onPress={handleNext}
+          isLoading={loading}
+        />
       </View>
     </SafeAreaView>
   );

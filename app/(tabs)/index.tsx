@@ -1,12 +1,34 @@
 import { GYM_IMAGES } from "@/constants/Images";
 import { useAuthContext } from "@/lib/AuthContext";
+import { supabase } from "@/lib/supabase"; // Import supabase
 import { FontAwesome } from "@expo/vector-icons";
-import React from "react";
-import { Image, ScrollView, Text, View } from "react-native";
-import Barcode from "react-native-barcode-svg";
+import React, { useEffect, useState } from "react"; // Import useEffect, useState
+import { Dimensions, Image, ScrollView, Text, View } from "react-native";
+import {
+  BarcodeCreatorView,
+  BarcodeFormat,
+} from "react-native-barcode-creator";
 
 export default function HomeScreen() {
   const { user } = useAuthContext();
+  const screenWidth = Dimensions.get("window").width;
+  const [memberTier, setMemberTier] = useState("STANDARD MEMBER"); // Default state
+
+  // Fetch Tier
+  useEffect(() => {
+    if (!user) return;
+    const fetchTier = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("tier")
+        .eq("id", user.id)
+        .single();
+      if (data?.tier) {
+        setMemberTier(data.tier.toUpperCase());
+      }
+    };
+    fetchTier();
+  }, [user]);
 
   const MENU_ITEMS = [
     { name: "Workout", icon: "bicycle" },
@@ -16,7 +38,12 @@ export default function HomeScreen() {
   ];
 
   return (
-    <ScrollView className="flex-1 bg-background">
+    <ScrollView
+      className="flex-1 bg-background"
+      showsVerticalScrollIndicator={false}
+      decelerationRate="fast"
+      overScrollMode="never"
+    >
       {/* Header */}
       <View className="pt-12 px-6 mb-6">
         <Text className="text-gray-400 text-sm">Welcome back,</Text>
@@ -37,30 +64,35 @@ export default function HomeScreen() {
                 GYMBROS
               </Text>
               <Text className="text-gray-500 text-xs tracking-wider">
-                PREMIUM MEMBER
+                {memberTier}
               </Text>
             </View>
             <FontAwesome name="diamond" size={24} color="#FFA500" />
           </View>
 
-          <View className="flex-row justify-between items-end">
+          <View className="flex-row justify-between items-end mb-6">
             <View>
               <Text className="text-gray-400 text-xs mb-1">MEMBER NAME</Text>
               <Text className="text-white font-bold text-lg uppercase">
                 {user?.email?.split("@")[0] || "MEMBER"}
               </Text>
             </View>
-            {/* Barcode */}
-            <View className="bg-white p-2 rounded-md items-center justify-center">
-              {user && (
-                <Barcode
-                  value={user.id}
-                  format="CODE128"
-                  singleBarWidth={100}
-                  height={30}
-                />
-              )}
-            </View>
+          </View>
+
+          {/* Barcode - Full Width */}
+          <View className="bg-white pt-4 pb-2 px-2 rounded-xl items-center justify-center w-full overflow-hidden">
+            {user && (
+              <BarcodeCreatorView
+                value={user.id}
+                format={BarcodeFormat.CODE128}
+                background="#FFFFFF"
+                foregroundColor="#000000"
+                style={{ height: 60, width: screenWidth - 48 - 48 }}
+              />
+            )}
+            <Text className="text-black text-[10px] mt-1 tracking-[4px]">
+              {user?.id ? user.id.substring(0, 18).toUpperCase() : ""}
+            </Text>
           </View>
         </View>
       </View>
