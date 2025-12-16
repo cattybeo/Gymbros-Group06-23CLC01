@@ -135,3 +135,26 @@ npx expo start --dev-client
 - `components/`: Các UI Component tái sử dụng (Button, Input...).
 - `lib/`: Cấu hình Supabase, Axios...
 - `assets/`: Hình ảnh, font chữ, icon...
+
+---
+
+## Tối ưu hóa Build (Windows)
+
+Nếu bạn code trên Windows, việc build Android có thể rất chậm do cơ chế file system của NTFS và Windows Defender. Dưới đây là các cấu hình để tăng tốc:
+
+### 1. Cấu hình Gradle (Đã áp dụng)
+
+File `android/gradle.properties` đã được cấu hình sẵn:
+
+- **Tăng RAM**: `org.gradle.jvmargs=-Xmx4096m` (Cấp 4GB RAM cho tiến trình build).
+- **Caching**: `org.gradle.caching=true` (Tái sử dụng kết quả build cũ).
+- **Config Cache**: `org.gradle.configuration-cache=true` (Bỏ qua bước cấu hình nếu không có gì thay đổi).
+
+### 2. Sử dụng Dev Drive (Khuyến nghị nâng cao)
+
+Nếu máy bạn chạy Windows 11 và có nhiều RAM (>16GB), hãy tạo ổ **Dev Drive**:
+
+1. Vào **Settings** > **System** > **Storage** > **Disks & Volumes** > **Create Dev Drive**.
+2. Chọn kích thước (tầm 50GB).
+3. Di chuyển toàn bộ folder code `Gymbros` vào ổ này.
+4. **Kết quả**: Tốc độ build sẽ tăng 30-40% nhờ File System ReFS và chế độ Performance của Defender.
