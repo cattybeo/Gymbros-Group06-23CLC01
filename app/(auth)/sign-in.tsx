@@ -4,19 +4,21 @@ import InputField from "@/components/ui/InputField";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignIn() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSignIn() {
     if (!email || !password) {
-      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
+      Alert.alert(t("common.error"), t("common.missing_info"));
       return;
     }
 
@@ -30,7 +32,7 @@ export default function SignIn() {
     setLoading(false);
 
     if (error) {
-      Alert.alert("Đăng nhập thất bại", error.message);
+      Alert.alert(t("common.error"), error.message);
     }
   }
 
@@ -44,10 +46,10 @@ export default function SignIn() {
         <View className="w-20 h-20 bg-surface rounded-full items-center justify-center mb-4 border border-primary">
           <Text className="text-4xl">💪</Text>
         </View>
-        <Text className="text-3xl font-bold text-white">Welcome Back!</Text>
-        <Text className="text-gray-400 mt-2">
-          Đăng nhập để tiếp tục tập luyện
+        <Text className="text-3xl font-bold text-white">
+          {t("auth.welcome_back")}
         </Text>
+        <Text className="text-gray-400 mt-2">{t("auth.login_subtitle")}</Text>
       </Animated.View>
 
       {/* Form */}
@@ -55,16 +57,16 @@ export default function SignIn() {
         entering={FadeInDown.delay(400).duration(1000).springify()}
       >
         <InputField
-          label="Email"
-          placeholder="Nhập email của bạn"
+          label={t("auth.email_label")}
+          placeholder={t("auth.email_placeholder")}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
         />
         <InputField
-          label="Mật khẩu"
-          placeholder="••••••"
+          label={t("auth.password_label")}
+          placeholder={t("auth.password_placeholder")}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -72,7 +74,7 @@ export default function SignIn() {
 
         <View className="mt-4">
           <Button
-            title="Đăng Nhập"
+            title={t("auth.login_button")}
             onPress={handleSignIn}
             isLoading={loading}
           />
@@ -85,15 +87,17 @@ export default function SignIn() {
         className="mt-8"
       >
         <View className="flex-row justify-center mb-8">
-          <Text className="text-gray-400">Chưa có tài khoản? </Text>
+          <Text className="text-gray-400">{t("auth.no_account")} </Text>
           <TouchableOpacity onPress={() => router.push("/sign-up")}>
-            <Text className="text-primary font-bold">Đăng ký ngay</Text>
+            <Text className="text-primary font-bold">
+              {t("auth.register_now")}
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View className="flex-row items-center mb-6">
           <View className="flex-1 h-[1px] bg-gray-700" />
-          <Text className="mx-4 text-gray-500">Hoặc tiếp tục với</Text>
+          <Text className="mx-4 text-gray-500">{t("auth.or_continue")}</Text>
           <View className="flex-1 h-[1px] bg-gray-700" />
         </View>
 
