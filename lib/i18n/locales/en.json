@@ -86,7 +86,8 @@
     "unit_session": "Session",
     "unit_kcal": "Kcal/Day",
     "unit_min": "Min",
-    "tier_standard": "Standard Member"
+    "tier_standard": "Standard Member",
+    "update_success_msg": "Profile updated successfully!"
   },
   "plans": {
     "silver_pack": "Silver Pack",

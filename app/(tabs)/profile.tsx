@@ -1,9 +1,10 @@
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { FontAwesome } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
   const { user } = useAuthContext();
@@ -120,8 +121,12 @@ export default function ProfileScreen() {
     },
   ];
 
-  const MENU_ITEMS = [
-    { label: t("profile.edit_profile"), icon: "user" },
+  const MENU_ITEMS: { label: string; icon: string; action?: () => void }[] = [
+    {
+      label: t("profile.edit_profile"),
+      icon: "user",
+      action: () => router.push("/profile-edit"),
+    },
     { label: t("profile.notifications"), icon: "bell" },
     { label: t("profile.privacy_policy"), icon: "shield" },
     { label: t("profile.settings"), icon: "cog" },
@@ -183,6 +188,16 @@ export default function ProfileScreen() {
                   ? "border-b border-gray-800"
                   : ""
               }`}
+              onPress={() => {
+                if (item.action) {
+                  item.action();
+                } else {
+                  Alert.alert(
+                    "Feature coming soon",
+                    "This feature is under development."
+                  );
+                }
+              }}
             >
               <View className="w-8 h-8 bg-gray-900 rounded-full items-center justify-center mr-4">
                 <FontAwesome
