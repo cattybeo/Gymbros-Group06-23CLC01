@@ -1,11 +1,13 @@
 import Button from "@/components/ui/Button";
 import { useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { ImageBackground, Text, View } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <ImageBackground
@@ -24,19 +26,18 @@ export default function WelcomeScreen() {
           className="w-full items-center"
         >
           <Text className="text-primary text-lg font-bold uppercase tracking-widest mb-2">
-            Welcome to Gymbros
+            {t("welcome.title")}
           </Text>
           <Text className="text-white text-3xl font-bold text-center mb-4">
-            Training For Everyone
+            {t("welcome.subtitle")}
           </Text>
           <Text className="text-gray-400 text-center mb-8 px-4">
-            Helping you to keep fit and healthy. Monitor your progress and
-            achieve your goals.
+            {t("welcome.description")}
           </Text>
 
           <View className="w-full">
             <Button
-              title="Get Started"
+              title={t("welcome.get_started")}
               onPress={() => router.push("/personal-specs")}
             />
           </View>

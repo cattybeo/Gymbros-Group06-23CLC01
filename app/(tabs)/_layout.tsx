@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>["name"];
@@ -12,6 +13,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
@@ -20,9 +22,9 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "#6B7280", // Gray-500
         tabBarStyle: {
           backgroundColor: "#1E1E1E", // Surface color (Dark Grey)
-          borderTopColor: "#1E1E1E", // Hide top border
-          paddingBottom: 5,
-          height: 60,
+          borderTopColor: "#1E1E1E",
+          paddingBottom: insets.bottom + 5,
+          height: 60 + insets.bottom, // Expand height to cover nav bar
         },
         headerShown: false, // Ẩn Header mặc định để dùng Header riêng của từng trang
       }}

@@ -1,0 +1,46 @@
+{
+  "welcome": {
+    "title": "Chào mừng đến với Gymbros",
+    "subtitle": "Tập luyện cho mọi người",
+    "description": "Giúp bạn giữ dáng và khỏe mạnh. Theo dõi quá trình và đạt được mục tiêu của bạn.",
+    "get_started": "Bắt đầu ngay"
+  },
+  "auth": {
+    "welcome_back": "Chào mừng trở lại!",
+    "login_subtitle": "Đăng nhập để tiếp tục tập luyện",
+    "email_label": "Email",
+    "email_placeholder": "Nhập email của bạn",
+    "password_label": "Mật khẩu",
+    "password_placeholder": "••••••",
+    "login_button": "Đăng Nhập",
+    "no_account": "Chưa có tài khoản?",
+    "register_now": "Đăng ký ngay",
+    "or_continue": "Hoặc tiếp tục với",
+    "sign_up_title": "Tạo tài khoản",
+    "sign_up_subtitle": "Bắt đầu hành trình ngay hôm nay",
+    "register_button": "Đăng Ký",
+    "has_account": "Đã có tài khoản?",
+    "login_now": "Đăng nhập ngay",
+    "password_mismatch": "Mật khẩu xác nhận không khớp",
+    "sign_up_failed": "Đăng ký thất bại",
+    "sign_up_success_msg": "Tài khoản đã được tạo! Vui lòng kiểm tra email để xác thực.",
+    "confirm_password_label": "Nhập lại Mật khẩu"
+  },
+  "onboarding": {
+    "title": "Cho chúng tôi biết về bạn",
+    "subtitle": "Giúp chúng tôi điều chỉnh lộ trình phù hợp với thể trạng của bạn.",
+    "gender_label": "Giới tính",
+    "age_label": "Tuổi",
+    "age_placeholder": "VD: 25",
+    "weight_label": "Cân nặng (kg)",
+    "weight_placeholder": "VD: 70",
+    "height_label": "Chiều cao (cm)",
+    "height_placeholder": "VD: 175",
+    "next_button": "Tiếp tục"
+  },
+  "common": {
+    "error": "Lỗi",
+    "missing_info": "Vui lòng điền đầy đủ thông tin.",
+    "success": "Thành công"
+  }
+}

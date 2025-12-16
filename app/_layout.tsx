@@ -3,6 +3,7 @@ import { supabase } from "@/lib/supabase";
 import "../global.css";
 
 import { configureGoogleSignIn } from "@/lib/GoogleAuth";
+import "@/lib/i18n";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
@@ -12,7 +13,7 @@ import {
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import "react-native-reanimated";
 
@@ -65,45 +66,50 @@ function RootLayoutNav() {
     }
   }, [loaded]);
 
-  // Navigation Guard
+  // Navigation Guard / Onboarding Check
+  const [isChecking, setIsChecking] = useState(true);
+
   useEffect(() => {
     if (isLoading) return; // Chờ load xong trạng thái Auth
 
-    const inAuthGroup = segments[0] === "(auth)"; // Kiểm tra xem có trong nhóm auth không
-    const inOnboardingGroup = segments[0] === "(onboarding)"; // Kiểm tra xem có trong nhóm onboarding không
+    const inAuthGroup = segments[0] === "(auth)";
+    const inOnboardingGroup = segments[0] === "(onboarding)";
 
     const checkOnboarding = async () => {
-      if (session) {
-        // Kiểm tra xem user đã có chỉ số cơ thể chưa
-        const { data, error } = await supabase
-          .from("body_indices")
-          .select("id")
-          .eq("user_id", session.user.id)
-          .single();
+      try {
+        if (session) {
+          // Kiểm tra xem user đã có chỉ số cơ thể chưa
+          const { data } = await supabase
+            .from("body_indices")
+            .select("id")
+            .eq("user_id", session.user.id)
+            .single();
 
-        const hasBodyIndices = !!data;
+          const hasBodyIndices = !!data;
 
-        if (!hasBodyIndices && !inOnboardingGroup) {
-          // Case 0: Đã login nhưng chưa có chỉ số -> Vào Onboarding
-          router.replace("/(onboarding)/welcome");
-        } else if (hasBodyIndices && (inAuthGroup || inOnboardingGroup)) {
-          // Case 1: Đã login và có chỉ số -> Vào App chính
-          router.replace("/(tabs)");
+          if (!hasBodyIndices && !inOnboardingGroup) {
+            router.replace("/(onboarding)/welcome");
+          } else if (hasBodyIndices && (inAuthGroup || inOnboardingGroup)) {
+            router.replace("/(tabs)");
+          }
+        } else if (!session && !inAuthGroup) {
+          router.replace("/(auth)/sign-in");
         }
-      } else if (!session && !inAuthGroup) {
-        // Case 2: Chưa đăng nhập -> Vào trang Login
-        router.replace("/(auth)/sign-in");
+      } catch (e) {
+        console.error("Onboarding check error:", e);
+      } finally {
+        setIsChecking(false);
       }
     };
 
     checkOnboarding();
-  }, [session, segments, isLoading, loaded]);
+  }, [session, isLoading]);
 
-  // Nếu chưa load font hoặc đang check session -> Hiện thị Splash Screen
-  if (!loaded || isLoading) {
+  // Nếu chưa load font, đang check auth, hoặc đang check DB -> Hiện thị Splash Screen
+  if (!loaded || isLoading || isChecking) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#0000ff" />
+      <View className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color="#FFA500" />
       </View>
     );
   }
