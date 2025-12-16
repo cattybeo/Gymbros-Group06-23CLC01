@@ -2,6 +2,17 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.6.3] - 2025-12-17
+
+### Sửa lỗi (Bug Fixes)
+
+- Khắc phục lỗi thiếu key dịch thuật (`auth.name_label`, `common.save`) tại màn hình Chỉnh sửa hồ sơ.
+- Thêm thông báo "Không hỗ trợ đổi Email" vào file ngôn ngữ.
+
+### Thêm mới (New Features)
+
+- **Đổi Mật Khẩu**: Thêm màn hình `ChangePasswordScreen` với tính năng xác thực mật khẩu cũ.
+
 ## [v0.6.2] - 2025-12-17
 
 ### Thay ổi (Changes)
