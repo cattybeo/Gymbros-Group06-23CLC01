@@ -68,7 +68,10 @@
       "silver": "HỘI VIÊN BẠC",
       "gold": "HỘI VIÊN VÀNG",
       "platinum": "HỘI VIÊN BẠCH KIM"
-    }
+    },
+    "no_activity": "Chưa có hoạt động nào gần đây",
+    "upcoming_class": "Lớp sắp tới",
+    "completed_class": "Đã hoàn thành"
   },
   "profile": {
     "workouts": "Buổi tập",
