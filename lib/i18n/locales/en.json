@@ -68,7 +68,10 @@
       "silver": "SILVER MEMBER",
       "gold": "GOLD MEMBER",
       "platinum": "PLATINUM MEMBER"
-    }
+    },
+    "no_activity": "No recent activity",
+    "upcoming_class": "Upcoming Class",
+    "completed_class": "Completed"
   },
   "profile": {
     "workouts": "Workouts",
