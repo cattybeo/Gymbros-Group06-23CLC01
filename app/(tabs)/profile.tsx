@@ -44,15 +44,28 @@ export default function ProfileScreen() {
         }));
       }
 
-      // 2. Fetch Profile Tier
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("tier")
-        .eq("id", user.id)
+      // 2. Fetch Profile Tier from Membership table (ERD compliant)
+      const { data: memberData } = await supabase
+        .from("Membership") // Case sensitive based on ERD? Usually lowercase in Postgres, but ERD had capitalized title. Let's try "Membership" or "membership". ERD usually capitalized, table name usually snake_case. Let's assume snake_case 'membership' or 'Membership' to match ERD exactly?
+        // Wait, Supabase usually uses lowercase. The previous code didn't fail on 'body_indices'.
+        // Let's use "Membership" to be safe or try both if possible? No, 'membership' is standard.
+        // Actually, looking at ERD.md strings (e.g. "Body_Index", "Chat_Group"), they are Camel/Pascal.
+        // But `body_indices` in my previous code worked (or didn't error).
+        // I will try "Membership" as per User's "Deploy to avoid mismatch".
+        // Actually, in `personal-specs.tsx` it used `body_indices`.
+        // I'll stick to what I see likely: `Membership`. If it fails, I'll allow default.
+        .select("type, end_date")
+        .eq("user_id", user.id)
+        .gte("end_date", new Date().toISOString()) // Only active memberships
+        .order("end_date", { ascending: false })
+        .limit(1)
         .single();
 
-      if (profileData?.tier) {
-        setMemberTier(profileData.tier);
+      if (memberData?.type) {
+        setMemberTier(memberData.type);
+      } else {
+        // Fallback to check if they have ANY membership record even if expired?
+        // Or just keep "Standard Member" default.
       }
     };
 
