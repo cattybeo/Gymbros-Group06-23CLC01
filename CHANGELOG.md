@@ -2,7 +2,25 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
-## [0.5.1] - 2025-12-16
+## [0.6.0] - 2025-12-16
+
+### Thêm mới
+
+- **Thanh toán (Stripe Integration)**:
+  - Tích hợp Stripe Payment Sheet cho luồng thanh toán Native.
+  - Xây dựng Edge Function `payment-sheet` để xử lý bảo mật thanh toán.
+  - Hỗ trợ thanh toán các gói Silver, Gold, Platinum.
+- **Tối ưu hóa (Performance)**:
+  - Áp dụng `Promise.all` tại màn hình Profile và Home để tải dữ liệu song song.
+- **Tài liệu**:
+  - Hướng dẫn cài đặt và deploy Stripe (`stripe_setup_guide.md`).
+
+### Sửa lỗi
+
+- **Database**: Đồng bộ code với Schema chuẩn (`Membership` -> `user_memberships`).
+- **Logic**: Sửa lỗi insert cột `type` không tồn tại khi kích hoạt gói tập.
+
+## [v0.5.1] - 2025-12-16
 
 ### Sửa lỗi
 

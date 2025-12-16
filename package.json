@@ -1,7 +1,7 @@
 {
   "name": "gymbros",
   "main": "expo-router/entry",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -13,6 +13,7 @@
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-google-signin/google-signin": "^16.0.0",
     "@react-navigation/native": "^7.1.8",
+    "@stripe/stripe-react-native": "^0.57.1",
     "@supabase/supabase-js": "^2.84.0",
     "expo": "~54.0.29",
     "expo-constants": "~18.0.12",
@@ -53,6 +54,7 @@
     "prettier": "^3.0",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react-test-renderer": "19.1.0",
+    "supabase": "^2.67.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.9.3"
   },

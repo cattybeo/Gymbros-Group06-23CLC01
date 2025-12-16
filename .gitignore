@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+*.lock
 
 # Expo
 .expo/
@@ -22,7 +23,6 @@ expo-env.d.ts
 .metro-health-check*
 
 # debug
-*.lock
 yarn.lock
 package-lock.json
 npm-debug.*
@@ -35,12 +35,14 @@ yarn-error.*
 
 # local env files
 # Disable temporarily
-# .env*.local 
+.env*
+.env 
 secrets/
 
 # typescript
 *.tsbuildinfo
 node_modules/
+.temp/
 
 # generated native folders
 /ios
@@ -52,5 +54,4 @@ node_modules/
 # Docs
 /docs_need_to_work
 /design_references
-.env
 /scripts
