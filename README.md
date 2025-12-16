@@ -155,6 +155,9 @@ File `android/gradle.properties` đã được cấu hình sẵn:
 Nếu máy bạn chạy Windows 11 và có nhiều RAM (>16GB), hãy tạo ổ **Dev Drive**:
 
 1. Vào **Settings** > **System** > **Storage** > **Disks & Volumes** > **Create Dev Drive**.
-2. Chọn kích thước (tầm 50GB).
-3. Di chuyển toàn bộ folder code `Gymbros` vào ổ này.
+2. Cấu hình chi tiết:
+   - **Virtual hard disk size**: Tối thiểu **50GB** (Khuyên dùng 64GB-100GB để thoải mái không gian).
+   - **Virtual hard disk format**: Chọn **VHDX** (Hiện đại, ổn định hơn).
+   - **Virtual hard disk type**: Chọn **Dynamically expanding** (Tiết kiệm dung lượng ổ cứng thật, chỉ chiếm chỗ khi cần).
+3. Di chuyển toàn bộ folder code `Gymbros` vào ổ này (Ví dụ ổ `D:\` hoặc `Z:\` mới tạo).
 4. **Kết quả**: Tốc độ build sẽ tăng 30-40% nhờ File System ReFS và chế độ Performance của Defender.
