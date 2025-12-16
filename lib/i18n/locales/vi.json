@@ -86,7 +86,8 @@
     "unit_session": "Buổi",
     "unit_kcal": "Kcal/Ngày",
     "unit_min": "Phút",
-    "tier_standard": "Thành Viên Tiêu Chuẩn"
+    "tier_standard": "Thành Viên Tiêu Chuẩn",
+    "update_success_msg": "Cập nhật hồ sơ thành công!"
   },
   "plans": {
     "silver_pack": "Gói Bạc",
