@@ -8,6 +8,9 @@ export default {
     tint: "#FFA500", // Orange
     tabIconDefault: "#ccc",
     tabIconSelected: "#FFA500",
+    silver: "#C0C0C0",
+    gold: "#FFD700",
+    platinum: "#22d3ee",
   },
   dark: {
     text: "#fff",
@@ -15,5 +18,8 @@ export default {
     tint: "#FFA500", // Orange
     tabIconDefault: "#ccc",
     tabIconSelected: "#FFA500",
+    silver: "#C0C0C0",
+    gold: "#FFD700",
+    platinum: "#22d3ee",
   },
 };

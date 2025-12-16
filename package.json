@@ -1,7 +1,7 @@
 {
   "name": "gymbros",
   "main": "expo-router/entry",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -13,7 +13,7 @@
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-google-signin/google-signin": "^16.0.0",
     "@react-navigation/native": "^7.1.8",
-    "@stripe/stripe-react-native": "^0.57.1",
+    "@stripe/stripe-react-native": "0.50.3",
     "@supabase/supabase-js": "^2.84.0",
     "expo": "~54.0.29",
     "expo-constants": "~18.0.12",
