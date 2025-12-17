@@ -14,6 +14,7 @@ export interface UserMembership {
   start_date: string;
   end_date: string;
   status: "active" | "expired";
+  membership_plans?: MembershipPlan; // For Joined Queries
 }
 
 export interface GymClass {
@@ -33,4 +34,16 @@ export interface Booking {
   class_id: string;
   booking_date: string;
   status: string;
+}
+
+export interface BodyIndex {
+  id?: string;
+  user_id: string;
+  height: number;
+  weight: number;
+  age: number;
+  gender: string;
+  goal: string;
+  record_day: string;
+  created_at?: string;
 }

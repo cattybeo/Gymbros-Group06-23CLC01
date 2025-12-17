@@ -44,7 +44,8 @@
     "missing_info": "Please fill in all fields.",
     "success": "Success",
     "save": "Save Changes",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "add": "Add"
   },
   "membership": {
     "title": "Membership Plans",
@@ -81,6 +82,7 @@
     "calories": "Calories",
     "minutes": "Minutes",
     "edit_profile": "Edit Profile",
+    "change_avatar": "Tap to change avatar",
     "notifications": "Notifications",
     "privacy_policy": "Privacy Policy",
     "settings": "Settings",
@@ -92,7 +94,11 @@
     "tier_standard": "Standard Member",
     "update_success_msg": "Profile updated successfully!",
     "email_change_notice": "Email cannot be changed directly.",
-    "change_password_success": "Password changed successfully!"
+    "change_password_success": "Password changed successfully!",
+    "body_index": "Body Index",
+    "body_index_history": "Body Metrics History",
+    "add_record": "Add New Record",
+    "no_records": "No records found. Add your first measurement!"
   },
   "plans": {
     "silver_pack": "Silver Pack",
