@@ -13,9 +13,16 @@ import {
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import * as TaskManager from "expo-task-manager";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, useColorScheme, View } from "react-native";
 import "react-native-reanimated";
+
+// Register the task (even if empty) to prevent warnings
+TaskManager.defineTask("StripeKeepJsAwakeTask", () => {
+  // This task is required by Stripe SDK to keep the app awake during payment
+  // No persistent background logic needed here, just the registration.
+});
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -23,7 +30,6 @@ export {
 } from "expo-router";
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "(tabs)",
 };
 

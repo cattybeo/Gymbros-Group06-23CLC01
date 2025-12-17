@@ -1,10 +1,19 @@
-export interface MembershipPlan {
+export interface MembershipTier {
   id: string;
   name: string;
-  description: string | null;
+  code: string;
+  level: number;
+  features: string[]; // JSONB stored as array of strings
+  image_slug: string;
+}
+
+export interface MembershipPlan {
+  id: string;
+  tier_id: string;
   price: number;
   duration_months: number;
-  image_slug: string;
+  discount_label: string | null;
+  tier?: MembershipTier; // Joined
 }
 
 export interface UserMembership {
@@ -14,7 +23,7 @@ export interface UserMembership {
   start_date: string;
   end_date: string;
   status: "active" | "expired";
-  membership_plans?: MembershipPlan; // For Joined Queries
+  plan?: MembershipPlan; // For Joined Queries (changed from membership_plans to plan for clarity/mapping)
 }
 
 export interface GymClass {
