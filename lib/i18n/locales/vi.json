@@ -135,5 +135,16 @@
     "membership_required_msg": "Bạn cần đăng ký gói hội viên để đặt lịch.",
     "already_booked": "Bạn đã đặt lịch lớp này rồi.",
     "empty_list": "Không có lớp học nào sắp tới."
+  },
+  "features": {
+    "gym_access": "Quyền truy cập phòng gym",
+    "locker": "Tủ đồ cá nhân",
+    "yoga_class": "1 lớp Yoga/tuần",
+    "all_classes": "Tham gia mọi lớp học",
+    "sauna": "Xông hơi miễn phí",
+    "guest_pass": "Vé mời bạn bè",
+    "pt_1_week": "1 buổi PT/tuần",
+    "towel_service": "Dịch vụ khăn tắm",
+    "pt_1_session": "1 buổi PT định hướng"
   }
 }
