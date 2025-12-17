@@ -40,7 +40,13 @@
         }
       ],
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you set your avatar."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

@@ -126,6 +126,19 @@ function RootLayoutNav() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="profile/change-password"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="profile/body-index"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="profile/add-body-index"
+          options={{ headerShown: false }}
+        />
       </Stack>
     </ThemeProvider>
   );
