@@ -53,9 +53,11 @@ export default function HomeScreen() {
             .maybeSingle(),
         ]);
 
-        if (tierResponse.data?.plan) {
-          // @ts-ignore
-          setMemberTier(tierResponse.data.plan.name.toUpperCase());
+        if (tierResponse.data && tierResponse.data.plan) {
+          const planData = tierResponse.data.plan as unknown as {
+            name: string;
+          };
+          setMemberTier(planData.name.toUpperCase());
         }
 
         if (activityResponse.data) {

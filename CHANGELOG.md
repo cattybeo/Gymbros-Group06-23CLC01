@@ -2,6 +2,34 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [0.6.5] - 2025-12-17
+
+### Đã thêm (Added)
+
+- **Theo dõi Chỉ số Cơ thể**: Màn hình mới để xem lịch sử và thêm bản ghi cân nặng/chiều cao (`profile/body-index`, `profile/add-body-index`).
+- **Đa ngôn ngữ**: Bổ sung dịch tiếng Việt cho Hạng Thành viên (Tiêu chuẩn/Bạc/Vàng/Bạch kim) và các tính năng chỉ số cơ thể.
+- **Tài liệu**: Thêm `health_integration_plan.md` (Tiếng Việt) phác thảo lộ trình tích hợp Google Health/Apple Health.
+
+### Đã sửa (Fixed)
+
+- **Giao diện**: Sửa lỗi `SafeAreaView` khiến nút "Lưu" bị che khuất ở màn hình Chỉ số cơ thể.
+- **Header**: Ẩn header mặc định bị trùng lặp.
+- **Refactor**: Cập nhật `ImagePicker.MediaTypeOptions` (đã lỗi thời) sang `['images']`.
+- **Lỗi**: Sửa lỗi hiển thị "STANDARD MEMBER" tiếng Anh bằng cách ánh xạ dữ liệu gói tập sang key ngôn ngữ tương ứng.
+
+## [v0.6.4] - 2025-12-17
+
+### Sửa lỗi (Bug Fixes)
+
+- Ẩn header mặc định bị trùng lặp tại các màn hình con của Profile (`edit`, `change-password`).
+
+### Thêm mới (New Features)
+
+- **Ảnh đại diện (Avatar)**:
+  - Cho phép người dùng tải ảnh lên từ thư viện (sử dụng Supabase Storage).
+  - Hiển thị ảnh đại diện từ Google nếu có (fallback).
+  - Tự động hiển thị chữ cái đầu tên nếu chưa có ảnh.
+
 ## [v0.6.3] - 2025-12-17
 
 ### Sửa lỗi (Bug Fixes)

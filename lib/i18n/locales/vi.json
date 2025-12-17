@@ -48,7 +48,8 @@
     "missing_info": "Vui lòng điền đầy đủ thông tin.",
     "success": "Thành công",
     "save": "Lưu thay đổi",
-    "cancel": "Hủy"
+    "cancel": "Hủy",
+    "add": "Thêm"
   },
   "membership": {
     "title": "Gói Hội Viên",
@@ -85,6 +86,7 @@
     "calories": "Kcal/Ngày",
     "minutes": "Phút",
     "edit_profile": "Chỉnh sửa hồ sơ",
+    "change_avatar": "Chạm để đổi ảnh đại diện",
     "notifications": "Thông báo",
     "privacy_policy": "Chính sách bảo mật",
     "settings": "Cài đặt",
@@ -96,7 +98,11 @@
     "tier_standard": "Thành Viên Tiêu Chuẩn",
     "update_success_msg": "Cập nhật hồ sơ thành công!",
     "email_change_notice": "Email không thể thay đổi trực tiếp.",
-    "change_password_success": "Đổi mật khẩu thành công!"
+    "change_password_success": "Đổi mật khẩu thành công!",
+    "body_index": "Chỉ số cơ thể",
+    "body_index_history": "Lịch sử chỉ số",
+    "add_record": "Thêm bản ghi mới",
+    "no_records": "Chưa có dữ liệu. Hãy thêm bản ghi đầu tiên!"
   },
   "plans": {
     "silver_pack": "Gói Bạc",

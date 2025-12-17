@@ -4,7 +4,14 @@ import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ProfileScreen() {
   const { user } = useAuthContext();
@@ -14,7 +21,7 @@ export default function ProfileScreen() {
     calories: 0,
     minutes: 0,
   });
-  const [memberTier, setMemberTier] = useState("Standard Member");
+  const [memberTier, setMemberTier] = useState(t("home.tier.standard"));
 
   useEffect(() => {
     if (!user) return;
@@ -85,15 +92,24 @@ export default function ProfileScreen() {
 
         // 2. Process Membership Data
         if (memberResponse.data?.plan) {
-          // Use image_slug if available, assuming we can get it from plan. But we only selected name.
-          // Let's modify the query to get image_slug as well.
-          // For now, let's map name for standard casing issues or assume generic fallback.
-          // Actually, the most reliable way is if we fetched image_slug.
-          // But let's check what we fetched: plan:membership_plans(name).
-          // We should fetch * or name, image_slug.
-          // Wait, re-reading fetch code... select("end_date, plan:membership_plans(name)")
-          // We need image_slug to use the keys I just added.
-          //  Let's fix the query first.
+          const planName = (memberResponse.data.plan as any).name;
+          // Map backend Plan Names to Translation Keys
+          // Assuming DB names: "Standard Pack", "Silver Pack", "Gold Pack", "Platinum Pack"
+          let translatedTier = t("home.tier.standard"); // Default
+
+          if (planName.toLowerCase().includes("silver")) {
+            translatedTier = t("home.tier.silver");
+          } else if (planName.toLowerCase().includes("gold")) {
+            translatedTier = t("home.tier.gold");
+          } else if (planName.toLowerCase().includes("platinum")) {
+            translatedTier = t("home.tier.platinum");
+          } else {
+            translatedTier = t("home.tier.standard");
+          }
+
+          setMemberTier(translatedTier);
+        } else {
+          setMemberTier(t("home.tier.standard"));
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
@@ -132,6 +148,11 @@ export default function ProfileScreen() {
       icon: "lock",
       action: () => router.push("/profile/change-password"),
     },
+    {
+      label: t("profile.body_index"),
+      icon: "heartbeat",
+      action: () => router.push("/profile/body-index"),
+    },
     { label: t("profile.notifications"), icon: "bell" },
     { label: t("profile.privacy_policy"), icon: "shield" },
     { label: t("profile.settings"), icon: "cog" },
@@ -151,8 +172,28 @@ export default function ProfileScreen() {
     >
       {/* Header */}
       <View className="items-center pt-12 pb-8 bg-surface rounded-b-[30px] shadow-sm mb-6 border-b border-gray-800">
-        <View className="w-24 h-24 bg-gray-700 rounded-full items-center justify-center mb-4 border-2 border-primary">
-          <Text className="text-4xl">😎</Text>
+        <View className="mb-4 relative">
+          <View className="w-24 h-24 rounded-full bg-gray-700 items-center justify-center border-4 border-surface overflow-hidden">
+            {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
+              <Image
+                source={{
+                  uri:
+                    user?.user_metadata?.avatar_url ||
+                    user?.user_metadata?.picture,
+                }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+            ) : (
+              <Text className="text-3xl font-bold text-gray-400">
+                {user?.user_metadata?.full_name
+                  ? user.user_metadata.full_name.charAt(0).toUpperCase()
+                  : user?.email?.charAt(0).toUpperCase()}
+              </Text>
+            )}
+          </View>
+          {/* Status Indicator (Optional) */}
+          <View className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-surface" />
         </View>
         <Text className="text-white text-2xl font-bold mb-1">
           {displayName}

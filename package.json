@@ -1,7 +1,7 @@
 {
   "name": "gymbros",
   "main": "expo-router/entry",
-  "version": "0.6.3",
+  "version": "0.6.5",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -15,10 +15,12 @@
     "@react-navigation/native": "^7.1.8",
     "@stripe/stripe-react-native": "0.50.3",
     "@supabase/supabase-js": "^2.84.0",
+    "base64-arraybuffer": "^1.0.2",
     "expo": "~54.0.29",
     "expo-constants": "~18.0.12",
     "expo-dev-client": "~6.0.20",
     "expo-font": "~14.0.10",
+    "expo-image-picker": "~17.0.10",
     "expo-linking": "~8.0.10",
     "expo-localization": "^17.0.8",
     "expo-router": "~6.0.19",
