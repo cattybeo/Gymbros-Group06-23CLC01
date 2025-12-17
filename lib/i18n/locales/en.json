@@ -131,5 +131,16 @@
     "membership_required_msg": "You need an active membership to book classes.",
     "already_booked": "You have already booked this class.",
     "empty_list": "No upcoming classes found."
+  },
+  "features": {
+    "gym_access": "Gym Access",
+    "locker": "Personal Locker",
+    "yoga_class": "1 Yoga Class/week",
+    "all_classes": "Access to All Classes",
+    "sauna": "Free Sauna Access",
+    "guest_pass": "Guest Pass",
+    "pt_1_week": "1 PT Session/week",
+    "towel_service": "Towel Service",
+    "pt_1_session": "1 PT Session"
   }
 }

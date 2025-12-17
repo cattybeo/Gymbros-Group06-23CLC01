@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
-import { MembershipPlan } from "@/lib/types";
+import { MembershipPlan, MembershipTier } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
 import {
   Image,
@@ -11,7 +12,12 @@ import {
 } from "react-native";
 
 interface MembershipCardProps {
-  plan: MembershipPlan;
+  plan: MembershipPlan & {
+    name?: string;
+    description?: string;
+    image_slug?: string;
+  }; // Hybrid support for old/new
+  tier?: MembershipTier; // New optional prop
   onBuy: (planId: string) => void;
   isLoading?: boolean;
   status: "default" | "current" | "upgrade" | "downgrade";
@@ -19,6 +25,7 @@ interface MembershipCardProps {
 
 export default function MembershipCard({
   plan,
+  tier,
   onBuy,
   isLoading,
   status = "default",
@@ -32,7 +39,9 @@ export default function MembershipCard({
     currency: "VND",
   }).format(plan.price);
 
-  const imageSource = GYM_IMAGES[plan.image_slug] || GYM_IMAGES["default"];
+  // Use Tier image if available, else plan image, else default
+  const imageKey = tier?.image_slug || plan.image_slug;
+  const imageSource = GYM_IMAGES[imageKey] || GYM_IMAGES["default"];
 
   // Button Logic based on status
   const isCurrent = status === "current";
@@ -67,10 +76,21 @@ export default function MembershipCard({
         resizeMode="cover"
       />
       <View className="flex-row justify-between items-center mb-2 px-2">
-        <Text className="text-xl font-bold text-white max-w-[70%]">
-          {t(`plans.${plan.image_slug}`, { defaultValue: plan.name })}
-        </Text>
-        <View className="bg-gray-700 px-3 py-1 rounded-full">
+        <View className="flex-1">
+          <Text className="text-xl font-bold text-white">
+            {/* Try to translate the name (Silver, Gold) or fallback */}
+            {tier
+              ? t(`home.tier.${tier.code}`, { defaultValue: tier.name })
+              : t(`plans.${plan.image_slug}`, { defaultValue: plan.name })}
+          </Text>
+          {plan.discount_label && (
+            <Text className="text-green-400 text-xs font-bold uppercase mt-1">
+              {plan.discount_label}
+            </Text>
+          )}
+        </View>
+
+        <View className="bg-gray-700 px-3 py-1 rounded-full ml-2">
           <Text
             style={{ color: colors.tint }}
             className="font-semibold text-xs"
@@ -87,8 +107,26 @@ export default function MembershipCard({
         {formattedPrice}
       </Text>
 
-      {plan.description && (
-        <Text className="text-gray-400 mb-6 px-2">{plan.description}</Text>
+      {/* Render Features from Tier */}
+      {tier && tier.features && tier.features.length > 0 ? (
+        <View className="mb-6 px-2">
+          {tier.features.map((feature, index) => (
+            <View key={index} className="flex-row items-center mb-2">
+              <Ionicons name="checkmark-circle" size={16} color={colors.tint} />
+              <Text className="text-gray-300 ml-2 text-sm">
+                {/* Provide i18n key or raw feature name */}
+                {t(`features.${feature}`, {
+                  defaultValue: feature.replace(/_/g, " "),
+                })}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        // Fallback to description
+        plan.description && (
+          <Text className="text-gray-400 mb-6 px-2">{plan.description}</Text>
+        )
       )}
 
       <TouchableOpacity

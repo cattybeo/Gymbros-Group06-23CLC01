@@ -39,12 +39,14 @@ export default function ProfileScreen() {
             .single(),
           supabase
             .from("user_memberships")
-            .select("end_date, plan:membership_plans(name)")
+            .select(
+              "end_date, plan:membership_plans(id, tier:membership_tiers(name, code))"
+            ) // Nested Join
             .eq("user_id", user.id)
             .gte("end_date", new Date().toISOString())
             .order("end_date", { ascending: false })
             .limit(1)
-            .maybeSingle(), // Use maybeSingle to avoid error if no membership
+            .maybeSingle(),
         ]);
 
         // 1. Process Body Data & Real Stats
@@ -92,19 +94,37 @@ export default function ProfileScreen() {
 
         // 2. Process Membership Data
         if (memberResponse.data?.plan) {
-          const planName = (memberResponse.data.plan as any).name;
-          // Map backend Plan Names to Translation Keys
-          // Assuming DB names: "Standard Pack", "Silver Pack", "Gold Pack", "Platinum Pack"
-          let translatedTier = t("home.tier.standard"); // Default
+          // New Structure: user_mem -> plan -> tier
+          // memberResponse.data.plan is now properly typed (mostly) via join
+          const planData = memberResponse.data.plan as any;
+          // If we have tier data nested (fetching plan:membership_plans(..., tier:membership_tiers(*)))?
+          // Wait, in fetch call above I did: select("end_date, plan:membership_plans(name)")
+          // I need to change that select to get tier info.
+          // BUT, I can't easily change the query in this replace block without changing lines further up (30-48).
+          // Wait, I am replacing lines 93-113.
+          // I should fix the query first.
 
-          if (planName.toLowerCase().includes("silver")) {
+          // Let's assume I fix the query in the next step.
+          // For now, I'll put defensive code.
+
+          let tierName = "Standard";
+          // If the query returns nested tier, use it.
+          // If simply plan name, try to parse it.
+          if (planData.tier) {
+            tierName = planData.tier.name;
+          } else if (planData.name) {
+            // Fallback for old data or partial fetch
+            tierName = planData.name;
+          }
+
+          let translatedTier = t("home.tier.standard");
+
+          if (tierName.toLowerCase().includes("silver")) {
             translatedTier = t("home.tier.silver");
-          } else if (planName.toLowerCase().includes("gold")) {
+          } else if (tierName.toLowerCase().includes("gold")) {
             translatedTier = t("home.tier.gold");
-          } else if (planName.toLowerCase().includes("platinum")) {
+          } else if (tierName.toLowerCase().includes("platinum")) {
             translatedTier = t("home.tier.platinum");
-          } else {
-            translatedTier = t("home.tier.standard");
           }
 
           setMemberTier(translatedTier);
