@@ -2,6 +2,27 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [0.7.0] - 2025-12-17
+
+### Tính năng mới (New Features)
+
+- **Membership Redesign**: Tái cấu trúc hoàn toàn module Hội viên.
+  - Chuyển đổi sang mô hình **Hạng (Tier)** và **Gói (Plan)**.
+  - Thêm tính năng hiển thị quyền lợi (Features) động từ Database.
+  - Thêm nút chuyển đổi xem giá theo **Tháng/Năm** (Tiết kiệm hơn khi mua năm).
+  - Cập nhật giao diện thẻ Membership mới, hiển thị đúng ảnh cho từng hạng (Bạc, Vàng, Bạch Kim).
+- **Profile**: Cập nhật logic hiển thị Hạng thành viên dựa trên cấu trúc dữ liệu mới.
+
+### Sửa lỗi (Bug Fixes)
+
+- **Stripe**: Sửa lỗi warning "No task registered for key StripeKeepJsAwakeTask" bằng cách đăng ký background task hợp lệ.
+- **i18n**: Bổ sung đầy đủ dịch thuật cho danh sách quyền lợi (Features) và các gói tập.
+- **Assets**: Fix lỗi hiển thị ảnh mặc định cho các gói tập mới.
+
+### Tài liệu (Documentation)
+
+- Thêm `docs/feature-membership-redesign.md` mô tả chi tiết kiến trúc Membership mới.
+
 ## [0.6.5] - 2025-12-17
 
 ### Đã thêm (Added)
