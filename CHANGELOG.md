@@ -2,6 +2,16 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [0.7.1] - 2026-01-03
+
+### Cải thiện & Sửa lỗi (Improvements & Fixes)
+
+- **Membership Module Stabilization**:
+  - **Server-side Fulfillment**: Chuyển logic kích hoạt gói từ Client sang Stripe Webhook để đảm bảo an toàn giao dịch tuyệt đối.
+  - **Date Drift Fix**: Sửa lỗi trôi ngày khi gia hạn. Gói mới sẽ tự động cộng nối tiếp thời hạn nếu gói cũ chưa hết hạn.
+  - **Cancel Membership**: Thêm nút "Hủy Gói Tập" cho phép user tự hủy gói đang hợat động (chuyển trạng thái sang `cancelled`).
+  - **UX**: Cải thiện Logic mua gói, cho phép user chuyển đổi linh hoạt giữa gói Tháng/Năm (cùng Tier) mà không bị chặn.
+
 ## [0.7.0] - 2025-12-17
 
 ### Tính năng mới (New Features)
