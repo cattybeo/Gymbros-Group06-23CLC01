@@ -7,12 +7,18 @@ interface ClassCardProps {
   gymClass: GymClass;
   onBook: (classId: string) => void;
   isBooking?: boolean;
+  isBooked?: boolean;
+  isFull?: boolean;
+  spotsLeft?: number;
 }
 
 export default function ClassCard({
   gymClass,
   onBook,
   isBooking,
+  isBooked,
+  isFull,
+  spotsLeft,
 }: ClassCardProps) {
   const { t, i18n } = useTranslation();
   const startTime = new Date(gymClass.start_time);
@@ -31,6 +37,22 @@ export default function ClassCard({
     });
 
   const imageSource = GYM_IMAGES[gymClass.image_slug] || GYM_IMAGES["default"];
+
+  // Determine Button State
+  let buttonText = t("classes.book_now");
+  let buttonStyle = "bg-primary active:bg-orange-600";
+  let isDisabled = isBooking || isBooked || isFull;
+
+  if (isBooking) {
+    buttonText = t("classes.processing");
+    buttonStyle = "bg-gray-700 opacity-50";
+  } else if (isBooked) {
+    buttonText = t("classes.booked");
+    buttonStyle = "bg-green-600 opacity-90 border border-green-500";
+  } else if (isFull) {
+    buttonText = t("classes.full");
+    buttonStyle = "bg-red-500 opacity-90";
+  }
 
   return (
     <View className="bg-surface p-4 rounded-2xl shadow-sm mb-4 border border-gray-800 overflow-hidden">
@@ -53,10 +75,19 @@ export default function ClassCard({
             </Text>
           </View>
 
-          <View className="self-start bg-gray-700 px-2 py-1 rounded-md mt-1">
-            <Text className="text-xs font-semibold text-gray-300">
-              {gymClass.capacity} {t("classes.slots")}
-            </Text>
+          <View className="flex-row items-center mt-1 space-x-2">
+            <View className="bg-gray-700 px-2 py-1 rounded-md">
+              <Text className="text-xs font-semibold text-gray-300">
+                {gymClass.capacity} {t("classes.slots")}
+              </Text>
+            </View>
+            {spotsLeft !== undefined && (
+              <Text
+                className={`text-xs font-bold ${spotsLeft < 5 ? "text-red-400" : "text-green-400"}`}
+              >
+                {t("classes.spots_left", { count: spotsLeft })}
+              </Text>
+            )}
           </View>
         </View>
       </View>
@@ -68,15 +99,11 @@ export default function ClassCard({
       )}
 
       <TouchableOpacity
-        className={`w-full py-3 rounded-xl items-center ${
-          isBooking ? "bg-gray-700" : "bg-primary active:bg-orange-600"
-        }`}
+        className={`w-full py-3 rounded-xl items-center ${buttonStyle}`}
         onPress={() => onBook(gymClass.id)}
-        disabled={isBooking}
+        disabled={isDisabled}
       >
-        <Text className="text-white font-bold">
-          {isBooking ? t("classes.booked") : t("classes.book_now")}
-        </Text>
+        <Text className="text-white font-bold">{buttonText}</Text>
       </TouchableOpacity>
     </View>
   );

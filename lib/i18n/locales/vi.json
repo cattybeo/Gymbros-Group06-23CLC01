@@ -134,7 +134,11 @@
     "membership_required": "Cần có gói Hội viên",
     "membership_required_msg": "Bạn cần đăng ký gói hội viên để đặt lịch.",
     "already_booked": "Bạn đã đặt lịch lớp này rồi.",
-    "empty_list": "Không có lớp học nào sắp tới."
+    "empty_list": "Không có lớp học nào sắp tới.",
+    "processing": "Đang xử lý...",
+    "spots_left": "Còn {{count}} chỗ",
+    "fetch_error": "Lỗi tải dữ liệu lớp học.",
+    "class_full": "Lớp học đã đầy."
   },
   "features": {
     "gym_access": "Quyền truy cập phòng gym",

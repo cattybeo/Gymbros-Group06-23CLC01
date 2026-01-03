@@ -11,26 +11,69 @@ export default function ClassesScreen() {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const { t } = useTranslation();
 
+  const [myBookings, setMyBookings] = useState<Set<string>>(new Set());
+  const [classCounts, setClassCounts] = useState<Record<string, number>>({});
+
   useEffect(() => {
-    fetchClasses();
+    fetchData();
   }, []);
 
-  async function fetchClasses() {
+  async function fetchData() {
     setLoading(true);
-    // Fetch future classes only
-    const { data, error } = await supabase
-      .from("classes")
-      .select("*")
-      .gte("start_time", new Date().toISOString())
-      .order("start_time", { ascending: true });
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (error) {
-      Alert.alert(t("common.error"), t("classes.empty_list")); // Or a generic fetch error if we had one
+      // 1. Fetch Classes
+      const { data: classesData, error: classesError } = await supabase
+        .from("classes")
+        .select("*")
+        .gte("start_time", new Date().toISOString())
+        .order("start_time", { ascending: true });
+
+      if (classesError) throw classesError;
+      setClasses(classesData || []);
+
+      const classIds = classesData?.map((c) => c.id) || [];
+
+      // 2. Fetch User's Bookings (if logged in)
+      if (user && classIds.length > 0) {
+        const { data: userBookings } = await supabase
+          .from("bookings")
+          .select("class_id")
+          .eq("user_id", user.id)
+          .in("class_id", classIds)
+          .in("status", ["confirmed", "checked_in"]); // exclude cancelled
+
+        const bookedSet = new Set(userBookings?.map((b) => b.class_id) || []);
+        setMyBookings(bookedSet);
+      }
+
+      // 3. Fetch Booking Counts (Aggregation)
+      // Since Supabase doesn't support easy "groupBy" count in client without View/RPC,
+      // and we want avoid fetching ALL bookings.
+      // Approach: Fetch all "confirmed" bookings for these classIds.
+      // Optimization: For production, use a View/RPC. For MVP, this is acceptable.
+      if (classIds.length > 0) {
+        const { data: allBookings } = await supabase
+          .from("bookings")
+          .select("class_id")
+          .in("class_id", classIds)
+          .in("status", ["confirmed", "checked_in"]);
+
+        const counts: Record<string, number> = {};
+        allBookings?.forEach((b) => {
+          counts[b.class_id] = (counts[b.class_id] || 0) + 1;
+        });
+        setClassCounts(counts);
+      }
+    } catch (error) {
       console.error(error);
-    } else {
-      setClasses(data || []);
+      Alert.alert(t("common.error"), t("classes.fetch_error"));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleBook(classId: string) {
@@ -46,6 +89,14 @@ export default function ClassesScreen() {
     setBookingId(classId);
 
     try {
+      // 0. Check Capacity (Client-side optimistic check)
+      const currentCount = classCounts[classId] || 0;
+      const targetClass = classes.find((c) => c.id === classId);
+      if (targetClass && currentCount >= targetClass.capacity) {
+        Alert.alert(t("common.error"), t("classes.class_full"));
+        return;
+      }
+
       // 1. Check Active Membership
       const { data: memberships, error: memError } = await supabase
         .from("user_memberships")
@@ -92,6 +143,7 @@ export default function ClassesScreen() {
         t("classes.booking_success"),
         t("classes.booking_success_msg")
       );
+      fetchData(); // Refresh counts and status
     } catch (error: any) {
       Alert.alert(t("classes.booking_error"), error.message);
     } finally {
@@ -111,15 +163,25 @@ export default function ClassesScreen() {
       <FlatList
         data={classes}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <ClassCard
-            gymClass={item}
-            onBook={handleBook}
-            isBooking={bookingId === item.id}
-          />
-        )}
+        renderItem={({ item }) => {
+          const bookedCount = classCounts[item.id] || 0;
+          const isBooked = myBookings.has(item.id);
+          const isFull = bookedCount >= item.capacity;
+          const spotsLeft = item.capacity - bookedCount;
+
+          return (
+            <ClassCard
+              gymClass={item}
+              onBook={handleBook}
+              isBooking={bookingId === item.id}
+              isBooked={isBooked}
+              isFull={isFull}
+              spotsLeft={spotsLeft}
+            />
+          );
+        }}
         refreshing={loading}
-        onRefresh={fetchClasses}
+        onRefresh={fetchData}
         ListEmptyComponent={
           !loading ? (
             <Text className="text-center text-gray-500 mt-10">
