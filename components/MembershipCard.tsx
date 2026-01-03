@@ -20,7 +20,7 @@ interface MembershipCardProps {
   tier?: MembershipTier; // New optional prop
   onBuy: (planId: string) => void;
   isLoading?: boolean;
-  status: "default" | "current" | "upgrade" | "downgrade";
+  status: "default" | "current" | "upgrade" | "downgrade" | "cancelled";
 }
 
 export default function MembershipCard({
@@ -40,12 +40,20 @@ export default function MembershipCard({
   }).format(plan.price);
 
   // Use Tier image if available, else plan image, else default
-  const imageKey = tier?.image_slug || plan.image_slug;
+  const imageKey = tier?.image_slug || plan.image_slug || "default";
   const imageSource = GYM_IMAGES[imageKey] || GYM_IMAGES["default"];
 
   // Button Logic based on status
   const isCurrent = status === "current";
   const isDowngrade = status === "downgrade";
+  // Cancelled plans are effectively "expired" logic-wise for buying new ones?
+  // No, if cancelled but still valid date -> "Ends Soon".
+  // Note: membership.tsx filters "active" and "cancelled".
+  // If cancelled, we might want to allow "Renew" (Buy again)?
+  // For now, let's treat 'cancelled' as 'default' (Buyable to reactivate?)
+  // OR show specific text. Let's show specific text.
+  const isCancelled = status === "cancelled";
+
   const isDisabled = isCurrent || isDowngrade || isLoading;
 
   let buttonText = t("membership.buy_now");
@@ -66,6 +74,10 @@ export default function MembershipCard({
   } else if (status === "upgrade") {
     buttonText = t("membership.upgrade");
     buttonStyle = "bg-green-600 active:bg-green-700";
+  } else if (isCancelled) {
+    buttonText = "Đã hủy (Hết hạn sớm)";
+    buttonStyle = "bg-red-900 opacity-80";
+    textStyle = "text-red-200 font-bold text-lg";
   }
 
   return (
