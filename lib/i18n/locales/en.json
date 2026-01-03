@@ -130,7 +130,11 @@
     "membership_required": "Membership Required",
     "membership_required_msg": "You need an active membership to book classes.",
     "already_booked": "You have already booked this class.",
-    "empty_list": "No upcoming classes found."
+    "empty_list": "No upcoming classes found.",
+    "processing": "Processing...",
+    "spots_left": "{{count}} left",
+    "fetch_error": "Failed to load classes.",
+    "class_full": "Class is full."
   },
   "features": {
     "gym_access": "Gym Access",
