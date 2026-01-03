@@ -22,7 +22,7 @@ export interface UserMembership {
   plan_id: string;
   start_date: string;
   end_date: string;
-  status: "active" | "expired";
+  status: "active" | "expired" | "cancelled";
   plan?: MembershipPlan; // For Joined Queries (changed from membership_plans to plan for clarity/mapping)
 }
 
