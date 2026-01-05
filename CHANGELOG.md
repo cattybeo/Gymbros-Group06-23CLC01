@@ -2,6 +2,20 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.7.2] - 2026-01-05
+
+### Sửa lỗi (Fixed)
+
+- **Google Sign-In**: Khắc phục lỗi `DEVELOPER_ERROR` (Code 10) bằng cách cấu hình `google-services.json` trong `app.json` và xác định yêu cầu SHA-1.
+- **Gym Classes**: Sửa lỗi tính toán "Số chỗ còn lại" (Spots Left) do RLS chặn. Đã triển khai RPC `get_class_counts` để đếm booking chính xác.
+- **Dữ liệu mẫu (Mock Data)**: Sửa script `heatmap_migration.sql` để phân phối booking ngẫu nhiên thay vì dồn vào một lớp.
+- **Giao diện (UI)**: Đổi tên "Lịch tập" thành "Lớp học" trong bản dịch tiếng Việt (`vi.json`) để rõ nghĩa hơn.
+
+### Thêm mới (Added)
+
+- **Tài liệu**: Tạo `storage_migration_guide.md` hướng dẫn migrate hình ảnh sang Supabase Storage.
+- **Chiến lược**: Chuyển hướng sang phát triển "Profile 2.0" để thu thập dữ liệu cá nhân hóa trước khi làm AI.
+
 ## [0.7.1] - 2026-01-03
 
 ### Cải thiện & Sửa lỗi (Improvements & Fixes)

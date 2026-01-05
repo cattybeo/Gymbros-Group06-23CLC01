@@ -114,10 +114,10 @@
     "home": "Trang chủ",
     "profile": "Hồ sơ",
     "membership": "Gói tập",
-    "classes": "Lịch tập"
+    "classes": "Lớp học"
   },
   "classes": {
-    "title": "Lịch Tập",
+    "title": "Lớp Học",
     "subtitle": "Các lớp học sắp diễn ra",
     "trainer": "HLV",
     "duration": "Thời gian",
@@ -138,7 +138,27 @@
     "processing": "Đang xử lý...",
     "spots_left": "Còn {{count}} chỗ",
     "fetch_error": "Lỗi tải dữ liệu lớp học.",
-    "class_full": "Lớp học đã đầy."
+    "class_full": "Lớp học đã đầy.",
+    "explore": "Khám phá lớp học",
+    "all": "Tất cả",
+    "upcoming_schedule": "Lịch tập sắp tới"
+  },
+  "heatmap": {
+    "title": "Biểu Đồ Đông Đúc",
+    "now": "Hiện tại:",
+    "low": "Vắng",
+    "med": "Vừa phải",
+    "high": "Đông",
+    "capacity": "Sức chứa",
+    "days": {
+      "0": "CN",
+      "1": "T2",
+      "2": "T3",
+      "3": "T4",
+      "4": "T5",
+      "5": "T6",
+      "6": "T7"
+    }
   },
   "features": {
     "gym_access": "Quyền truy cập phòng gym",

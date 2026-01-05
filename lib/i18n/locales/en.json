@@ -134,7 +134,27 @@
     "processing": "Processing...",
     "spots_left": "{{count}} left",
     "fetch_error": "Failed to load classes.",
-    "class_full": "Class is full."
+    "class_full": "Class is full.",
+    "explore": "Explore Classes",
+    "all": "All",
+    "upcoming_schedule": "Upcoming Schedule"
+  },
+  "heatmap": {
+    "title": "Crowd Meter",
+    "now": "Right Now:",
+    "low": "Not Busy",
+    "med": "Moderate",
+    "high": "Busy",
+    "capacity": "Capacity",
+    "days": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
   },
   "features": {
     "gym_access": "Gym Access",
