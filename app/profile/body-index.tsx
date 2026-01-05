@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
 import { BodyIndex } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -43,9 +43,11 @@ export default function BodyIndexHistoryScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchHistory();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchHistory();
+    }, [])
+  );
 
   const calculateBMI = (weight: number, height: number) => {
     // height is in cm
@@ -73,6 +75,47 @@ export default function BodyIndexHistoryScreen() {
         <View className="items-end bg-gray-800 px-3 py-1 rounded-lg">
           <Text className="text-xs text-gray-400">BMI</Text>
           <Text className="text-primary font-bold">{bmi}</Text>
+        </View>
+      </View>
+    );
+  };
+
+  const renderHeader = () => {
+    if (loading || data.length < 2) return null;
+    const current = data[0];
+    const start = data[data.length - 1];
+    const change = current.weight - start.weight;
+
+    return (
+      <View className="bg-gray-900 border border-gray-800 p-4 rounded-2xl mb-6 flex-row justify-between items-center">
+        <View>
+          <Text className="text-gray-400 text-xs uppercase mb-1">
+            {t("profile.start_weight")}
+          </Text>
+          <Text className="text-white text-xl font-bold">
+            {start.weight} kg
+          </Text>
+        </View>
+        <View className="items-center">
+          <Text className="text-gray-400 text-xs uppercase mb-1">
+            {t("profile.total_change")}
+          </Text>
+          <Text
+            className={`text-2xl font-black ${
+              change <= 0 ? "text-green-500" : "text-orange-500"
+            }`}
+          >
+            {change > 0 ? "+" : ""}
+            {change.toFixed(1)}
+          </Text>
+        </View>
+        <View className="items-end">
+          <Text className="text-gray-400 text-xs uppercase mb-1">
+            {t("profile.current_weight")}
+          </Text>
+          <Text className="text-white text-xl font-bold">
+            {current.weight} kg
+          </Text>
         </View>
       </View>
     );
@@ -109,6 +152,7 @@ export default function BodyIndexHistoryScreen() {
         <FlatList
           data={data}
           keyExtractor={(item) => item.id || item.record_day}
+          ListHeaderComponent={renderHeader}
           renderItem={renderItem}
           ListEmptyComponent={
             <Text className="text-gray-500 text-center mt-10">

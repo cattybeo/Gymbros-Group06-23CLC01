@@ -19,7 +19,7 @@ import { ActivityIndicator, useColorScheme, View } from "react-native";
 import "react-native-reanimated";
 
 // Register the task (even if empty) to prevent warnings
-TaskManager.defineTask("StripeKeepJsAwakeTask", () => {
+TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
   // This task is required by Stripe SDK to keep the app awake during payment
   // No persistent background logic needed here, just the registration.
 });
@@ -143,6 +143,14 @@ function RootLayoutNav() {
         />
         <Stack.Screen
           name="profile/add-body-index"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="profile/privacy-policy"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="profile/settings"
           options={{ headerShown: false }}
         />
       </Stack>
