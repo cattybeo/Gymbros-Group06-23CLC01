@@ -44,9 +44,27 @@ secrets/
 node_modules/
 .temp/
 
-# generated native folders
-/ios
-/android
+# Native folders (Do not ignore top level)
+# /ios
+# /android
+
+# iOS
+*.pbxproj
+*.xcworkspace
+*.podspec
+/ios/build/
+/ios/Pods/
+/ios/*.xcworkspace
+/ios/*.xcodeproj
+
+# Android
+/android/build/
+/android/app/build/
+/android/.gradle/
+/android/local.properties
+/android/*.iml
+/android/.idea
+/android/.navigation
 
 # vscode
 .vscode/

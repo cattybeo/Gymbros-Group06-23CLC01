@@ -24,7 +24,13 @@
     "password_mismatch": "Passwords do not match",
     "sign_up_failed": "Sign up failed",
     "sign_up_success_msg": "Account created! Please check your email to verify.",
-    "confirm_password_label": "Confirm Password"
+    "confirm_password_label": "Confirm Password",
+    "name_label": "Full Name",
+    "name_placeholder": "Ex: John Doe",
+    "old_password": "Old Password",
+    "new_password": "New Password",
+    "change_password": "Change Password",
+    "password_incorrect": "Incorrect old password"
   },
   "onboarding": {
     "title": "Tell us about yourself",
@@ -45,7 +51,11 @@
     "success": "Success",
     "save": "Save Changes",
     "cancel": "Cancel",
-    "add": "Add"
+    "confirm": "Confirm",
+    "add": "Add",
+    "feature_coming_soon": "Feature coming soon!",
+    "pick_image_error": "Could not pick image.",
+    "uploading": "Uploading..."
   },
   "membership": {
     "title": "Membership Plans",
@@ -96,9 +106,50 @@
     "email_change_notice": "Email cannot be changed directly.",
     "change_password_success": "Password changed successfully!",
     "body_index": "Body Index",
+    "goal_label": "Primary Goal",
+    "gender_label": "Gender",
+    "birthday_label": "Date of Birth (YYYY-MM-DD)",
+    "personal_details": "Personal Details",
+    "fitness_profile": "Fitness Profile",
+    "goals": {
+      "lose_weight": "Lose Weight",
+      "build_muscle": "Build Muscle",
+      "maintain": "Maintain Weight",
+      "endurance": "Endurance",
+      "flexibility": "Flexibility"
+    },
+    "genders": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "body_index_history": "Body Metrics History",
+    "start_weight": "Starting Weight",
+    "current_weight": "Current Weight",
+    "total_change": "Total Change",
     "add_record": "Add New Record",
-    "no_records": "No records found. Add your first measurement!"
+    "not_set": "Not Set",
+    "no_records": "No records found. Add your first measurement!",
+    "activity_level_label": "Activity Level",
+    "experience_level_label": "Experience Level",
+    "weekly_availability_label": "Weekly Availability",
+    "activities": {
+      "sedentary": "Sedentary (Office Job)",
+      "light": "Lightly Active (1-2 days/week)",
+      "moderate": "Moderately Active (3-5 days/week)",
+      "active": "Active (6-7 days/week)",
+      "very_active": "Very Active (Athlete)"
+    },
+    "experiences": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "availabilities": {
+      "1_2": "1-2 days/week",
+      "3_4": "3-4 days/week",
+      "5_plus": "5+ days/week"
+    }
   },
   "plans": {
     "silver_pack": "Silver Pack",
@@ -166,5 +217,40 @@
     "pt_1_week": "1 PT Session/week",
     "towel_service": "Towel Service",
     "pt_1_session": "1 PT Session"
+  },
+  "privacy": {
+    "last_updated": "Last Updated",
+    "introduction": {
+      "title": "1. Introduction",
+      "content": "Welcome to Gymbros. We are committed to protecting your personal information and your right to privacy. When you use our mobile application, you trust us with your personal information. We take this privacy very seriously."
+    },
+    "data_collection": {
+      "title": "2. Information We Collect",
+      "content": "We collect personal information that you voluntarily provide to us when you register on the App, such as name, email address, gender, birthday, and profile picture. We also collect health-related data necessary for the app's functionality, including height, weight, fitness goals, and workout history."
+    },
+    "data_usage": {
+      "title": "3. How We Use Your Information",
+      "content": "We use the information we collect or receive to: \n- Facilitate account creation and logon process.\n- Calculate body metrics (BMI, BMR) and track your fitness progress.\n- Manage your class bookings and memberships.\n- Send you administrative information."
+    },
+    "data_sharing": {
+      "title": "4. Will Your Information be Shared?",
+      "content": "We strictly do not sell your personal data. We only share information with your consent, to comply with laws, to provide you with services (e.g., payment processing), to protect your rights, or to fulfill business obligations."
+    },
+    "security": {
+      "title": "5. Data Security",
+      "content": "We represent that we have implemented appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, please also remember that the internet itself is not 100% secure."
+    },
+    "user_rights": {
+      "title": "6. Your Privacy Rights",
+      "content": "You may review, change, or terminate your account at any time. If you wish to delete your account and all associated data, you can do so from the Settings menu or by contacting support."
+    },
+    "contact": {
+      "title": "7. Contact Us",
+      "content": "If you have questions or comments about this policy, you may email us at support@gymbros.com."
+    }
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme"
   }
 }

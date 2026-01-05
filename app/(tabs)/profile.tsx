@@ -1,8 +1,8 @@
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { FontAwesome } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -20,124 +20,117 @@ export default function ProfileScreen() {
     workouts: 0,
     calories: 0,
     minutes: 0,
+    bmi: 0,
   });
   const [memberTier, setMemberTier] = useState(t("home.tier.standard"));
 
-  useEffect(() => {
-    if (!user) return;
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
 
-    const fetchData = async () => {
-      try {
-        // Parallel Fetch using Promise.all
-        const [bodyResponse, memberResponse] = await Promise.all([
-          supabase
-            .from("body_indices")
-            .select("weight, height, age, gender")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(1)
-            .single(),
-          supabase
-            .from("user_memberships")
-            .select(
-              "end_date, plan:membership_plans(id, tier:membership_tiers(name, code))"
-            ) // Nested Join
-            .eq("user_id", user.id)
-            .gte("end_date", new Date().toISOString())
-            .order("end_date", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        ]);
+      const fetchData = async () => {
+        try {
+          // Parallel Fetch using Promise.all
+          const [bodyResponse, memberResponse] = await Promise.all([
+            supabase
+              .from("body_indices")
+              .select("weight, height, age, gender")
+              .eq("user_id", user.id)
+              .order("created_at", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            supabase
+              .from("user_memberships")
+              .select(
+                "end_date, plan:membership_plans(id, tier:membership_tiers(name, code))"
+              ) // Nested Join
+              .eq("user_id", user.id)
+              .gte("end_date", new Date().toISOString())
+              .order("end_date", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+          ]);
 
-        // 1. Process Body Data & Real Stats
-        let bmr = 0;
-        let totalSessions = 0;
-        let totalMinutes = 0;
+          // 1. Process Body Data & Real Stats
+          let bmr = 0;
+          let totalSessions = 0;
+          let totalMinutes = 0;
 
-        if (bodyResponse.data) {
-          const { weight, height, age, gender } = bodyResponse.data;
+          if (bodyResponse.data) {
+            const { weight, height, age, gender } = bodyResponse.data;
 
-          if (weight && height && age) {
-            if (gender === "Male") {
-              bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-            } else {
-              bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            if (weight && height && age) {
+              if (gender === "Male" || gender === "male") {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+              } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+              }
             }
           }
-        }
 
-        // Fetch Bookings + Classes for Stats (Client-side aggregation for now)
-        // Note: For large scale, use RPC or optimized query.
-        const { data: bookingsData } = await supabase
-          .from("bookings")
-          .select("class:classes(start_time, end_time)")
-          .eq("user_id", user.id)
-          .eq("status", "confirmed");
+          // Fetch Bookings + Classes for Stats (Client-side aggregation for now)
+          const { data: bookingsData } = await supabase
+            .from("bookings")
+            .select("class:classes(start_time, end_time)")
+            .eq("user_id", user.id)
+            .eq("status", "confirmed");
 
-        if (bookingsData) {
-          totalSessions = bookingsData.length;
-          bookingsData.forEach((booking: any) => {
-            if (booking.class) {
-              const start = new Date(booking.class.start_time).getTime();
-              const end = new Date(booking.class.end_time).getTime();
-              const durationMin = (end - start) / (1000 * 60);
-              totalMinutes += durationMin;
-            }
+          if (bookingsData) {
+            totalSessions = bookingsData.length;
+            bookingsData.forEach((booking: any) => {
+              if (booking.class) {
+                const start = new Date(booking.class.start_time).getTime();
+                const end = new Date(booking.class.end_time).getTime();
+                const durationMin = (end - start) / (1000 * 60);
+                totalMinutes += durationMin;
+              }
+            });
+          }
+
+          // Calculate BMI
+          let calculatedBmi = 0;
+          if (bodyResponse.data?.weight && bodyResponse.data?.height) {
+            const h = bodyResponse.data.height / 100;
+            calculatedBmi = bodyResponse.data.weight / (h * h);
+          }
+
+          setStats({
+            workouts: totalSessions,
+            calories: Math.round(bmr),
+            minutes: Math.round(totalMinutes),
+            bmi: calculatedBmi,
           });
-        }
 
-        setStats({
-          workouts: totalSessions,
-          calories: Math.round(bmr),
-          minutes: Math.round(totalMinutes),
-        });
+          // 2. Process Membership Data
+          if (memberResponse.data?.plan) {
+            const planData = memberResponse.data.plan as any;
+            let tierName = "Standard";
+            if (planData.tier) {
+              tierName = planData.tier.name;
+            } else if (planData.name) {
+              tierName = planData.name;
+            }
 
-        // 2. Process Membership Data
-        if (memberResponse.data?.plan) {
-          // New Structure: user_mem -> plan -> tier
-          // memberResponse.data.plan is now properly typed (mostly) via join
-          const planData = memberResponse.data.plan as any;
-          // If we have tier data nested (fetching plan:membership_plans(..., tier:membership_tiers(*)))?
-          // Wait, in fetch call above I did: select("end_date, plan:membership_plans(name)")
-          // I need to change that select to get tier info.
-          // BUT, I can't easily change the query in this replace block without changing lines further up (30-48).
-          // Wait, I am replacing lines 93-113.
-          // I should fix the query first.
-
-          // Let's assume I fix the query in the next step.
-          // For now, I'll put defensive code.
-
-          let tierName = "Standard";
-          // If the query returns nested tier, use it.
-          // If simply plan name, try to parse it.
-          if (planData.tier) {
-            tierName = planData.tier.name;
-          } else if (planData.name) {
-            // Fallback for old data or partial fetch
-            tierName = planData.name;
+            let translatedTier = t("home.tier.standard");
+            if (tierName.toLowerCase().includes("silver")) {
+              translatedTier = t("home.tier.silver");
+            } else if (tierName.toLowerCase().includes("gold")) {
+              translatedTier = t("home.tier.gold");
+            } else if (tierName.toLowerCase().includes("platinum")) {
+              translatedTier = t("home.tier.platinum");
+            }
+            setMemberTier(translatedTier);
+          } else {
+            setMemberTier(t("home.tier.standard"));
           }
-
-          let translatedTier = t("home.tier.standard");
-
-          if (tierName.toLowerCase().includes("silver")) {
-            translatedTier = t("home.tier.silver");
-          } else if (tierName.toLowerCase().includes("gold")) {
-            translatedTier = t("home.tier.gold");
-          } else if (tierName.toLowerCase().includes("platinum")) {
-            translatedTier = t("home.tier.platinum");
-          }
-
-          setMemberTier(translatedTier);
-        } else {
-          setMemberTier(t("home.tier.standard"));
+        } catch (error) {
+          console.error("Error fetching profile data:", error);
         }
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-      }
-    };
+      };
 
-    fetchData();
-  }, [user]);
+      fetchData();
+    }, [user])
+  );
 
   const STATS = [
     {
@@ -173,9 +166,25 @@ export default function ProfileScreen() {
       icon: "heartbeat",
       action: () => router.push("/profile/body-index"),
     },
-    { label: t("profile.notifications"), icon: "bell" },
-    { label: t("profile.privacy_policy"), icon: "shield" },
-    { label: t("profile.settings"), icon: "cog" },
+    {
+      label: t("profile.notifications"),
+      icon: "bell",
+      action: () =>
+        Alert.alert(
+          t("profile.notifications"),
+          t("common.feature_coming_soon")
+        ),
+    },
+    {
+      label: t("profile.privacy_policy"),
+      icon: "shield",
+      action: () => router.push("/profile/privacy-policy"),
+    },
+    {
+      label: t("profile.settings"),
+      icon: "cog",
+      action: () => router.push("/profile/settings"),
+    },
   ];
 
   const displayName =
@@ -222,6 +231,29 @@ export default function ProfileScreen() {
         <Text className="text-primary font-bold text-xs mt-2 bg-orange-900/30 px-3 py-1 rounded-full uppercase tracking-wider">
           {memberTier}
         </Text>
+      </View>
+
+      <View className="px-6 mb-6">
+        <View className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex-row justify-between items-center shadow-sm">
+          <View className="flex-1 mr-4">
+            <Text className="text-gray-400 text-xs font-bold uppercase mb-1">
+              {t("profile.goal_label")}
+            </Text>
+            <Text className="text-white text-lg font-bold flex-wrap">
+              {user?.user_metadata?.goal
+                ? t(`profile.goals.${user.user_metadata.goal}`)
+                : t("profile.not_set")}
+            </Text>
+          </View>
+          <View className="items-end min-w-[60px]">
+            <Text className="text-gray-400 text-xs font-bold uppercase mb-1">
+              BMI
+            </Text>
+            <Text className="text-primary text-2xl font-black">
+              {stats.bmi > 0 ? stats.bmi.toFixed(1) : "--"}
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Stats */}

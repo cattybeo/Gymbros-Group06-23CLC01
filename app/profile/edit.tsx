@@ -3,6 +3,9 @@ import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { decode } from "base64-arraybuffer";
+import dayjs from "dayjs";
+import "dayjs/locale/en";
+import "dayjs/locale/vi";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -12,6 +15,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   ScrollView,
   Text,
@@ -20,12 +24,15 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import DateTimePicker, { DateType } from "react-native-ui-datepicker";
 
 export default function EditProfileScreen() {
   const { user } = useAuthContext();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const insets = useSafeAreaInsets();
 
   const [fullName, setFullName] = useState(
     user?.user_metadata?.full_name || ""
@@ -35,6 +42,46 @@ export default function EditProfileScreen() {
   );
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Profile 2.0 State
+  const [goal, setGoal] = useState<string>(
+    user?.user_metadata?.goal || "maintain"
+  );
+  const [gender, setGender] = useState<string>(
+    user?.user_metadata?.gender || "male"
+  );
+  const [birthday, setBirthday] = useState<Date | null>(
+    user?.user_metadata?.birthday ? new Date(user.user_metadata.birthday) : null
+  );
+  const [activityLevel, setActivityLevel] = useState<string>(
+    user?.user_metadata?.activity_level || "sedentary"
+  );
+  const [experienceLevel, setExperienceLevel] = useState<string>(
+    user?.user_metadata?.experience_level || "beginner"
+  );
+  const [weeklyAvailability, setWeeklyAvailability] = useState<string>(
+    user?.user_metadata?.weekly_availability || "1_2"
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [tempDate, setTempDate] = useState<DateType>(dayjs());
+
+  const GOAL_OPTIONS = [
+    "lose_weight",
+    "build_muscle",
+    "maintain",
+    "endurance",
+    "flexibility",
+  ];
+  const GENDER_OPTIONS = ["male", "female", "other"];
+  const ACTIVITY_OPTIONS = [
+    "sedentary",
+    "light",
+    "moderate",
+    "active",
+    "very_active",
+  ];
+  const EXPERIENCE_OPTIONS = ["beginner", "intermediate", "advanced"];
+  const AVAILABILITY_OPTIONS = ["1_2", "3_4", "5_plus"];
 
   const pickImage = async () => {
     try {
@@ -57,7 +104,7 @@ export default function EditProfileScreen() {
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert(t("common.error"), "Could not pick image.");
+      Alert.alert(t("common.error"), t("common.pick_image_error"));
     }
   };
 
@@ -111,16 +158,26 @@ export default function EditProfileScreen() {
 
   const handleUpdate = async () => {
     if (!user) return;
+
     setLoading(true);
 
     const { error } = await supabase.auth.updateUser({
-      data: { full_name: fullName, avatar_url: avatarUrl },
+      data: {
+        full_name: fullName,
+        avatar_url: avatarUrl,
+        goal,
+        gender,
+        birthday: birthday ? birthday.toISOString().split("T")[0] : null,
+        activity_level: activityLevel,
+        experience_level: experienceLevel,
+        weekly_availability: weeklyAvailability,
+      },
     });
 
     if (error) {
       Alert.alert(t("common.error"), error.message);
     } else {
-      Alert.alert(t("common.success"), t("profile.update_success_msg")); // need to add key
+      Alert.alert(t("common.success"), t("profile.update_success_msg"));
       router.back();
     }
     setLoading(false);
@@ -131,11 +188,18 @@ export default function EditProfileScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-background"
     >
-      <ScrollView className="flex-1 px-6 pt-12">
+      <ScrollView
+        className="flex-1 px-6"
+        contentContainerStyle={{
+          paddingTop: insets.top + 20,
+          paddingBottom: insets.bottom + 40,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Back Button */}
         <TouchableOpacity
           onPress={() => router.back()}
-          className="mb-6 w-10 h-10 items-center justify-center rounded-full bg-gray-800"
+          className="mb-4 w-10 h-10 items-center justify-center rounded-full bg-gray-800"
         >
           <FontAwesome name="arrow-left" size={20} color="white" />
         </TouchableOpacity>
@@ -176,37 +240,311 @@ export default function EditProfileScreen() {
             </View>
           </TouchableOpacity>
           <Text className="text-gray-400 text-sm mt-3">
-            {uploading ? "Uploading..." : t("profile.change_avatar")}
+            {uploading ? t("common.uploading") : t("profile.change_avatar")}
           </Text>
         </View>
 
-        <View className="space-y-4">
-          <View>
-            <Text className="text-gray-400 mb-2 font-medium">
-              {t("auth.name_label") || "Full Name"}
+        <View className="space-y-10">
+          {/* Section 1: Personal Details */}
+          <View className="space-y-6">
+            <Text className="text-white text-xl font-bold opacity-90 border-b border-gray-800 pb-2">
+              {t("profile.personal_details")}
             </Text>
-            <TextInput
-              className="bg-surface p-4 rounded-xl text-white border border-gray-700 focus:border-primary"
-              value={fullName}
-              onChangeText={setFullName}
-              placeholder="Ex: John Doe"
-              placeholderTextColor="#6B7280"
-            />
+
+            {/* Name */}
+            <View>
+              <Text className="text-gray-400 mb-2 font-medium">
+                {t("auth.name_label") || "Full Name"}
+              </Text>
+              <TextInput
+                className="bg-surface p-4 rounded-xl text-white border border-gray-700 focus:border-primary"
+                value={fullName}
+                onChangeText={setFullName}
+                placeholder={t("auth.name_placeholder")}
+                placeholderTextColor="#6B7280"
+              />
+            </View>
+
+            {/* Email */}
+            <View>
+              <Text className="text-gray-400 mb-2 font-medium">
+                {t("auth.email_label")}
+              </Text>
+              <View className="bg-gray-800 p-4 rounded-xl border border-gray-700 opacity-50">
+                <Text className="text-gray-400">{user?.email}</Text>
+              </View>
+              <Text className="text-gray-500 text-xs mt-1 italic">
+                {t("profile.email_change_notice")}
+              </Text>
+            </View>
+
+            {/* Gender Selector */}
+            <View>
+              <Text className="text-gray-400 mb-2 font-medium">
+                {t("profile.gender_label")}
+              </Text>
+              <View className="flex-row gap-3">
+                {GENDER_OPTIONS.map((g) => (
+                  <TouchableOpacity
+                    key={g}
+                    onPress={() => setGender(g)}
+                    className={`flex-1 py-3 rounded-xl border items-center ${
+                      gender === g
+                        ? "bg-primary border-primary"
+                        : "bg-gray-800 border-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`${
+                        gender === g ? "text-white font-bold" : "text-gray-400"
+                      }`}
+                    >
+                      {t(`profile.genders.${g}`)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* Birthday */}
+            <View>
+              <Text className="text-gray-400 mb-2 font-medium">
+                {t("profile.birthday_label")}
+              </Text>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setTempDate(birthday || dayjs());
+                  setShowDatePicker(true);
+                }}
+                className="bg-surface p-4 rounded-xl border border-gray-700 flex-row justify-between items-center"
+              >
+                <Text
+                  className={`${birthday ? "text-white" : "text-gray-500"}`}
+                >
+                  {birthday
+                    ? dayjs(birthday).format("YYYY-MM-DD")
+                    : "YYYY-MM-DD"}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+
+              {/* Data Picker Modal (Keep existing code structure implicitly via replace if possible, but here we are replacing a large chunk) */}
+              <Modal
+                visible={showDatePicker}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setShowDatePicker(false)}
+              >
+                <View className="flex-1 justify-center items-center bg-black/80 p-4">
+                  <View className="bg-surface w-full max-w-sm rounded-3xl p-6 border border-gray-700">
+                    <Text className="text-white text-xl font-bold mb-4 text-center">
+                      {t("profile.birthday_label")}
+                    </Text>
+
+                    <View className="bg-background rounded-2xl p-2 mb-6">
+                      <DateTimePicker
+                        locale={i18n.language}
+                        mode="single"
+                        date={tempDate}
+                        onChange={(params: any) => setTempDate(params.date)}
+                        maxDate={dayjs().toDate()}
+                        styles={{
+                          selected: { backgroundColor: colors.tint },
+                          selected_label: {
+                            color: "black",
+                            fontWeight: "bold",
+                          },
+                          day_label: { color: "white" },
+                          year_label: { color: "white", fontWeight: "bold" },
+                          month_label: { color: "white", fontWeight: "bold" },
+                          month_selector_label: {
+                            color: "white",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                          },
+                          year_selector_label: {
+                            color: "white",
+                            fontSize: 16,
+                            fontWeight: "bold",
+                          },
+                          weekday_label: { color: "#9CA3AF" },
+                        }}
+                        components={{
+                          IconPrev: (
+                            <Ionicons
+                              name="chevron-back"
+                              size={20}
+                              color="white"
+                            />
+                          ),
+                          IconNext: (
+                            <Ionicons
+                              name="chevron-forward"
+                              size={20}
+                              color="white"
+                            />
+                          ),
+                        }}
+                      />
+                    </View>
+
+                    <View className="flex-row gap-4">
+                      <TouchableOpacity
+                        onPress={() => setShowDatePicker(false)}
+                        className="flex-1 py-3 rounded-xl bg-gray-800 border border-gray-700 items-center"
+                      >
+                        <Text className="text-gray-300 font-bold">
+                          {t("common.cancel") || "Cancel"}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (tempDate) {
+                            setBirthday(dayjs(tempDate).toDate());
+                          }
+                          setShowDatePicker(false);
+                        }}
+                        className="flex-1 py-3 rounded-xl bg-primary items-center"
+                      >
+                        <Text className="text-black font-bold">
+                          {t("common.confirm") || "Confirm"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </Modal>
+            </View>
           </View>
 
-          <View>
-            <Text className="text-gray-400 mb-2 font-medium">Email</Text>
-            <View className="bg-gray-800 p-4 rounded-xl border border-gray-700 opacity-50">
-              <Text className="text-gray-400">{user?.email}</Text>
-            </View>
-            <Text className="text-gray-500 text-xs mt-1 italic">
-              {t("profile.email_change_notice")}
+          {/* Section 2: Fitness Goals */}
+          <View className="space-y-6">
+            <Text className="text-white text-xl font-bold opacity-90 border-b border-gray-800 pb-2">
+              {t("profile.fitness_profile")}
             </Text>
+
+            <View>
+              <Text className="text-gray-400 mb-3 font-medium">
+                {t("profile.goal_label")}
+              </Text>
+              <View className="flex-row flex-wrap gap-3">
+                {GOAL_OPTIONS.map((g) => (
+                  <TouchableOpacity
+                    key={g}
+                    onPress={() => setGoal(g)}
+                    className={`px-4 py-2 rounded-full border ${
+                      goal === g
+                        ? "bg-primary border-primary"
+                        : "bg-gray-800 border-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`${
+                        goal === g ? "text-white font-bold" : "text-gray-400"
+                      }`}
+                    >
+                      {t(`profile.goals.${g}`)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* AI Data: Activity Level */}
+            <View>
+              <Text className="text-gray-400 mb-3 font-medium">
+                {t("profile.activity_level_label")}
+              </Text>
+              <View className="flex-row flex-wrap gap-3">
+                {ACTIVITY_OPTIONS.map((opt) => (
+                  <TouchableOpacity
+                    key={opt}
+                    onPress={() => setActivityLevel(opt)}
+                    className={`px-4 py-2 rounded-full border ${
+                      activityLevel === opt
+                        ? "bg-primary border-primary"
+                        : "bg-gray-800 border-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`${
+                        activityLevel === opt
+                          ? "text-white font-bold"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {t(`profile.activities.${opt}`)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* AI Data: Experience Level */}
+            <View>
+              <Text className="text-gray-400 mb-3 font-medium">
+                {t("profile.experience_level_label")}
+              </Text>
+              <View className="flex-row flex-wrap gap-3">
+                {EXPERIENCE_OPTIONS.map((opt) => (
+                  <TouchableOpacity
+                    key={opt}
+                    onPress={() => setExperienceLevel(opt)}
+                    className={`px-4 py-2 rounded-full border ${
+                      experienceLevel === opt
+                        ? "bg-primary border-primary"
+                        : "bg-gray-800 border-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`${
+                        experienceLevel === opt
+                          ? "text-white font-bold"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {t(`profile.experiences.${opt}`)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* AI Data: Weekly Availability */}
+            <View>
+              <Text className="text-gray-400 mb-3 font-medium">
+                {t("profile.weekly_availability_label")}
+              </Text>
+              <View className="flex-row flex-wrap gap-3">
+                {AVAILABILITY_OPTIONS.map((opt) => (
+                  <TouchableOpacity
+                    key={opt}
+                    onPress={() => setWeeklyAvailability(opt)}
+                    className={`px-4 py-2 rounded-full border ${
+                      weeklyAvailability === opt
+                        ? "bg-primary border-primary"
+                        : "bg-gray-800 border-gray-700"
+                    }`}
+                  >
+                    <Text
+                      className={`${
+                        weeklyAvailability === opt
+                          ? "text-white font-bold"
+                          : "text-gray-400"
+                      }`}
+                    >
+                      {t(`profile.availabilities.${opt}`)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
           </View>
         </View>
 
         <TouchableOpacity
-          className={`mt-8 w-full py-4 rounded-xl items-center ${
+          className={`mt-10 w-full py-4 rounded-xl items-center ${
             loading ? "bg-gray-700" : "bg-primary"
           }`}
           onPress={handleUpdate}
