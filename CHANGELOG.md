@@ -2,6 +2,19 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.7.3] - 2026-01-05
+
+### Sửa lỗi (Fixed)
+
+- **Avatar**: Khôi phục chức năng tải ảnh đại diện từ thư viện và cập nhật ngay lập tức.
+- **Giao diện (UI)**: Sửa lỗi `SafeAreaView` tại màn hình Profile và Edit Profile, đảm bảo nội dung không bị che khuất bởi tai thỏ/notch.
+- **Đa ngôn ngữ (i18n)**: Bổ sung các key bản dịch còn thiếu (`uploading`, `pick_image_error`, `email_label`) tại Edit Profile.
+
+### Thêm mới (Added)
+
+- **Cài đặt (Settings)**: Thêm màn hình Cài đặt riêng biệt, cho phép chuyển đổi ngôn ngữ Anh-Việt nhanh chóng.
+- **Trải nghiệm**: Cải thiện khoảng cách (Spacing) và bố cục màn hình Chỉnh sửa hồ sơ.
+
 ## [v0.7.2] - 2026-01-05
 
 ### Sửa lỗi (Fixed)
