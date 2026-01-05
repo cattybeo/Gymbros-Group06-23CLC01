@@ -14,6 +14,7 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 
 - **Cài đặt (Settings)**: Thêm màn hình Cài đặt riêng biệt, cho phép chuyển đổi ngôn ngữ Anh-Việt nhanh chóng.
 - **Trải nghiệm**: Cải thiện khoảng cách (Spacing) và bố cục màn hình Chỉnh sửa hồ sơ.
+- **Onboarding**: Cập nhật màn hình thu thập chỉ số cá nhân, đồng bộ với Profile 2.0 (Thêm Mục tiêu, Mức độ vận động, Kinh nghiệm).
 
 ## [v0.7.2] - 2026-01-05
 
