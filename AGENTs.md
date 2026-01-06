@@ -110,6 +110,113 @@ _Derived from `package.json` at commit `2026-01-05`_:
 5. [ ] **Performance**: Lists use FlatList; Keyboard handling implemented.
 6. [ ] **Secrets Safe**: No private keys in client code.
 
+## 7. 17 Rules of Agentic Coding
+
+Based on Eric Raymond's Unix Philosophy, these principles guide sustainable software development. Adapted from [The Art of Unix Programming](https://cdn.nakamototinstitute.org/docs/taoup.pdf).
+
+### Core Architecture Rules
+
+1. **Rule of Modularity (Quy tắc Tính mô-đun)**
+   - Write simple parts connected by clean interfaces
+   - Each component/hook should have a single, clear responsibility
+   - Example: `useCustomAlert` is a self-contained alert system; `AuthContext` only handles auth state
+
+2. **Rule of Clarity (Quy tắc Tính rõ ràng)**
+   - Clarity is better than cleverness
+   - Prefer explicit code over magic; write code that reads like prose
+   - Use descriptive variable/function names; avoid abbreviations unless obvious
+
+3. **Rule of Composition (Quy tắc Tính kết hợp)**
+   - Design programs to connect with other programs
+   - Build reusable UI primitives in `components/ui/` that compose into screens
+   - Supabase RPC functions enable composable data operations
+
+4. **Rule of Separation (Quy tắc Tính tách biệt)**
+   - Separate policy from mechanism; separate interface from engine
+   - UI components (mechanism) vs. business logic (policy)
+   - AuthContext (engine) vs. route guards (interface)
+   - Database schema (data) vs. RLS policies (access control)
+
+5. **Rule of Simplicity (Quy tắc Tính đơn giản)**
+   - Design for simplicity; add complexity only when proven necessary
+   - No Redux/Zustand when Context suffices
+   - Prefer native APIs over heavy libraries
+   - If you can't explain it simply, you don't understand it well enough
+
+6. **Rule of Parsimony (Quy tắc Tính tiết kiệm)**
+   - Write large programs only when it's clear no smaller approach works
+   - Start with component state; elevate to Context only when needed
+   - Use native navigation before custom solutions
+
+7. **Rule of Transparency (Quy tắc Tính minh bạch)**
+   - Design for visibility to make debugging easier
+   - Use console.log strategically for navigation guards flow
+   - Error boundaries should reveal failure context
+   - Prefer explicit error messages over generic ones
+
+8. **Rule of Robustness (Quy tắc Tính mạnh mẽ)**
+   - Robustness is the result of transparency and simplicity
+   - Complex code breaks in complex ways; simple code breaks simply
+   - Test core flows (auth, booking, membership) thoroughly
+
+9. **Rule of Representation (Quy tắc Tính đại diện)**
+   - Fold knowledge into data to simplify program logic
+   - Image slugs in `constants/Images.ts` instead of scattered require() calls
+   - Translation keys in `lib/i18n/locales/` capture UI text logic
+   - Database schema captures business relationships
+
+### Interface & Behavior Rules
+
+10. **Rule of Least Surprise (Quy tắc Ít bất ngờ nhất)**
+    - In interface design, always do the least surprising thing
+    - Button placement should follow platform conventions
+    - Navigation should behave predictably (back button, gestures)
+    - Follow React Native and Expo idioms
+
+11. **Rule of Silence (Quy tắc Im lặng)**
+    - When a program has nothing surprising to say, it should say nothing
+    - Don't log every state change; log meaningful events only
+    - Silence in success, noise in failure (see Rule of Repair)
+    - Avoid toast notifications for expected operations
+
+12. **Rule of Repair (Quy tắc Sửa chữa)**
+    - When you must fail, fail noisily and as early as possible
+    - Validate user input at source; show errors immediately
+    - Use TypeScript to catch errors at compile time
+    - Supabase errors should be surfaced to user via `CustomAlert`
+
+### Development Workflow Rules
+
+13. **Rule of Economy (Quy tắc Tiết kiệm)**
+    - Programmer time is expensive; conserve it, not machine time
+    - Don't premature optimize; `yarn analysis:knip` is fast enough
+    - Prefer readable code over micro-optimizations
+    - Use libraries instead of reinventing wheels
+
+14. **Rule of Generation (Quy tắc Tự sinh)**
+    - Avoid manual code; write programs to write programs when possible
+    - Use `scripts/generate-context.js` to generate project documentation
+    - Use Knip to find dead code instead of manual review
+    - Supabase migrations generate schema; don't hand-edit SQL
+
+15. **Rule of Optimization (Quy tắc Tối ưu hóa)**
+    - Prototype before polishing. Get it working before optimizing
+    - Make it work, make it right, then make it fast
+    - Use `useFocusEffect` for data refresh before implementing complex caching
+    - Profile before optimizing (React DevTools)
+
+16. **Rule of Diversity (Quy tắc Đa dạng)**
+    - Distrust all claims for "the one true way"
+    - Consider multiple approaches; use the right tool for the job
+    - Not everything needs to be a hook; not everything needs to be a component
+    - Balance best practices with pragmatism
+
+17. **Rule of Extensibility (Quy tắc Khả năng mở rộng)**
+    - Design for the future; it will be here sooner than you think
+    - Add i18n keys even if currently single-language
+    - Design components for multiple variants (variants, sizes, states)
+    - Write database migrations that are reversible
+
 ## Sources & Citations
 
 - [Expo Versions](https://docs.expo.dev/versions/latest/) - Validated SDK 54 mapping.

@@ -37,7 +37,7 @@ export default function MembershipCard({
   // Calculate Monthly Price
   const monthlyPriceRaw = plan.price / duration;
   const formattedMonthlyPrice = isFreeTier
-    ? "Miễn phí"
+    ? t("membership.free")
     : new Intl.NumberFormat("vi-VN", {
         style: "currency",
         currency: "VND",
@@ -80,7 +80,7 @@ export default function MembershipCard({
     buttonText = t("membership.upgrade");
     buttonStyle = "bg-success active:bg-success/90 shadow-md shadow-success/30";
   } else if (isCancelled) {
-    buttonText = "Đã hủy (Hết hạn sớm)";
+    buttonText = t("membership.cancelled_early");
     buttonStyle = "bg-error opacity-80";
     textStyle = "text-error-foreground font-bold text-lg";
   }
@@ -125,15 +125,14 @@ export default function MembershipCard({
                 {formattedTotalPrice}
               </Text>
               <Text className="text-muted_foreground ml-1 text-base font-medium">
-                / {duration}{" "}
-                {t("membership.month_unit", { defaultValue: "tháng" })}
+                / {duration} {t("membership.month_unit", { count: duration })}
               </Text>
             </View>
 
             {duration > 1 && (
               <Text className="text-muted_foreground text-sm mt-1">
                 ≈ {formattedMonthlyPrice} /{" "}
-                {t("membership.month_unit", { defaultValue: "tháng" })}
+                {t("membership.month_unit", { count: 1 })}
               </Text>
             )}
             {/* Show "Billed once" text? user probably gets it from "Total / X months" */}
@@ -170,6 +169,8 @@ export default function MembershipCard({
       )}
 
       <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel={buttonText}
         className={`w-full py-4 rounded-2xl items-center ${buttonStyle}`}
         onPress={() => onBuy(plan.id)}
         disabled={isDisabled}
