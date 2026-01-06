@@ -140,7 +140,7 @@ export default function SettingsScreen() {
           </View>
 
           <Text className="text-muted_foreground text-xs mt-4 text-center">
-            Version 0.7.3 (Beta)
+            Version 0.8.0 (Beta)
           </Text>
         </View>
       </View>
