@@ -6,6 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Colors from "@/constants/Colors";
+import { useColorScheme } from "react-native";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -20,6 +22,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function AddBodyIndexScreen() {
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
@@ -40,17 +44,20 @@ export default function AddBodyIndexScreen() {
 
       if (!user) return;
 
-      // We need age/gender from previous record if not provided,
-      // but for V1 let's just ask/require or default.
-      // To keep it simple, we require inputs or fetch latest.
-      // Let's assume user inputs for now.
+      // Fetch gender from user metadata with fallback
+      const userGender = user?.user_metadata?.gender || "male";
+
+      // Fetch age from user metadata if not provided
+      const userAge = age || user?.user_metadata?.birthday
+        ? new Date().getFullYear() - new Date(user.user_metadata.birthday).getFullYear()
+        : 25;
 
       const { error } = await supabase.from("body_indices").insert({
         user_id: user.id,
         weight: parseFloat(weight),
         height: parseFloat(height),
-        age: age ? parseInt(age) : 25, // Fallback or fetch logic could be here
-        gender: "Male", // Fallback, ideally we fetch user profile
+        age: userAge,
+        gender: userGender,
         goal: "Maintain",
         record_day: new Date().toISOString().split("T")[0],
       });
@@ -77,7 +84,7 @@ export default function AddBodyIndexScreen() {
               onPress={() => router.back()}
               className="w-10 h-10 items-center justify-center bg-surface rounded-full mr-4"
             >
-              <Ionicons name="arrow-back" size={24} color="#fff" />
+              <Ionicons name="arrow-back" size={24} color={colors.foreground} />
             </TouchableOpacity>
             <Text className="text-foreground text-xl font-bold">
               {t("profile.add_record")}
