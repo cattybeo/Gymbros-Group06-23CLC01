@@ -21,12 +21,12 @@ export default function GoogleSignOutButton() {
     <TouchableOpacity
       onPress={handleSignOut}
       disabled={loading}
-      className="bg-red-500 p-4 rounded-xl items-center justify-center"
+      className="bg-destructive p-4 rounded-xl items-center justify-center"
     >
       {loading ? (
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator />
       ) : (
-        <Text className="text-white font-bold">Đăng xuất</Text>
+        <Text className="text-destructive-foreground font-bold">Đăng xuất</Text>
       )}
     </TouchableOpacity>
   );

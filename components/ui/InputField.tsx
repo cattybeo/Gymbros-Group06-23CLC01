@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -6,6 +7,7 @@ import {
   TextInputProps,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
 
 interface InputFielProps extends TextInputProps {
@@ -21,22 +23,24 @@ export default function InputField({
 }: InputFielProps) {
   // State để quản lý hiển thị mật khẩu
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   // Kiểm tra nếu là trường mật khẩu
   const isPasswordField = secureTextEntry === true;
 
   return (
     <View className="mb-4">
-      <Text className="text-gray-400 mb-2 font-medium">{label}</Text>
+      <Text className="text-foreground mb-2 font-medium">{label}</Text>
       {/* Container for input and icon */}
       <View
-        className={`w-full bg-surface rounded-xl border flex-row items-center px-4 ${
-          error ? "border-red-500" : "border-gray-700"
-        } focus:border-primary`}
+        className={`w-full bg-card rounded-xl border flex-row items-center px-4 ${
+          error ? "border-destructive" : "border-input"
+        } focus:border-ring`}
       >
         <TextInput
-          className="flex-1 py-4 text-white h-full"
-          placeholderTextColor="#6B7280"
+          className="flex-1 py-4 text-foreground h-full"
+          placeholderTextColor={colors.muted_foreground}
           secureTextEntry={isPasswordField && !isPasswordVisible}
           {...props} // Truyền tất cả các props còn lại (onChangeText, value, secureTextEntry...)
         />
@@ -48,13 +52,13 @@ export default function InputField({
             <Ionicons
               name={isPasswordVisible ? "eye-off" : "eye"}
               size={24}
-              color="gray"
+              color={colors.muted_foreground}
             />
           </TouchableOpacity>
         )}
       </View>
 
-      {error && <Text className="text-red-500 text-sm mt-1">{error}</Text>}
+      {error && <Text className="text-destructive text-sm mt-1">{error}</Text>}
     </View>
   );
 }

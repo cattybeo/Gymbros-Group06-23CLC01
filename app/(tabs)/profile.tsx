@@ -1,28 +1,25 @@
+import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { FontAwesome } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Alert,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function ProfileScreen() {
   const { user } = useAuthContext();
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
+
+  const [memberTier, setMemberTier] = useState(t("home.tier.standard"));
   const [stats, setStats] = useState({
     workouts: 0,
     calories: 0,
     minutes: 0,
     bmi: 0,
   });
-  const [memberTier, setMemberTier] = useState(t("home.tier.standard"));
 
   useFocusEffect(
     useCallback(() => {
@@ -43,7 +40,7 @@ export default function ProfileScreen() {
               .from("user_memberships")
               .select(
                 "end_date, plan:membership_plans(id, tier:membership_tiers(name, code))"
-              ) // Nested Join
+              )
               .eq("user_id", user.id)
               .gte("end_date", new Date().toISOString())
               .order("end_date", { ascending: false })
@@ -129,7 +126,7 @@ export default function ProfileScreen() {
       };
 
       fetchData();
-    }, [user])
+    }, [user, t])
   );
 
   const STATS = [
@@ -150,7 +147,7 @@ export default function ProfileScreen() {
     },
   ];
 
-  const MENU_ITEMS: { label: string; icon: string; action?: () => void }[] = [
+  const MENU_ITEMS = [
     {
       label: t("profile.edit_profile"),
       icon: "user",
@@ -170,10 +167,7 @@ export default function ProfileScreen() {
       label: t("profile.notifications"),
       icon: "bell",
       action: () =>
-        Alert.alert(
-          t("profile.notifications"),
-          t("common.feature_coming_soon")
-        ),
+        showAlert(t("profile.notifications"), t("common.feature_coming_soon")),
     },
     {
       label: t("profile.privacy_policy"),
@@ -191,7 +185,7 @@ export default function ProfileScreen() {
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
     user?.email?.split("@")[0] ||
-    "Gymbro User";
+    t("common.default_user_name");
 
   return (
     <ScrollView
@@ -200,9 +194,9 @@ export default function ProfileScreen() {
       showsVerticalScrollIndicator={false}
     >
       {/* Header */}
-      <View className="items-center pt-12 pb-8 bg-surface rounded-b-[30px] shadow-sm mb-6 border-b border-gray-800">
+      <View className="items-center pt-16 pb-8 bg-card rounded-b-[30px] shadow-sm mb-6 border-b border-border">
         <View className="mb-4 relative">
-          <View className="w-24 h-24 rounded-full bg-gray-700 items-center justify-center border-4 border-surface overflow-hidden">
+          <View className="w-24 h-24 rounded-full bg-card items-center justify-center border-4 border-background overflow-hidden relative">
             {user?.user_metadata?.avatar_url || user?.user_metadata?.picture ? (
               <Image
                 source={{
@@ -214,7 +208,7 @@ export default function ProfileScreen() {
                 resizeMode="cover"
               />
             ) : (
-              <Text className="text-3xl font-bold text-gray-400">
+              <Text className="text-3xl font-bold text-muted_foreground">
                 {user?.user_metadata?.full_name
                   ? user.user_metadata.full_name.charAt(0).toUpperCase()
                   : user?.email?.charAt(0).toUpperCase()}
@@ -222,31 +216,31 @@ export default function ProfileScreen() {
             )}
           </View>
           {/* Status Indicator (Optional) */}
-          <View className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-surface" />
+          <View className="absolute bottom-1 right-1 w-6 h-6 bg-success rounded-full border-4 border-card" />
         </View>
-        <Text className="text-white text-2xl font-bold mb-1">
+        <Text className="text-foreground text-2xl font-bold mb-1">
           {displayName}
         </Text>
-        <Text className="text-gray-500 text-sm">{user?.email}</Text>
-        <Text className="text-primary font-bold text-xs mt-2 bg-orange-900/30 px-3 py-1 rounded-full uppercase tracking-wider">
+        <Text className="text-muted_foreground text-sm">{user?.email}</Text>
+        <Text className="text-primary font-bold text-xs mt-2 bg-card border border-primary/30 px-3 py-1 rounded-full uppercase tracking-wider">
           {memberTier}
         </Text>
       </View>
 
       <View className="px-6 mb-6">
-        <View className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex-row justify-between items-center shadow-sm">
+        <View className="bg-card border border-border rounded-3xl p-5 flex-row justify-between items-center shadow-sm">
           <View className="flex-1 mr-4">
-            <Text className="text-gray-400 text-xs font-bold uppercase mb-1">
+            <Text className="text-muted_foreground text-xs font-bold uppercase mb-1">
               {t("profile.goal_label")}
             </Text>
-            <Text className="text-white text-lg font-bold flex-wrap">
+            <Text className="text-foreground text-lg font-bold flex-wrap">
               {user?.user_metadata?.goal
                 ? t(`profile.goals.${user.user_metadata.goal}`)
                 : t("profile.not_set")}
             </Text>
           </View>
           <View className="items-end min-w-[60px]">
-            <Text className="text-gray-400 text-xs font-bold uppercase mb-1">
+            <Text className="text-muted_foreground text-xs font-bold uppercase mb-1">
               BMI
             </Text>
             <Text className="text-primary text-2xl font-black">
@@ -261,11 +255,13 @@ export default function ProfileScreen() {
         {STATS.map((stat, index) => (
           <View
             key={index}
-            className="bg-surface w-[30%] p-3 rounded-2xl items-center border border-gray-800"
+            className="bg-card w-[30%] p-3 rounded-3xl items-center border border-border shadow-sm"
           >
             <Text className="text-primary text-xl font-bold">{stat.value}</Text>
-            <Text className="text-gray-400 text-xs mt-1">{stat.unit}</Text>
-            <Text className="text-gray-500 text-[10px] mt-1 uppercase">
+            <Text className="text-muted_foreground text-xs mt-1">
+              {stat.unit}
+            </Text>
+            <Text className="text-muted_foreground text-[10px] mt-1 uppercase">
               {stat.label}
             </Text>
           </View>
@@ -274,40 +270,45 @@ export default function ProfileScreen() {
 
       {/* Menu Options */}
       <View className="px-6 mb-8">
-        <Text className="text-white font-bold text-lg mb-4">
+        <Text className="text-foreground font-bold text-lg mb-4">
           {t("profile.general")}
         </Text>
-        <View className="bg-surface rounded-2xl overflow-hidden border border-gray-800">
+        <View className="bg-card rounded-3xl overflow-hidden border border-border shadow-sm">
           {MENU_ITEMS.map((item, index) => (
             <TouchableOpacity
               key={index}
               className={`flex-row items-center p-4 ${
-                index !== MENU_ITEMS.length - 1
-                  ? "border-b border-gray-800"
-                  : ""
+                index !== MENU_ITEMS.length - 1 ? "border-b border-border" : ""
               }`}
               onPress={() => {
                 if (item.action) {
                   item.action();
                 } else {
-                  Alert.alert(
+                  showAlert(
                     "Feature coming soon",
                     "This feature is under development."
                   );
                 }
               }}
             >
-              <View className="w-8 h-8 bg-gray-900 rounded-full items-center justify-center mr-4">
+              <View className="w-8 h-8 bg-background rounded-full items-center justify-center mr-4">
                 <FontAwesome
                   name={item.icon as any}
                   size={14}
-                  color="#FFA500"
+                  color={Colors.light.tint}
                 />
               </View>
-              <Text className="text-white flex-1 font-medium">
+              <Text className="text-foreground flex-1 font-medium">
                 {item.label}
               </Text>
-              <FontAwesome name="angle-right" size={16} color="#4B5563" />
+              <FontAwesome
+                name="angle-right"
+                size={16}
+                color={
+                  Colors[useAuthContext().user ? "light" : "dark"]
+                    .tabIconDefault /* Just use gray */
+                }
+              />
             </TouchableOpacity>
           ))}
         </View>
@@ -316,15 +317,28 @@ export default function ProfileScreen() {
       {/* Logout Button */}
       <View className="px-6 pb-20">
         <TouchableOpacity
-          className="w-full bg-surface border border-red-900/50 p-4 rounded-xl flex-row items-center justify-center"
-          onPress={() => supabase.auth.signOut()}
+          className="w-full bg-card border border-destructive/50 p-4 rounded-2xl flex-row items-center justify-center shadow-sm"
+          onPress={() => {
+            showAlert(
+              t("profile.logout"),
+              t("auth.logout_confirmation"),
+              "warning",
+              {
+                primaryButtonText: t("common.confirm"),
+                secondaryButtonText: t("common.cancel"),
+                onPrimaryPress: () => supabase.auth.signOut(),
+              }
+            );
+          }}
         >
-          <FontAwesome name="sign-out" size={18} color="#EF4444" />
-          <Text className="text-red-500 font-bold ml-2">
+          <FontAwesome name="sign-out" size={18} color={Colors.light.error} />
+          <Text className="text-destructive font-bold ml-2">
             {t("profile.logout")}
           </Text>
         </TouchableOpacity>
       </View>
+
+      <CustomAlertComponent />
     </ScrollView>
   );
 }
