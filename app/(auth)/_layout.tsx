@@ -1,9 +1,11 @@
+import Colors from "@/constants/Colors";
+import { useThemeContext } from "@/lib/theme";
 import { Stack } from "expo-router";
-import { useColorScheme } from "react-native";
 
 export default function AuthLayout() {
-  const colorScheme = useColorScheme();
-  const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
+  const backgroundColor = colors.background;
 
   return (
     <Stack

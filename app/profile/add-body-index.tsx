@@ -1,12 +1,14 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -19,6 +21,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // Screen for adding new body index record
 export default function AddBodyIndexScreen() {
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
+
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [age, setAge] = useState("");
@@ -26,7 +32,7 @@ export default function AddBodyIndexScreen() {
 
   const handleSave = async () => {
     if (!weight || !height) {
-      Alert.alert(t("common.error"), t("common.missing_info"));
+      showAlert(t("common.error"), t("common.missing_info"), "error");
       return;
     }
 
@@ -38,17 +44,22 @@ export default function AddBodyIndexScreen() {
 
       if (!user) return;
 
-      // We need age/gender from previous record if not provided,
-      // but for V1 let's just ask/require or default.
-      // To keep it simple, we require inputs or fetch latest.
-      // Let's assume user inputs for now.
+      // Fetch gender from user metadata with fallback
+      const userGender = user?.user_metadata?.gender || "male";
+
+      // Fetch age from user metadata if not provided
+      const userAge =
+        age || user?.user_metadata?.birthday
+          ? new Date().getFullYear() -
+            new Date(user.user_metadata.birthday).getFullYear()
+          : 25;
 
       const { error } = await supabase.from("body_indices").insert({
         user_id: user.id,
         weight: parseFloat(weight),
         height: parseFloat(height),
-        age: age ? parseInt(age) : 25, // Fallback or fetch logic could be here
-        gender: "Male", // Fallback, ideally we fetch user profile
+        age: userAge,
+        gender: userGender,
         goal: "Maintain",
         record_day: new Date().toISOString().split("T")[0],
       });
@@ -57,7 +68,7 @@ export default function AddBodyIndexScreen() {
 
       router.replace("/profile/body-index");
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message);
+      showAlert(t("common.error"), error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -75,30 +86,30 @@ export default function AddBodyIndexScreen() {
               onPress={() => router.back()}
               className="w-10 h-10 items-center justify-center bg-surface rounded-full mr-4"
             >
-              <Ionicons name="arrow-back" size={24} color="white" />
+              <Ionicons name="arrow-back" size={24} color={colors.foreground} />
             </TouchableOpacity>
-            <Text className="text-white text-xl font-bold">
+            <Text className="text-foreground text-xl font-bold">
               {t("profile.add_record")}
             </Text>
           </View>
 
-          <View className="bg-surface p-6 rounded-2xl border border-gray-800">
+          <View className="bg-surface p-6 rounded-2xl border border-border">
             <InputField
-              label={t("onboarding.weight_label") + " (kg)"}
+              label={t("onboarding.weight_label")}
               placeholder="0.0"
               value={weight}
               onChangeText={setWeight}
               keyboardType="numeric"
             />
             <InputField
-              label={t("onboarding.height_label") + " (cm)"}
+              label={t("onboarding.height_label")}
               placeholder="0"
               value={height}
               onChangeText={setHeight}
               keyboardType="numeric"
             />
             <InputField
-              label={t("onboarding.age_label") + " (Optional)"}
+              label={`${t("onboarding.age_label")} (${t("common.optional")})`}
               placeholder="25"
               value={age}
               onChangeText={setAge}
@@ -107,7 +118,7 @@ export default function AddBodyIndexScreen() {
           </View>
         </ScrollView>
 
-        <View className="p-4 border-t border-gray-800">
+        <View className="p-4 border-t border-border">
           <Button
             title={t("common.save")}
             onPress={handleSave}
@@ -115,6 +126,7 @@ export default function AddBodyIndexScreen() {
           />
         </View>
       </KeyboardAvoidingView>
+      <CustomAlertComponent />
     </SafeAreaView>
   );
 }

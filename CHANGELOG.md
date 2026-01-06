@@ -2,6 +2,127 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.9.1] - 2026-01-07
+
+### Sửa lỗi (Fixed)
+
+- **Lỗi Navigation Context**: Khắc phục triệt để lỗi "Couldn't find a navigation context" gây crash ứng dụng khi khởi động bằng cách sử dụng `useRootNavigationState` và đưa logic điều hướng vào `AuthGuard` component. Đã hỗ trợ xử lý độ trễ trên Android.
+- **Sửa lỗi Privacy Policy**: Khắc phục lỗi crash trên Android khi tương tác với các mục trong Chính sách bảo mật do xung đột giữa NativeWind (`ring` classes) và `LayoutAnimation`.
+- **Khôi phục Dark Mode**: Sửa lỗi Dark Mode không hoạt động sau khi refactor root layout. Đã thêm lại container theme và tối ưu hóa màn hình loading.
+- **Cập nhật SafeAreaView**: Thay thế toàn bộ các import `SafeAreaView` từ `react-native` sang `react-native-safe-area-context` để loại bỏ các cảnh báo (warnings) không còn được hỗ trợ.
+
+### Cải thiện (Changed)
+
+- **Đa ngôn ngữ Profile**: Hoàn tất việc quốc tế hóa (i18n) cho toàn bộ phần Profile, đảm bảo không còn văn bản tiếng Anh mã cứng trong UI Tiếng Việt.
+- **Cấu trúc Root Layout**: Refactor lại `app/_layout.tsx` để tách biệt rõ ràng giữa logic giao diện (UI) và logic bảo mật/điều hướng (AuthGuard).
+
+### Đã thêm (Added)
+
+- **AuthGuard Component**: Thành phần mới giúp quản lý luồng điều hướng dựa trên trạng thái xác thực và onboarding của người dùng một cách ổn định hơn.
+
+## [v0.9.0] - 2026-01-07
+
+### Tính năng mới (Added)
+
+- **Hỗ trợ Dark Mode**: Hoàn thiện chế độ tối với dual-mode control (System + Manual).
+  - Phát hiện theme hệ thống (auto-follow device settings).
+  - Toggle thủ công trong màn hình Settings (Light/Dark/System options).
+  - Lưu trữ preference qua AsyncStorage (tồn tại qua app restarts).
+  - Hệ thống semantic token cho consistent theming trên toàn bộ screens.
+  - Hỗ trợ cả React Native's Appearance API và manual override.
+- **Skeleton Loading System**: Shimmer effect loaders tái sử dụng cho UX tốt hơn.
+  - Component Skeleton cho single elements.
+  - Component SkeletonCard cho card-based layouts.
+  - Mượt mà 60fps sử dụng react-native-reanimated.
+  - Dark mode support với semantic tokens.
+  - Optimized cleanup on unmount (Rule 15 compliance).
+- **Cải thiện Profile Screen**:
+  - Loading state với Skeleton UI.
+  - Fade-in animation khi content load.
+  - Đơn giản hóa dual loading state (loại bỏ ActivityIndicator confusion).
+
+### Thay đổi (Changed)
+
+- **Kiến trúc Theme System**:
+  - Refactor từ system-only sang dual-mode control (system + manual).
+  - Thêm ThemeContext với useThemeContext hook.
+  - Tích hợp NativeWind v4's useColorScheme và setColorScheme.
+  - Tất cả components giờ sử dụng theme context thay vì direct hooks.
+- **Styling Consistency**:
+  - Áp dụng semantic tokens throughout app.
+  - Thay hardcoded colors bằng design system tokens.
+  - Fix icon colors để sử dụng colors.foreground thay vì hardcoded values.
+
+### Sửa lỗi (Fixed)
+
+- **Hardcoded gender trong add-body-index.tsx**:
+  - Fetch gender từ user metadata với fallback "male".
+  - Fetch age từ birthday metadata nếu có.
+- **Kích hoạt NativeWind dark: className variants** bằng cách gọi setColorScheme.
+- **Khôi phục darkMode 'class' config** để enable manual theme toggle.
+- **Update version number** sang 0.9.0 trong settings screen.
+
+### Chi tiết kỹ thuật (Technical Details)
+
+- **Files Modified**: 15+ files across app/, components/, lib/
+- **Theme Tokens**: 50+ semantic color tokens defined trong global.css
+- **Design System**: 7 border radius levels, 6 shadow levels, spacing tokens
+- **Breaking Changes**: None - backward compatible
+
+## [v0.8.0] - 2026-01-06
+
+### Tính năng mới (Added)
+
+- **Stripe React Native v0.57.2**: Tích hợp StripeProvider ở cấp độ root layout (app/\_layout.tsx) theo best practices.
+  - Di chuyển StripeProvider từ tabs layout lên root layout để đảm bảo toàn bộ ứng dụng có thể truy cập Stripe SDK.
+  - Stripe SDK v0.57.2 bao gồm các bản sửa lỗi cho Android PaymentSheet crashes có trong v0.50.x.
+  - Cấu trúc Provider: RootLayout → StripeProvider → AuthProvider → RootLayoutNav → Stack.
+  - StripeKeepJsAwakeTask registration vẫn được giữ lại như yêu cầu của Stripe SDK.
+
+### Sửa lỗi (Fixed)
+
+- **Stripe Plugin Config**: Khắc phục lỗi `TypeError: Cannot read properties of undefined (reading 'merchantIdentifier')`.
+  - Plugin config thiếu object cấu hình, gây lỗi khi destructuring merchantIdentifier.
+  - Cập nhật app.json để thêm options object với `enableGooglePay: false`.
+  - Cho phép plugin chạy mà không cần merchantIdentifier (tính năng Apple Pay).
+  - Chạy `npx expo prebuild --clean` để xác nhận fix.
+- **UI Logic vs Config Logic**: Loại bỏ inline style với colors từ các Text component.
+  - components/MembershipCard.tsx: Duration và Price text giờ sử dụng `className="text-primary"`.
+  - app/(tabs)/index.tsx: JOIN NOW text giờ sử dụng `className="text-primary"`.
+  - Text components nên sử dụng className với semantic tokens (UI Logic), không phải inline styles.
+
+### Thay đổi (Changed)
+
+- **Code Comments Cleanup**: Chuẩn hóa code comments trên toàn bộ codebase.
+  - Áp dụng tags chuẩn: TODO (công việc tương lai), FIXME (lỗi đã biết), NOTE (ngữ cảnh quan trọng).
+  - Dịch các bình luận tiếng Việt sang tiếng Anh.
+  - Loại bỏ các bình luận dài dòng và giải thích hiển nhiên.
+  - Loại bỏ TODO comment đã hoàn thành cho get_class_counts RPC (đã được implement).
+  - Files ảnh hưởng: app/, components/, lib/ (14 files tổng cộng).
+
+### Tài liệu (Documentation)
+
+- **CLAUDE.md**: Làm rõ sự tách biệt giữa UI Logic và Config Logic cho NativeWind.
+  - Thêm flowchart quyết định khi nào sử dụng className vs Colors.ts.
+  - Tài liệu UI Logic: Sử dụng className cho View, Text, TouchableOpacity, etc.
+  - Tài liệu Config Logic: Sử dụng Colors.ts cho màu icon, navigation themes, ActivityIndicator.
+  - Bao gồm ví dụ component sử dụng kết hợp cả hai.
+  - Giải thích tại sao sự tách biệt này cần thiết dựa trên giới hạn của NativeWind.
+
+## [v0.7.3] - 2026-01-05
+
+### Sửa lỗi (Fixed)
+
+- **Avatar**: Khôi phục chức năng tải ảnh đại diện từ thư viện và cập nhật ngay lập tức.
+- **Giao diện (UI)**: Sửa lỗi `SafeAreaView` tại màn hình Profile và Edit Profile, đảm bảo nội dung không bị che khuất bởi tai thỏ/notch.
+- **Đa ngôn ngữ (i18n)**: Bổ sung các key bản dịch còn thiếu (`uploading`, `pick_image_error`, `email_label`) tại Edit Profile.
+
+### Thêm mới (Added)
+
+- **Cài đặt (Settings)**: Thêm màn hình Cài đặt riêng biệt, cho phép chuyển đổi ngôn ngữ Anh-Việt nhanh chóng.
+- **Trải nghiệm**: Cải thiện khoảng cách (Spacing) và bố cục màn hình Chỉnh sửa hồ sơ.
+- **Onboarding**: Cập nhật màn hình thu thập chỉ số cá nhân, đồng bộ với Profile 2.0 (Thêm Mục tiêu, Mức độ vận động, Kinh nghiệm).
+
 ## [v0.7.2] - 2026-01-05
 
 ### Sửa lỗi (Fixed)
