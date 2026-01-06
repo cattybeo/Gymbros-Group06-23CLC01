@@ -24,7 +24,7 @@ export default function ClassCard({
   const startTime = new Date(gymClass.start_time);
   const endTime = new Date(gymClass.end_time);
 
-  // use i18n.language. 'vi' maps to 'vi-VN', 'en' maps to 'en-US' basically.
+  // Map i18n language to locale format
   const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
 
   const formatTime = (date: Date) =>

@@ -9,9 +9,9 @@ export default function GoogleSignOutButton() {
     setLoading(true);
     try {
       await signOutFromGoogle();
-      // AuthContext sẽ tự động nhận diện session = null và điều hướng về sign-in
+      // AuthContext will detect session = null and redirect to sign-in
     } catch (error) {
-      console.log("Lỗi đăng xuất:", error);
+      console.error("Sign out error:", error);
     } finally {
       setLoading(false);
     }
