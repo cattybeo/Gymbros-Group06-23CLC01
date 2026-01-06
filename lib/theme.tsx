@@ -18,7 +18,7 @@ interface ThemeContextType {
   /** User's selected preference (light, dark, or system default) */
   userPreference: "light" | "dark" | "system";
   /** Function to update theme preference */
-  setColorScheme: (scheme: "light" | "dark" | "system") => void;
+  setColorScheme: (scheme: "light" | "dark" | "system") => Promise<void>;
   /** Indicates if theme preference is being loaded from storage */
   isLoading: boolean;
 }
@@ -39,7 +39,9 @@ const STORAGE_KEY = "@gymbros_theme_preference";
  * Handles corrupted data, missing keys, and storage errors gracefully
  * @returns User's theme preference ("light" | "dark" | "system"), defaults to "system"
  */
-export async function loadPreference(): Promise<"light" | "dark" | "system"> {
+export async function loadPreference(): Promise<
+  "light" | "dark" | "system"
+> {
   try {
     const value = await AsyncStorage.getItem(STORAGE_KEY);
     if (!value) {
@@ -76,21 +78,28 @@ export async function savePreference(
 /**
  * ThemeProvider component that manages theme state and provides context
  * Loads user preference from AsyncStorage on mount, implements priority resolution logic
+ * Integrates with NativeWind's useColorScheme to activate dark: className variants
  */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [userPreference, setUserPreference] = useState<
     "light" | "dark" | "system"
   >("system");
   const [isLoading, setIsLoading] = useState(true);
-  const { colorScheme: systemScheme } = useColorScheme();
+  const { colorScheme: systemScheme, setColorScheme: nwSetColorScheme } =
+    useColorScheme();
 
-  // Load preference on mount
+  // Load preference on mount and apply to NativeWind
   useEffect(() => {
     loadPreference().then((preference) => {
       setUserPreference(preference);
       setIsLoading(false);
+
+      // Apply the saved preference to NativeWind to activate dark: variants
+      if (preference !== "system") {
+        nwSetColorScheme(preference);
+      }
     });
-  }, []);
+  }, [nwSetColorScheme]);
 
   // Resolve actual colorScheme based on priority
   // Priority: Manual override ("light" or "dark") > System theme
@@ -101,15 +110,30 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return systemScheme ?? "light";
   }, [userPreference, systemScheme]);
 
-  // Update theme preference and persist to AsyncStorage
-  const setColorScheme = async (scheme: "light" | "dark" | "system") => {
+  // Update theme preference, persist to AsyncStorage, and apply to NativeWind
+  const setColorScheme = async (
+    scheme: "light" | "dark" | "system",
+  ): Promise<void> => {
     try {
       await savePreference(scheme);
       setUserPreference(scheme);
+
+      // Apply the scheme to NativeWind to activate dark: className variants
+      // This is the critical step that makes dark:bg-background, dark:text-foreground work
+      if (scheme === "system") {
+        nwSetColorScheme("system");
+      } else {
+        nwSetColorScheme(scheme);
+      }
     } catch (error) {
       console.error("[Theme] Failed to save preference:", error);
-      // Still update local state even if save fails
+      // Still update local state and NativeWind even if save fails
       setUserPreference(scheme);
+      if (scheme === "system") {
+        nwSetColorScheme("system");
+      } else {
+        nwSetColorScheme(scheme);
+      }
     }
   };
 
