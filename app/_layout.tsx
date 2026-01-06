@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { AuthProvider, useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { ThemeProvider, useThemeContext } from "@/lib/theme";
 import "../global.css";
 
 import { configureGoogleSignIn } from "@/lib/GoogleAuth";
@@ -10,13 +11,12 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as TaskManager from "expo-task-manager";
-import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import "react-native-reanimated";
@@ -26,9 +26,7 @@ TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
   // NOTE: Stripe SDK requires this task registration to keep app awake during payment
 });
 
-export {
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
@@ -48,14 +46,24 @@ export default function RootLayout() {
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}
     >
       <AuthProvider>
-        <RootLayoutNav />
+        <ThemeProvider>
+          <RootLayoutNav />
+        </ThemeProvider>
       </AuthProvider>
     </StripeProvider>
   );
 }
 
+function LoadingScreen() {
+  return (
+    <View className="flex-1 items-center justify-center bg-background">
+      <ActivityIndicator size="large" color={Colors.light.primary} />
+    </View>
+  );
+}
+
 function RootLayoutNav() {
-  const { colorScheme } = useColorScheme();
+  const { colorScheme, isLoading: themeLoading } = useThemeContext();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
@@ -129,16 +137,14 @@ function RootLayoutNav() {
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   // Show splash while loading fonts, auth, or DB check
-  if (!loaded || isLoading || isChecking) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
+  if (!loaded || isLoading || isChecking || themeLoading) {
+    return <LoadingScreen />;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <NavigationThemeProvider
+      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
       <Stack
         screenOptions={{
           contentStyle: { backgroundColor: colors.background },
@@ -171,6 +177,6 @@ function RootLayoutNav() {
           options={{ headerShown: false }}
         />
       </Stack>
-    </ThemeProvider>
+    </NavigationThemeProvider>
   );
 }
