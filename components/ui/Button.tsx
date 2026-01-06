@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors";
-import { ActivityIndicator, Text, TouchableOpacity, useColorScheme } from "react-native";
+import { useThemeContext } from "@/lib/theme";
+import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
 
 interface ButtonProps {
   title: string;
@@ -14,15 +15,13 @@ export default function Button({
   isLoading,
   variant = "primary",
 }: ButtonProps) {
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   const bgClass =
     variant === "primary" ? "bg-primary" : "bg-secondary border border-border";
   const textClass =
-    variant === "primary"
-      ? "text-on-primary"
-      : "text-on-secondary";
+    variant === "primary" ? "text-on-primary" : "text-on-secondary";
 
   return (
     <TouchableOpacity
@@ -33,9 +32,7 @@ export default function Button({
       {isLoading ? (
         <ActivityIndicator
           color={
-            variant === "primary"
-              ? colors.on_primary
-              : colors.on_secondary
+            variant === "primary" ? colors.on_primary : colors.on_secondary
           }
         />
       ) : (

@@ -1,15 +1,10 @@
 import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
+import { useThemeContext } from "@/lib/theme";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { useTranslation } from "react-i18next";
-import {
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-  useColorScheme,
-} from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 interface MembershipCardProps {
   plan: MembershipPlan & {
@@ -21,6 +16,7 @@ interface MembershipCardProps {
   onBuy: (planId: string) => void;
   isLoading?: boolean;
   status: "default" | "current" | "upgrade" | "downgrade" | "cancelled";
+  duration?: number;
 }
 
 export default function MembershipCard({
@@ -29,19 +25,30 @@ export default function MembershipCard({
   onBuy,
   isLoading,
   status = "default",
+  duration = 1,
 }: MembershipCardProps) {
   const { t } = useTranslation();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   // LOGIC OVERRIDE: Standard Tier (Level 1) is always Free
   const isFreeTier = tier?.level === 1;
-  const formattedPrice = isFreeTier
+
+  // Calculate Monthly Price
+  const monthlyPriceRaw = plan.price / duration;
+  const formattedMonthlyPrice = isFreeTier
     ? "Miễn phí"
     : new Intl.NumberFormat("vi-VN", {
         style: "currency",
         currency: "VND",
-      }).format(plan.price);
+        maximumFractionDigits: 0,
+      }).format(monthlyPriceRaw);
+
+  const formattedTotalPrice = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(plan.price);
 
   // Use Tier image if available, else plan image, else default
   const imageKey = tier?.image_slug || plan.image_slug || "default";
@@ -54,7 +61,8 @@ export default function MembershipCard({
   const isDisabled = isCurrent || isDowngrade || isLoading;
 
   let buttonText = t("membership.buy_now");
-  let buttonStyle = "bg-primary active:bg-primary/90";
+  let buttonStyle =
+    "bg-primary active:bg-primary/90 shadow-md shadow-primary/30";
   let textStyle = "text-on_primary font-bold text-lg";
 
   if (isLoading) {
@@ -70,7 +78,7 @@ export default function MembershipCard({
     textStyle = "text-foreground-secondary font-semibold text-base";
   } else if (status === "upgrade") {
     buttonText = t("membership.upgrade");
-    buttonStyle = "bg-success active:bg-success/90";
+    buttonStyle = "bg-success active:bg-success/90 shadow-md shadow-success/30";
   } else if (isCancelled) {
     buttonText = "Đã hủy (Hết hạn sớm)";
     buttonStyle = "bg-error opacity-80";
@@ -78,45 +86,72 @@ export default function MembershipCard({
   }
 
   return (
-    <View className="bg-card p-4 rounded-2xl shadow-sm mb-4 border border-border overflow-hidden">
-      <Image
-        source={imageSource}
-        className="w-full h-40 rounded-xl mb-4"
-        resizeMode="cover"
-      />
-      <View className="flex-row justify-between items-center mb-2 px-2">
-        <View className="flex-1">
-          <Text className="text-xl font-bold text-card_foreground">
-            {/* Try to translate the name (Silver, Gold) or fallback */}
+    <View className="bg-card p-4 rounded-3xl shadow-sm mb-6 border border-border overflow-hidden">
+      <View className="relative">
+        <Image
+          source={imageSource}
+          className="w-full h-48 rounded-2xl mb-4"
+          resizeMode="cover"
+        />
+        {/* Tier Badge Overlay */}
+        <View className="absolute bottom-6 left-2 bg-background/80 blur-md px-3 py-1 rounded-full border border-white/10">
+          <Text className="text-foreground font-bold text-sm tracking-wider uppercase">
             {tier
               ? t(`home.tier.${tier.code}`, { defaultValue: tier.name })
               : t(`plans.${plan.image_slug}`, { defaultValue: plan.name })}
           </Text>
-          {plan.discount_label && (
-            <Text className="text-success text-xs font-bold uppercase mt-1">
+        </View>
+
+        {/* Discount Badge Overlay */}
+        {plan.discount_label && (
+          <View className="absolute top-2 right-2 bg-error px-3 py-1 rounded-full shadow-sm">
+            <Text className="text-white text-xs font-bold uppercase">
               {plan.discount_label}
             </Text>
-          )}
-        </View>
-
-        <View className="bg-secondary px-3 py-1 rounded-full ml-2 border border-border">
-          <Text className="font-semibold text-xs text-primary">
-            {plan.duration_months} {t("membership.month")}
-          </Text>
-        </View>
+          </View>
+        )}
       </View>
 
-      <Text className="text-3xl font-extrabold my-2 px-2 text-primary">
-        {formattedPrice}
-      </Text>
+      {/* Price Section */}
+      <View className="px-2 mb-4">
+        {isFreeTier ? (
+          <Text className="text-4xl font-extrabold text-primary mb-1">
+            {t("membership.free", { defaultValue: "Miễn phí" })}
+          </Text>
+        ) : (
+          <View>
+            <View className="flex-row items-baseline">
+              <Text className="text-3xl font-extrabold text-primary">
+                {formattedTotalPrice}
+              </Text>
+              <Text className="text-muted_foreground ml-1 text-base font-medium">
+                / {duration}{" "}
+                {t("membership.month_unit", { defaultValue: "tháng" })}
+              </Text>
+            </View>
+
+            {duration > 1 && (
+              <Text className="text-muted_foreground text-sm mt-1">
+                ≈ {formattedMonthlyPrice} /{" "}
+                {t("membership.month_unit", { defaultValue: "tháng" })}
+              </Text>
+            )}
+            {/* Show "Billed once" text? user probably gets it from "Total / X months" */}
+          </View>
+        )}
+      </View>
 
       {/* Render Features from Tier */}
       {tier && tier.features && tier.features.length > 0 ? (
-        <View className="mb-6 px-2">
+        <View className="mb-6 px-2 space-y-2">
           {tier.features.map((feature, index) => (
-            <View key={index} className="flex-row items-center mb-2">
-              <Ionicons name="checkmark-circle" size={16} color={colors.tint} />
-              <Text className="text-muted_foreground ml-2 text-sm">
+            <View key={index} className="flex-row items-center">
+              <Ionicons
+                name="checkmark-circle"
+                size={18}
+                color={colors.primary}
+              />
+              <Text className="text-foreground ml-3 text-sm font-medium">
                 {/* Provide i18n key or raw feature name */}
                 {t(`features.${feature}`, {
                   defaultValue: feature.replace(/_/g, " "),
@@ -135,7 +170,7 @@ export default function MembershipCard({
       )}
 
       <TouchableOpacity
-        className={`w-full py-4 rounded-xl items-center ${buttonStyle}`}
+        className={`w-full py-4 rounded-2xl items-center ${buttonStyle}`}
         onPress={() => onBuy(plan.id)}
         disabled={isDisabled}
       >

@@ -65,10 +65,10 @@ export default function BodyIndexHistoryScreen() {
           </Text>
           <View className="flex-row gap-4">
             <Text className="text-foreground font-bold text-lg">
-              {item.weight} kg
+              {item.weight} {t("profile.units.kg")}
             </Text>
             <Text className="text-foreground font-bold text-lg">
-              {item.height} cm
+              {item.height} {t("profile.units.cm")}
             </Text>
           </View>
         </View>
@@ -93,7 +93,7 @@ export default function BodyIndexHistoryScreen() {
             {t("profile.start_weight")}
           </Text>
           <Text className="text-foreground text-xl font-bold">
-            {start.weight} kg
+            {start.weight} {t("profile.units.kg")}
           </Text>
         </View>
         <View className="items-center">
@@ -114,7 +114,7 @@ export default function BodyIndexHistoryScreen() {
             {t("profile.current_weight")}
           </Text>
           <Text className="text-foreground text-xl font-bold">
-            {current.weight} kg
+            {current.weight} {t("profile.units.kg")}
           </Text>
         </View>
       </View>

@@ -1,12 +1,12 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useColorScheme } from "nativewind";
 import React, {
   createContext,
   useContext,
   useEffect,
-  useState,
   useMemo,
+  useState,
 } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColorScheme } from "nativewind";
 
 /**
  * Theme context interface for managing theme state
@@ -39,9 +39,7 @@ const STORAGE_KEY = "@gymbros_theme_preference";
  * Handles corrupted data, missing keys, and storage errors gracefully
  * @returns User's theme preference ("light" | "dark" | "system"), defaults to "system"
  */
-export async function loadPreference(): Promise<
-  "light" | "dark" | "system"
-> {
+export async function loadPreference(): Promise<"light" | "dark" | "system"> {
   try {
     const value = await AsyncStorage.getItem(STORAGE_KEY);
     if (!value) {
@@ -65,7 +63,7 @@ export async function loadPreference(): Promise<
  * @throws Re-throws error for component-level handling
  */
 export async function savePreference(
-  theme: "light" | "dark" | "system",
+  theme: "light" | "dark" | "system"
 ): Promise<void> {
   try {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ theme }));
@@ -101,8 +99,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     });
   }, [nwSetColorScheme]);
 
-  // Resolve actual colorScheme based on priority
-  // Priority: Manual override ("light" or "dark") > System theme
   const resolvedColorScheme: "light" | "dark" = useMemo(() => {
     if (userPreference === "light" || userPreference === "dark") {
       return userPreference;
@@ -110,9 +106,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return systemScheme ?? "light";
   }, [userPreference, systemScheme]);
 
+  // Sync NativeWind's internal state with our resolved logic
+  // This ensures that dark: className variants are correctly activated
+  useEffect(() => {
+    nwSetColorScheme(resolvedColorScheme);
+  }, [resolvedColorScheme, nwSetColorScheme]);
+
   // Update theme preference, persist to AsyncStorage, and apply to NativeWind
   const setColorScheme = async (
-    scheme: "light" | "dark" | "system",
+    scheme: "light" | "dark" | "system"
   ): Promise<void> => {
     try {
       await savePreference(scheme);
@@ -165,5 +167,5 @@ export function useThemeContext() {
 }
 
 // Export types and constants for use in other modules
+export { STORAGE_KEY, ThemeContext };
 export type { ThemeContextType };
-export { ThemeContext, STORAGE_KEY };

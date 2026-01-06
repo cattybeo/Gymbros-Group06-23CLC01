@@ -4,6 +4,7 @@ import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +15,6 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 
@@ -22,8 +22,8 @@ export default function ProfileScreen() {
   const { user } = useAuthContext();
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   const [loading, setLoading] = useState(true);
   const [contentOpacity] = useState(new Animated.Value(0));
@@ -464,8 +464,8 @@ export default function ProfileScreen() {
                       item.action();
                     } else {
                       showAlert(
-                        "Feature coming soon",
-                        "This feature is under development."
+                        t("profile.notifications"),
+                        t("common.feature_coming_soon")
                       );
                     }
                   }}

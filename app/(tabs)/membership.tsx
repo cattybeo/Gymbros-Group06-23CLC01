@@ -81,7 +81,7 @@ export default function MembershipScreen() {
 
   function getPlanStatus(
     tierLevel: number,
-    targetPlanId: string,
+    targetPlanId: string
   ): "default" | "current" | "upgrade" | "downgrade" {
     // 1. If user has NO active plan, treat Level 1 (Standard) as "Current"
     if (!currentPlan) {
@@ -116,7 +116,7 @@ export default function MembershipScreen() {
           t("common.error"),
           "Vui lòng đăng nhập để mua gói tập.",
           "error",
-          { onClose: () => router.push("/(auth)/sign-in") },
+          { onClose: () => router.push("/(auth)/sign-in") }
         );
         return;
       }
@@ -182,7 +182,7 @@ export default function MembershipScreen() {
           showAlert(
             t("common.success"),
             "Đăng ký gói tập thành công!",
-            "success",
+            "success"
           );
           fetchData();
         } else if (attempts >= maxAttempts) {
@@ -191,7 +191,7 @@ export default function MembershipScreen() {
           showAlert(
             t("common.success"),
             "Thanh toán thành công! Gói tập sẽ được kích hoạt trong ít phút.",
-            "success",
+            "success"
           );
           fetchData();
         }
@@ -230,7 +230,7 @@ export default function MembershipScreen() {
               showAlert(
                 "Lỗi",
                 "Không tìm thấy gói tập đang hoạt động để hủy.",
-                "error",
+                "error"
               );
               return;
             }
@@ -239,7 +239,7 @@ export default function MembershipScreen() {
               "cancel-membership",
               {
                 body: { membershipId: mem.id },
-              },
+              }
             );
 
             if (error) throw error;
@@ -247,7 +247,7 @@ export default function MembershipScreen() {
             showAlert(
               t("common.success"),
               t("membership.cancel_success"),
-              "success",
+              "success"
             );
             fetchData();
           } catch (e: any) {
@@ -256,12 +256,12 @@ export default function MembershipScreen() {
             setLoading(false);
           }
         },
-      },
+      }
     );
   }
 
   return (
-    <View className="flex-1 bg-background pt-12 px-4">
+    <View className="flex-1 bg-background pt-24 px-4">
       <View className="mb-4">
         <Text className="text-3xl font-bold text-foreground">
           {t("membership.title")}
@@ -327,7 +327,7 @@ export default function MembershipScreen() {
 
           const relevantPlans = plans.filter((p) => p.tier_id === tier.id);
           const selectedPlan = relevantPlans.find(
-            (p) => p.duration_months === selectedDuration,
+            (p) => p.duration_months === selectedDuration
           );
 
           if (!selectedPlan) return null;

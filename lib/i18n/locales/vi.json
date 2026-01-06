@@ -59,7 +59,8 @@
     "feature_coming_soon": "Tính năng đang được phát triển!",
     "pick_image_error": "Không thể chọn ảnh.",
     "uploading": "Đang tải lên...",
-    "default_user_name": "Người dùng Gymbro"
+    "default_user_name": "Người dùng Gymbro",
+    "optional": "Tùy chọn"
   },
   "membership": {
     "payment_init_error": "Không thể khởi tạo thanh toán",
@@ -72,7 +73,16 @@
     "processing": "Đang xử lý...",
     "month": "Tháng",
     "empty_list": "Chưa có gói tập nào được mở bán.",
-    "cancel_success": "Đã hủy gói tập thành công."
+    "cancel_success": "Đã hủy gói tập thành công.",
+    "popular": "PHỔ BIẾN",
+    "best_value": "TỐT NHẤT",
+    "1_year": "1 Năm",
+    "month_count": "{{count}} Tháng",
+    "save_hint": "* Tiết kiệm tới 30% khi đăng ký dài hạn",
+    "free": "Miễn phí",
+    "month_unit": "tháng",
+    "billed_duration": "Thanh toán {{price}} mỗi {{count}} tháng",
+    "per_month_approx": "≈ {{price}} / tháng"
   },
   "home": {
     "welcome": "Chào mừng trở lại,",
@@ -156,6 +166,14 @@
       "1_2": "1-2 ngày/tuần",
       "3_4": "3-4 ngày/tuần",
       "5_plus": "5+ ngày/tuần"
+    },
+    "error_no_session": "Không tìm thấy phiên đăng nhập!",
+    "error_no_image": "Không tìm thấy dữ liệu ảnh.",
+    "error_user_email": "Không tìm thấy email người dùng",
+    "version": "Phiên bản",
+    "units": {
+      "kg": "kg",
+      "cm": "cm"
     }
   },
   "plans": {
@@ -259,6 +277,11 @@
   },
   "settings": {
     "language": "Tiếng Việt",
+    "language_label": "Ngôn ngữ",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
     "theme": {
       "title": "Giao diện",
       "light": "Sáng",

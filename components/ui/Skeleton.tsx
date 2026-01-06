@@ -1,14 +1,15 @@
+import { useThemeContext } from "@/lib/theme";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import { View, useColorScheme } from "react-native";
+import { View } from "react-native";
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withRepeat,
-  withTiming,
   Easing,
   cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
 
 /**
  * Skeleton Loading Component
@@ -47,7 +48,7 @@ export function Skeleton({
   borderRadius = 4,
   testID,
 }: SkeletonProps) {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useThemeContext();
 
   // Animation state: shimmer translates from -100% to 100%
   const translateX = useSharedValue(-1);
@@ -85,11 +86,12 @@ export function Skeleton({
       : ["transparent", "rgba(255, 255, 255, 0.4)", "transparent"];
 
   // Calculate NativeWind classes for border radius
-  const radiusClass = borderRadius === 0
-    ? "rounded-none"
-    : borderRadius === 9999
-    ? "rounded-full"
-    : ""; // Use inline style for custom values
+  const radiusClass =
+    borderRadius === 0
+      ? "rounded-none"
+      : borderRadius === 9999
+        ? "rounded-full"
+        : ""; // Use inline style for custom values
 
   return (
     <View

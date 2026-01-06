@@ -1,14 +1,9 @@
 import Colors from "@/constants/Colors";
+import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Modal,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
+import { Modal, Text, TouchableOpacity, View } from "react-native";
 
 export type AlertType = "success" | "error" | "warning" | "info";
 
@@ -35,8 +30,8 @@ export default function CustomAlertModal({
 }: CustomAlertModalProps) {
   const { t } = useTranslation();
   const effectivePrimaryText = primaryButtonText || t("common.confirm");
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   const getIconName = () => {
     switch (type) {

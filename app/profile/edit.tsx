@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert"; // Import Hook
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { decode } from "base64-arraybuffer";
 import dayjs from "dayjs";
@@ -22,7 +23,6 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DateTimePicker, { DateType } from "react-native-ui-datepicker";
@@ -30,8 +30,8 @@ import DateTimePicker, { DateType } from "react-native-ui-datepicker";
 export default function EditProfileScreen() {
   const { user } = useAuthContext();
   const { t, i18n } = useTranslation();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
   const insets = useSafeAreaInsets();
 
   const { showAlert, CustomAlertComponent } = useCustomAlert();
@@ -113,10 +113,10 @@ export default function EditProfileScreen() {
   const uploadAvatar = async (imageAsset: ImagePicker.ImagePickerAsset) => {
     try {
       setUploading(true);
-      if (!user) throw new Error("No user on the session!");
+      if (!user) throw new Error(t("profile.error_no_session"));
 
       const base64 = imageAsset.base64;
-      if (!base64) throw new Error("No image data found.");
+      if (!base64) throw new Error(t("profile.error_no_image"));
 
       const fileExt = imageAsset.uri.split(".").pop()?.toLowerCase() || "jpeg";
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
@@ -260,7 +260,7 @@ export default function EditProfileScreen() {
             {/* Name */}
             <View>
               <Text className="text-text_secondary mb-3 font-medium">
-                {t("auth.name_label") || "Full Name"}
+                {t("auth.name_label")}
               </Text>
               <TextInput
                 className="bg-surface p-4 rounded-xl text-text border border-border focus:border-primary"
@@ -571,9 +571,7 @@ export default function EditProfileScreen() {
           disabled={loading}
         >
           <Text className="text-primary-foreground font-bold text-lg">
-            {loading
-              ? t("membership.processing")
-              : t("common.save") || "Save Changes"}
+            {loading ? t("membership.processing") : t("common.save")}
           </Text>
         </TouchableOpacity>
       </ScrollView>

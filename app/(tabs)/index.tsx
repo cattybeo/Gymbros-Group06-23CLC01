@@ -2,17 +2,11 @@ import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  Text,
-  View,
-  useColorScheme,
-} from "react-native";
+import { Dimensions, Image, ScrollView, Text, View } from "react-native";
 import {
   BarcodeCreatorView,
   BarcodeFormat,
@@ -21,8 +15,8 @@ import {
 export default function HomeScreen() {
   const { user } = useAuthContext();
   const { t, i18n } = useTranslation();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
   const screenWidth = Dimensions.get("window").width;
   const [memberTier, setMemberTier] = useState(t("home.tier.standard")); // Default state
 
@@ -194,9 +188,7 @@ export default function HomeScreen() {
             <Text className="text-card-foreground font-bold text-xl w-2/3">
               TRANSFORM YOUR BODY WITH POWER PUMP
             </Text>
-            <Text className="text-primary font-bold mt-2">
-              JOIN NOW &rarr;
-            </Text>
+            <Text className="text-primary font-bold mt-2">JOIN NOW &rarr;</Text>
           </View>
         </View>
       </View>

@@ -1,14 +1,9 @@
 import Colors from "@/constants/Colors";
+import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-  useColorScheme,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export interface TrafficData {
   day_of_week: number; // 0 = Sun, 1 = Mon...
@@ -26,8 +21,8 @@ const DAYS = [1, 2, 3, 4, 5, 6, 0]; // Mon to Sun order
 
 export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
   const { t } = useTranslation();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   // Helper to get color based on score
   const getColor = (score: number) => {

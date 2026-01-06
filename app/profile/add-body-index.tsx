@@ -1,13 +1,13 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Colors from "@/constants/Colors";
-import { useColorScheme } from "react-native";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -22,8 +22,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function AddBodyIndexScreen() {
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
@@ -48,9 +48,11 @@ export default function AddBodyIndexScreen() {
       const userGender = user?.user_metadata?.gender || "male";
 
       // Fetch age from user metadata if not provided
-      const userAge = age || user?.user_metadata?.birthday
-        ? new Date().getFullYear() - new Date(user.user_metadata.birthday).getFullYear()
-        : 25;
+      const userAge =
+        age || user?.user_metadata?.birthday
+          ? new Date().getFullYear() -
+            new Date(user.user_metadata.birthday).getFullYear()
+          : 25;
 
       const { error } = await supabase.from("body_indices").insert({
         user_id: user.id,
@@ -93,21 +95,21 @@ export default function AddBodyIndexScreen() {
 
           <View className="bg-surface p-6 rounded-2xl border border-border">
             <InputField
-              label={t("onboarding.weight_label") + " (kg)"}
+              label={t("onboarding.weight_label")}
               placeholder="0.0"
               value={weight}
               onChangeText={setWeight}
               keyboardType="numeric"
             />
             <InputField
-              label={t("onboarding.height_label") + " (cm)"}
+              label={t("onboarding.height_label")}
               placeholder="0"
               value={height}
               onChangeText={setHeight}
               keyboardType="numeric"
             />
             <InputField
-              label={t("onboarding.age_label") + " (Optional)"}
+              label={`${t("onboarding.age_label")} (${t("common.optional")})`}
               placeholder="25"
               value={age}
               onChangeText={setAge}
