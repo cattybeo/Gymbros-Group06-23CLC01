@@ -143,6 +143,10 @@ export default function MembershipScreen() {
 
       if (initError) throw new Error(initError.message);
 
+      // Android Fix: Add a small delay between init and present to avoid race conditions
+      // with native fragments on high-arch versions.
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       const { error: paymentError } = await presentPaymentSheet();
 
       if (paymentError) {
