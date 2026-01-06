@@ -68,7 +68,7 @@ export default function SettingsScreen() {
 
         <View className="p-4">
           <Text className="text-text_secondary text-sm font-bold uppercase mb-4 mt-2">
-            {t("settings.language") || "Language"}
+            {t("settings.language_label")}
           </Text>
 
           <View className="bg-surface rounded-2xl overflow-hidden border border-border">
@@ -80,7 +80,7 @@ export default function SettingsScreen() {
               <View className="flex-row items-center">
                 <Text className="text-2xl mr-3">🇻🇳</Text>
                 <Text className="text-text font-medium text-lg">
-                  Tiếng Việt
+                  {t("settings.languages.vi")}
                 </Text>
               </View>
               {i18n.language === "vi" && (
@@ -99,7 +99,9 @@ export default function SettingsScreen() {
             >
               <View className="flex-row items-center">
                 <Text className="text-2xl mr-3">🇬🇧</Text>
-                <Text className="text-text font-medium text-lg">English</Text>
+                <Text className="text-text font-medium text-lg">
+                  {t("settings.languages.en")}
+                </Text>
               </View>
               {i18n.language === "en" && (
                 <Ionicons
@@ -140,7 +142,7 @@ export default function SettingsScreen() {
           </View>
 
           <Text className="text-muted_foreground text-xs mt-4 text-center">
-            Version 0.8.0 (Beta)
+            {t("profile.version")} 0.9.1 (Beta)
           </Text>
         </View>
       </View>

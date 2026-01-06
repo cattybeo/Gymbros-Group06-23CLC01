@@ -16,18 +16,23 @@ module.exports = {
         foreground: "rgb(var(--color-foreground) / <alpha-value>)",
         "foreground-secondary":
           "rgb(var(--color-foreground-secondary) / <alpha-value>)",
+        foreground_secondary:
+          "rgb(var(--color-foreground-secondary) / <alpha-value>)",
         "foreground-muted":
           "rgb(var(--color-foreground-muted) / <alpha-value>)",
+        foreground_muted: "rgb(var(--color-foreground-muted) / <alpha-value>)",
 
         /* ----- Brand Colors (Premium Orange Palette) ----- */
         primary: "rgb(var(--color-primary) / <alpha-value>)",
         "primary-light": "rgb(var(--color-primary-light) / <alpha-value>)",
         "primary-dark": "rgb(var(--color-primary-dark) / <alpha-value>)",
         "on-primary": "rgb(var(--color-on-primary) / <alpha-value>)",
+        on_primary: "rgb(var(--color-on-primary) / <alpha-value>)",
 
         accent: "rgb(var(--color-accent) / <alpha-value>)",
         "accent-light": "rgb(var(--color-accent-light) / <alpha-value>)",
         "on-accent": "rgb(var(--color-on-accent) / <alpha-value>)",
+        on_accent: "rgb(var(--color-on-accent) / <alpha-value>)",
 
         /* ----- UI Elements ----- */
         border: "rgb(var(--color-border) / <alpha-value>)",
@@ -37,28 +42,31 @@ module.exports = {
         ring: "rgb(var(--color-ring) / <alpha-value>)",
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
         "on-secondary": "rgb(var(--color-on-secondary) / <alpha-value>)",
+        on_secondary: "rgb(var(--color-on-secondary) / <alpha-value>)",
         muted: "rgb(var(--color-muted) / <alpha-value>)",
         "on-muted": "rgb(var(--color-on-muted) / <alpha-value>)",
+        on_muted: "rgb(var(--color-on-muted) / <alpha-value>)",
 
         /* ----- Status Colors ----- */
         success: "rgb(var(--color-success) / <alpha-value>)",
         "success-background":
           "rgb(var(--color-success-background) / <alpha-value>)",
         "on-success": "rgb(var(--color-on-success) / <alpha-value>)",
-
+        on_success: "rgb(var(--color-on-success) / <alpha-value>)",
         warning: "rgb(var(--color-warning) / <alpha-value>)",
         "warning-background":
           "rgb(var(--color-warning-background) / <alpha-value>)",
         "on-warning": "rgb(var(--color-on-warning) / <alpha-value>)",
-
+        on_warning: "rgb(var(--color-on-warning) / <alpha-value>)",
         error: "rgb(var(--color-error) / <alpha-value>)",
         "error-background":
           "rgb(var(--color-error-background) / <alpha-value>)",
         "on-error": "rgb(var(--color-on-error) / <alpha-value>)",
-
+        on_error: "rgb(var(--color-on-error) / <alpha-value>)",
         info: "rgb(var(--color-info) / <alpha-value>)",
         "info-background": "rgb(var(--color-info-background) / <alpha-value>)",
         "on-info": "rgb(var(--color-on-info) / <alpha-value>)",
+        on_info: "rgb(var(--color-on-info) / <alpha-value>)",
 
         /* ----- Interactive States ----- */
         "hover-overlay": "rgb(var(--color-hover-overlay) / <alpha-value>)",
@@ -73,19 +81,32 @@ module.exports = {
           "rgb(var(--color-popover-foreground) / <alpha-value>)",
         "primary-foreground":
           "rgb(var(--color-primary-foreground) / <alpha-value>)",
+        primary_foreground:
+          "rgb(var(--color-primary-foreground) / <alpha-value>)",
         "secondary-foreground":
           "rgb(var(--color-secondary-foreground) / <alpha-value>)",
+        secondary_foreground:
+          "rgb(var(--color-secondary-foreground) / <alpha-value>)",
         "muted-foreground":
-          "rgb(var(--color-muted-foreground) / <alpha-value>)",
+          "rgb(var(--color-foreground-muted) / <alpha-value>)",
+        muted_foreground: "rgb(var(--color-foreground-muted) / <alpha-value>)",
         "accent-foreground":
+          "rgb(var(--color-accent-foreground) / <alpha-value>)",
+        accent_foreground:
           "rgb(var(--color-accent-foreground) / <alpha-value>)",
         destructive: "rgb(var(--color-destructive) / <alpha-value>)",
         "destructive-foreground":
           "rgb(var(--color-destructive-foreground) / <alpha-value>)",
+        destructive_foreground:
+          "rgb(var(--color-destructive-foreground) / <alpha-value>)",
         text: "rgb(var(--color-text) / <alpha-value>)",
         "text-secondary": "rgb(var(--color-text-secondary) / <alpha-value>)",
+        text_secondary: "rgb(var(--color-text-secondary) / <alpha-value>)",
         "text-tertiary": "rgb(var(--color-text-tertiary) / <alpha-value>)",
+        text_tertiary: "rgb(var(--color-text-tertiary) / <alpha-value>)",
         "surface-highlight":
+          "rgb(var(--color-surface-highlight) / <alpha-value>)",
+        surface_highlight:
           "rgb(var(--color-surface-highlight) / <alpha-value>)",
       },
       boxShadow: {

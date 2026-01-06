@@ -52,7 +52,7 @@ export default function SignIn() {
         <Text className="text-3xl font-bold text-foreground">
           {t("auth.welcome_back")}
         </Text>
-        <Text className="text-muted_foreground mt-2">
+        <Text className="text-foreground-muted mt-2 text-center">
           {t("auth.login_subtitle")}
         </Text>
       </Animated.View>
@@ -92,7 +92,7 @@ export default function SignIn() {
         className="mt-8"
       >
         <View className="flex-row justify-center mb-8">
-          <Text className="text-muted_foreground">{t("auth.no_account")} </Text>
+          <Text className="text-foreground-muted">{t("auth.no_account")} </Text>
           <TouchableOpacity onPress={() => router.push("/sign-up")}>
             <Text className="text-primary font-bold">
               {t("auth.register_now")}
@@ -102,7 +102,7 @@ export default function SignIn() {
 
         <View className="flex-row items-center mb-6">
           <View className="flex-1 h-[1px] bg-border" />
-          <Text className="mx-4 text-muted_foreground">
+          <Text className="mx-4 text-foreground-muted">
             {t("auth.or_continue")}
           </Text>
           <View className="flex-1 h-[1px] bg-border" />
