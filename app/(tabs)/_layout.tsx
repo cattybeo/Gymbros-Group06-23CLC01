@@ -33,7 +33,7 @@ export default function TabLayout() {
             paddingBottom: insets.bottom + 5,
             height: 60 + insets.bottom,
           },
-          headerShown: false, // Ẩn Header mặc định để dùng Header riêng của từng trang
+          headerShown: false, // Hide default header (each screen uses custom header)
         }}
       >
         <Tabs.Screen

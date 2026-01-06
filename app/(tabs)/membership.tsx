@@ -1,5 +1,4 @@
 import MembershipCard from "@/components/MembershipCard";
-// Wait, previous code used supabase.auth.getUser() directly in fetchData/handleBuy.
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
@@ -8,9 +7,6 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, Text, TouchableOpacity, View } from "react-native";
-
-// Check if useAuthContext is better?
-// Code uses supabase.auth.getUser(). I'll stick to original logic to avoid side effects.
 
 export default function MembershipScreen() {
   const [tiers, setTiers] = useState<MembershipTier[]>([]);

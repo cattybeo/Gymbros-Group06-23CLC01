@@ -25,7 +25,7 @@ export default function GoogleSignInButton() {
     if (!result.success && !result.cancelled && result.error) {
       Alert.alert("Đăng nhập thất bại", result.error);
     }
-    // Nếu success -> AuthContext tự động điều hướng
+    // AuthContext will auto-redirect on success
   }
 
   if (loading) {

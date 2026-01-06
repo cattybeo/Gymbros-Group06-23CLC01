@@ -31,7 +31,7 @@ export default function SignUp() {
 
     setLoading(true);
 
-    // 1. Gọi Supabase Sign Up
+    // Call Supabase Sign Up
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -42,7 +42,6 @@ export default function SignUp() {
     if (error) {
       showAlert(t("auth.sign_up_failed"), error.message, "error");
     } else {
-      // 2. Thông báo thành công
       showAlert(t("common.success"), t("auth.sign_up_success_msg"), "success", {
         onClose: () => router.back(),
       });
