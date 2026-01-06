@@ -82,7 +82,12 @@ export default function MembershipScreen() {
     tierLevel: number,
     targetPlanId: string
   ): "default" | "current" | "upgrade" | "downgrade" {
-    if (!currentPlan) return "default";
+    // 1. If user has NO active plan, treat Level 1 (Standard) as "Current"
+    if (!currentPlan) {
+      if (tierLevel === 1) return "current";
+      return "upgrade"; // Anything higher than Level 1 is an upgrade
+    }
+
     if (currentPlan.id === targetPlanId) return "current";
 
     const currentTierId = currentPlan.tier_id;
@@ -90,6 +95,7 @@ export default function MembershipScreen() {
     if (!currentTier) return "default";
 
     if (tierLevel > currentTier.level) return "upgrade";
+    // If we are looking at Level 1, and current is higher, it's a downgrade
     if (tierLevel < currentTier.level) return "downgrade";
 
     return "default";
@@ -297,6 +303,9 @@ export default function MembershipScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item: tier }) => {
+          // LOGIC: Hide Standard Tier (Level 1) in Yearly View
+          if (isYearly && tier.level === 1) return null;
+
           const relevantPlans = plans.filter((p) => p.tier_id === tier.id);
           const selectedPlan = isYearly
             ? relevantPlans.find((p) => p.duration_months >= 12)
