@@ -6,13 +6,16 @@ import { FontAwesome } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Image, ScrollView, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 
 export default function ProfileScreen() {
   const { user } = useAuthContext();
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
+  const [loading, setLoading] = useState(true);
   const [memberTier, setMemberTier] = useState(t("home.tier.standard"));
   const [stats, setStats] = useState({
     workouts: 0,
@@ -122,6 +125,8 @@ export default function ProfileScreen() {
           }
         } catch (error) {
           console.error("Error fetching profile data:", error);
+        } finally {
+          setLoading(false);
         }
       };
 
@@ -188,11 +193,18 @@ export default function ProfileScreen() {
     t("common.default_user_name");
 
   return (
-    <ScrollView
-      className="flex-1 bg-background"
-      decelerationRate="fast"
-      showsVerticalScrollIndicator={false}
-    >
+    <>
+      {loading && (
+        <View className="flex-1 bg-background items-center justify-center">
+          <ActivityIndicator size="large" color={colors.tint} />
+          <Text className="text-muted_foreground mt-4">{t("common.loading") || "Loading..."}</Text>
+        </View>
+      )}
+      <ScrollView
+        className="flex-1 bg-background"
+        decelerationRate="fast"
+        showsVerticalScrollIndicator={false}
+      >
       {/* Header */}
       <View className="items-center pt-16 pb-8 bg-card rounded-b-[30px] shadow-sm mb-6 border-b border-border">
         <View className="mb-4 relative">
@@ -295,7 +307,7 @@ export default function ProfileScreen() {
                 <FontAwesome
                   name={item.icon as any}
                   size={14}
-                  color={Colors.light.tint}
+                  color={colors.tint}
                 />
               </View>
               <Text className="text-foreground flex-1 font-medium">
@@ -304,10 +316,7 @@ export default function ProfileScreen() {
               <FontAwesome
                 name="angle-right"
                 size={16}
-                color={
-                  Colors[useAuthContext().user ? "light" : "dark"]
-                    .tabIconDefault /* Just use gray */
-                }
+                color={colors.tabIconDefault}
               />
             </TouchableOpacity>
           ))}
@@ -331,7 +340,7 @@ export default function ProfileScreen() {
             );
           }}
         >
-          <FontAwesome name="sign-out" size={18} color={Colors.light.error} />
+          <FontAwesome name="sign-out" size={18} color={colors.error} />
           <Text className="text-destructive font-bold ml-2">
             {t("profile.logout")}
           </Text>
@@ -340,5 +349,6 @@ export default function ProfileScreen() {
 
       <CustomAlertComponent />
     </ScrollView>
+    </>
   );
 }
