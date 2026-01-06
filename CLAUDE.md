@@ -263,6 +263,133 @@ const backgroundColor = Colors[colorScheme].background;
 
 See [DESIGN_SYSTEM.md](C:/Users/ADMIN/.gemini/antigravity/brain/c3c84b73-011f-433d-bc08-df352e43197b/DESIGN_SYSTEM.md) for detailed design philosophy and visual identity guidelines.
 
+### UI Logic vs Config Logic
+
+**CRITICAL**: NativeWind has limitations - some React Native props require String values (not CSS class names). [`constants/Colors.ts`](constants/Colors.ts) is the "bridge" between CSS tokens and React Native props.
+
+#### Decision Flow
+
+```
+Need to style a component?
+        │
+        ▼
+┌──────────────────────────┐
+│ Standard React Native    │
+│ component?               │
+│ (View, Text, Button...)  │
+└──────┬──────────────┬─────┘
+       │              │
+      YES            NO
+       │              │
+       ▼              ▼
+  Use className    Use constants/
+  with tokens     Colors.ts
+```
+
+#### 🎨 UI Logic (Use `className` + Semantic Tokens)
+
+**Use For**: Visual styling of standard React Native components
+
+**Components**: `<View>`, `<Text>`, `<TouchableOpacity>`, `<ScrollView>`, `<Image>`, `<TextInput>`
+
+**Source**: [`global.css`](global.css) → [`tailwind.config.js`](tailwind.config.js) → `className`
+
+```tsx
+// ✅ CORRECT: Use className for UI styling
+<View className="bg-card p-4 rounded-xl shadow-md border border-border">
+  <Text className="text-foreground font-bold text-lg">Title</Text>
+  <Text className="text-foreground-secondary text-sm">Description</Text>
+</View>
+
+// ❌ WRONG: Don't use inline styles for standard UI
+<View style={{ backgroundColor: "#FFFFFF", padding: 16 }}>
+  <Text style={{ color: "#111827" }}>Title</Text>
+</View>
+```
+
+#### ⚙️ Config Logic (Use `constants/Colors.ts`)
+
+**Use For**: React Native props that require specific value types (Strings, not CSS class names)
+
+**Categories**:
+
+1. **Icon Colors** - Icons require `color` prop (hex string), not className
+   ```tsx
+   // ✅ CORRECT
+   import { Ionicons } from "@expo/vector-icons";
+   import Colors from "@/constants/Colors";
+   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+   <Ionicons name="home" size={24} color={colors.tint} />
+   ```
+
+2. **Navigation Themes** - React Navigation theme objects require color values
+   ```tsx
+   // ✅ CORRECT
+   import Colors from "@/constants/Colors";
+   const navigationTheme = {
+     colors: {
+       primary: Colors.light.primary,
+       background: Colors.light.background,
+     },
+   };
+   ```
+
+3. **ActivityIndicator** - Requires `color` prop with hex string
+   ```tsx
+   // ✅ CORRECT
+   import { ActivityIndicator } from "react-native";
+   import Colors from "@/constants/Colors";
+   <ActivityIndicator color={colors.foreground} />
+   ```
+
+4. **StatusBar** - Requires specific style string constants
+   ```tsx
+   // ✅ CORRECT
+   import { StatusBar } from "expo-status-bar";
+   <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+   ```
+
+#### Component Example (Mixed Usage)
+
+```tsx
+import Colors from "@/constants/Colors";
+import { Ionicons } from "@expo/vector-icons";
+import { TouchableOpacity, Text, View, ActivityIndicator, useColorScheme } from "react-native";
+
+export default function Button({ isLoading, onPress }) {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      disabled={isLoading}
+      // ✅ UI Logic: Use className for styling
+      className="bg-primary p-4 rounded-xl shadow-md"
+    >
+      {isLoading ? (
+        // ✅ Config Logic: ActivityIndicator requires color prop
+        <ActivityIndicator color={colors.on_primary} />
+      ) : (
+        <View className="flex-row items-center justify-center">
+          <Text className="text-on-primary font-bold">Submit</Text>
+          {/* ✅ Config Logic: Icon requires color prop */}
+          <Ionicons name="arrow-forward" color={colors.on_primary} />
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+}
+```
+
+#### Why This Separation?
+
+Based on [NativeWind limitations](https://github.com/nativewind/nativewind/issues/242):
+- Icon color styling (`text-[color]`) doesn't work properly in NativeWind V5
+- Colors don't cascade from `<View />` to children (React Native limitation)
+- Cannot use both `className` and `style` props simultaneously in V5
+- Navigation theming requires separate color constants file
+
 ### Styling System
 
 NativeWind 4.x with Tailwind CSS. Design tokens defined in [`global.css`](global.css) as CSS variables.
