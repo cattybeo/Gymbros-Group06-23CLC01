@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
-  // darkMode: "class", // REMOVED: NativeWind v4 uses media mode (system appearance) by default
+  darkMode: "class", // REQUIRED: This enables manual toggling (e.g., via settings) to override system preference
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
@@ -14,8 +14,10 @@ module.exports = {
 
         /* ----- Text Colors ----- */
         foreground: "rgb(var(--color-foreground) / <alpha-value>)",
-        "foreground-secondary": "rgb(var(--color-foreground-secondary) / <alpha-value>)",
-        "foreground-muted": "rgb(var(--color-foreground-muted) / <alpha-value>)",
+        "foreground-secondary":
+          "rgb(var(--color-foreground-secondary) / <alpha-value>)",
+        "foreground-muted":
+          "rgb(var(--color-foreground-muted) / <alpha-value>)",
 
         /* ----- Brand Colors (Premium Orange Palette) ----- */
         primary: "rgb(var(--color-primary) / <alpha-value>)",
@@ -30,7 +32,8 @@ module.exports = {
         /* ----- UI Elements ----- */
         border: "rgb(var(--color-border) / <alpha-value>)",
         input: "rgb(var(--color-input) / <alpha-value>)",
-        "input-background": "rgb(var(--color-input-background) / <alpha-value>)",
+        "input-background":
+          "rgb(var(--color-input-background) / <alpha-value>)",
         ring: "rgb(var(--color-ring) / <alpha-value>)",
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
         "on-secondary": "rgb(var(--color-on-secondary) / <alpha-value>)",
@@ -39,15 +42,18 @@ module.exports = {
 
         /* ----- Status Colors ----- */
         success: "rgb(var(--color-success) / <alpha-value>)",
-        "success-background": "rgb(var(--color-success-background) / <alpha-value>)",
+        "success-background":
+          "rgb(var(--color-success-background) / <alpha-value>)",
         "on-success": "rgb(var(--color-on-success) / <alpha-value>)",
 
         warning: "rgb(var(--color-warning) / <alpha-value>)",
-        "warning-background": "rgb(var(--color-warning-background) / <alpha-value>)",
+        "warning-background":
+          "rgb(var(--color-warning-background) / <alpha-value>)",
         "on-warning": "rgb(var(--color-on-warning) / <alpha-value>)",
 
         error: "rgb(var(--color-error) / <alpha-value>)",
-        "error-background": "rgb(var(--color-error-background) / <alpha-value>)",
+        "error-background":
+          "rgb(var(--color-error-background) / <alpha-value>)",
         "on-error": "rgb(var(--color-on-error) / <alpha-value>)",
 
         info: "rgb(var(--color-info) / <alpha-value>)",
@@ -60,19 +66,27 @@ module.exports = {
         "focus-ring": "rgb(var(--color-focus-ring) / <alpha-value>)",
 
         /* ----- Legacy Mappings (Backward Compatibility) ----- */
-        "card-foreground": "rgb(var(--color-popover-foreground) / <alpha-value>)",
+        "card-foreground":
+          "rgb(var(--color-popover-foreground) / <alpha-value>)",
         popover: "rgb(var(--color-popover) / <alpha-value>)",
-        "popover-foreground": "rgb(var(--color-popover-foreground) / <alpha-value>)",
-        "primary-foreground": "rgb(var(--color-primary-foreground) / <alpha-value>)",
-        "secondary-foreground": "rgb(var(--color-secondary-foreground) / <alpha-value>)",
-        "muted-foreground": "rgb(var(--color-muted-foreground) / <alpha-value>)",
-        "accent-foreground": "rgb(var(--color-accent-foreground) / <alpha-value>)",
+        "popover-foreground":
+          "rgb(var(--color-popover-foreground) / <alpha-value>)",
+        "primary-foreground":
+          "rgb(var(--color-primary-foreground) / <alpha-value>)",
+        "secondary-foreground":
+          "rgb(var(--color-secondary-foreground) / <alpha-value>)",
+        "muted-foreground":
+          "rgb(var(--color-muted-foreground) / <alpha-value>)",
+        "accent-foreground":
+          "rgb(var(--color-accent-foreground) / <alpha-value>)",
         destructive: "rgb(var(--color-destructive) / <alpha-value>)",
-        "destructive-foreground": "rgb(var(--color-destructive-foreground) / <alpha-value>)",
+        "destructive-foreground":
+          "rgb(var(--color-destructive-foreground) / <alpha-value>)",
         text: "rgb(var(--color-text) / <alpha-value>)",
         "text-secondary": "rgb(var(--color-text-secondary) / <alpha-value>)",
         "text-tertiary": "rgb(var(--color-text-tertiary) / <alpha-value>)",
-        "surface-highlight": "rgb(var(--color-surface-highlight) / <alpha-value>)",
+        "surface-highlight":
+          "rgb(var(--color-surface-highlight) / <alpha-value>)",
       },
       boxShadow: {
         /* ----- Shadow System (6 Levels) ----- */
