@@ -2,6 +2,46 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.8.0] - 2026-01-06
+
+### Tính năng mới (Added)
+
+- **Stripe React Native v0.57.2**: Tích hợp StripeProvider ở cấp độ root layout (app/_layout.tsx) theo best practices.
+  - Di chuyển StripeProvider từ tabs layout lên root layout để đảm bảo toàn bộ ứng dụng có thể truy cập Stripe SDK.
+  - Stripe SDK v0.57.2 bao gồm các bản sửa lỗi cho Android PaymentSheet crashes có trong v0.50.x.
+  - Cấu trúc Provider: RootLayout → StripeProvider → AuthProvider → RootLayoutNav → Stack.
+  - StripeKeepJsAwakeTask registration vẫn được giữ lại như yêu cầu của Stripe SDK.
+
+### Sửa lỗi (Fixed)
+
+- **Stripe Plugin Config**: Khắc phục lỗi `TypeError: Cannot read properties of undefined (reading 'merchantIdentifier')`.
+  - Plugin config thiếu object cấu hình, gây lỗi khi destructuring merchantIdentifier.
+  - Cập nhật app.json để thêm options object với `enableGooglePay: false`.
+  - Cho phép plugin chạy mà không cần merchantIdentifier (tính năng Apple Pay).
+  - Chạy `npx expo prebuild --clean` để xác nhận fix.
+- **UI Logic vs Config Logic**: Loại bỏ inline style với colors từ các Text component.
+  - components/MembershipCard.tsx: Duration và Price text giờ sử dụng `className="text-primary"`.
+  - app/(tabs)/index.tsx: JOIN NOW text giờ sử dụng `className="text-primary"`.
+  - Text components nên sử dụng className với semantic tokens (UI Logic), không phải inline styles.
+
+### Thay đổi (Changed)
+
+- **Code Comments Cleanup**: Chuẩn hóa code comments trên toàn bộ codebase.
+  - Áp dụng tags chuẩn: TODO (công việc tương lai), FIXME (lỗi đã biết), NOTE (ngữ cảnh quan trọng).
+  - Dịch các bình luận tiếng Việt sang tiếng Anh.
+  - Loại bỏ các bình luận dài dòng và giải thích hiển nhiên.
+  - Loại bỏ TODO comment đã hoàn thành cho get_class_counts RPC (đã được implement).
+  - Files ảnh hưởng: app/, components/, lib/ (14 files tổng cộng).
+
+### Tài liệu (Documentation)
+
+- **CLAUDE.md**: Làm rõ sự tách biệt giữa UI Logic và Config Logic cho NativeWind.
+  - Thêm flowchart quyết định khi nào sử dụng className vs Colors.ts.
+  - Tài liệu UI Logic: Sử dụng className cho View, Text, TouchableOpacity, etc.
+  - Tài liệu Config Logic: Sử dụng Colors.ts cho màu icon, navigation themes, ActivityIndicator.
+  - Bao gồm ví dụ component sử dụng kết hợp cả hai.
+  - Giải thích tại sao sự tách biệt này cần thiết dựa trên giới hạn của NativeWind.
+
 ## [v0.7.3] - 2026-01-05
 
 ### Sửa lỗi (Fixed)
