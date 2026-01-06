@@ -5,11 +5,11 @@ import { useTranslation } from "react-i18next";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { useColorScheme } from "nativewind";
+import { useThemeContext } from "@/lib/theme";
 
 export default function SettingsScreen() {
   const { t, i18n } = useTranslation();
-  const { colorScheme, setColorScheme } = useColorScheme();
+  const { colorScheme, userPreference, setColorScheme } = useThemeContext();
 
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
@@ -40,7 +40,7 @@ export default function SettingsScreen() {
         </View>
         <Text className="text-text font-medium text-lg">{label}</Text>
       </View>
-      {colorScheme === value && (
+      {userPreference === value && (
         <Ionicons name="checkmark-circle" size={24} color={Colors.light.tint} />
       )}
     </TouchableOpacity>
