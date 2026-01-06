@@ -16,15 +16,29 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 import { useFonts } from "expo-font";
 import {
   Stack,
+  router,
   useRootNavigationState,
-  useRouter,
   useSegments,
 } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as TaskManager from "expo-task-manager";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  UIManager,
+  View,
+} from "react-native";
 import "react-native-reanimated";
+
+// Enable LayoutAnimation for Android
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 // Register task required by Stripe SDK (prevents warnings)
 TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
@@ -84,6 +98,7 @@ function RootLayoutNav() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
+  const rootNavigationState = useRootNavigationState();
 
   useEffect(() => {
     if (error) throw error;
@@ -135,7 +150,7 @@ function RootLayoutNav() {
             options={{ headerShown: false }}
           />
         </Stack>
-        <AuthGuard />
+        {rootNavigationState?.key && <AuthGuard />}
         {showLoading && <LoadingScreen backgroundColor={colors.background} />}
       </View>
     </NavigationThemeProvider>
@@ -145,7 +160,6 @@ function RootLayoutNav() {
 function AuthGuard() {
   const { session, isLoading } = useAuthContext();
   const segments = useSegments();
-  const router = useRouter();
   const rootNavigationState = useRootNavigationState();
   const [isChecking, setIsChecking] = useState(true);
 

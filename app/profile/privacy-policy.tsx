@@ -1,26 +1,20 @@
 import Colors from "@/constants/Colors";
 import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  LayoutAnimation,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivacyPolicyScreen() {
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
+  const router = useRouter();
   const colors = Colors[colorScheme];
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const toggleSection = (section: string) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setExpandedSection(expandedSection === section ? null : section);
   };
 
@@ -99,7 +93,7 @@ export default function PrivacyPolicyScreen() {
                 onPress={() => toggleSection(section.id)}
                 className={`flex-row items-center justify-between p-4 rounded-xl border ${
                   expandedSection === section.id
-                    ? "bg-card border-primary ring-1 ring-primary"
+                    ? "bg-card border-primary"
                     : "bg-card border-border"
                 }`}
               >
