@@ -14,7 +14,8 @@ export default function MembershipScreen() {
   const [loading, setLoading] = useState(false);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
-  const [isYearly, setIsYearly] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<1 | 3 | 6 | 12>(1);
+  const durationOptions = [1, 3, 6, 12];
 
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
@@ -80,7 +81,7 @@ export default function MembershipScreen() {
 
   function getPlanStatus(
     tierLevel: number,
-    targetPlanId: string
+    targetPlanId: string,
   ): "default" | "current" | "upgrade" | "downgrade" {
     // 1. If user has NO active plan, treat Level 1 (Standard) as "Current"
     if (!currentPlan) {
@@ -115,7 +116,7 @@ export default function MembershipScreen() {
           t("common.error"),
           "Vui lòng đăng nhập để mua gói tập.",
           "error",
-          { onClose: () => router.push("/(auth)/sign-in") }
+          { onClose: () => router.push("/(auth)/sign-in") },
         );
         return;
       }
@@ -181,7 +182,7 @@ export default function MembershipScreen() {
           showAlert(
             t("common.success"),
             "Đăng ký gói tập thành công!",
-            "success"
+            "success",
           );
           fetchData();
         } else if (attempts >= maxAttempts) {
@@ -190,7 +191,7 @@ export default function MembershipScreen() {
           showAlert(
             t("common.success"),
             "Thanh toán thành công! Gói tập sẽ được kích hoạt trong ít phút.",
-            "success"
+            "success",
           );
           fetchData();
         }
@@ -229,7 +230,7 @@ export default function MembershipScreen() {
               showAlert(
                 "Lỗi",
                 "Không tìm thấy gói tập đang hoạt động để hủy.",
-                "error"
+                "error",
               );
               return;
             }
@@ -238,7 +239,7 @@ export default function MembershipScreen() {
               "cancel-membership",
               {
                 body: { membershipId: mem.id },
-              }
+              },
             );
 
             if (error) throw error;
@@ -246,7 +247,7 @@ export default function MembershipScreen() {
             showAlert(
               t("common.success"),
               t("membership.cancel_success"),
-              "success"
+              "success",
             );
             fetchData();
           } catch (e: any) {
@@ -255,7 +256,7 @@ export default function MembershipScreen() {
             setLoading(false);
           }
         },
-      }
+      },
     );
   }
 
@@ -270,32 +271,50 @@ export default function MembershipScreen() {
         </Text>
       </View>
 
-      {/* Toggle */}
-      <View className="flex-row bg-card p-1 rounded-xl mb-6 self-start border border-border">
-        <TouchableOpacity
-          className={`px-4 py-2 rounded-lg ${
-            !isYearly ? "bg-primary" : "bg-transparent"
-          }`}
-          onPress={() => setIsYearly(false)}
-        >
-          <Text
-            className={`font-bold ${!isYearly ? "text-primary_foreground" : "text-muted_foreground"}`}
-          >
-            {t("membership.month")}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className={`px-4 py-2 rounded-lg ${
-            isYearly ? "bg-primary" : "bg-transparent"
-          }`}
-          onPress={() => setIsYearly(true)}
-        >
-          <Text
-            className={`font-bold ${isYearly ? "text-primary_foreground" : "text-muted_foreground"}`}
-          >
-            Yearly (-20%)
-          </Text>
-        </TouchableOpacity>
+      {/* Duration Selector - Best Practice 2026 */}
+      <View className="mb-6">
+        <View className="flex-row bg-card p-1 rounded-3xl border border-border justify-between relative shadow-sm">
+          {durationOptions.map((duration) => (
+            <TouchableOpacity
+              key={duration}
+              className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
+                selectedDuration === duration
+                  ? "bg-primary shadow-sm"
+                  : "bg-transparent"
+              }`}
+              onPress={() => setSelectedDuration(duration as any)}
+            >
+              {duration === 6 && (
+                <View className="absolute -top-3 z-20 bg-accent px-2 py-0.5 rounded-full shadow-sm border border-white/20">
+                  <Text className="text-[10px] font-bold text-on_accent">
+                    {t("membership.popular")}
+                  </Text>
+                </View>
+              )}
+              {duration === 12 && (
+                <View className="absolute -top-3 z-20 bg-error px-2 py-0.5 rounded-full shadow-sm border border-white/20">
+                  <Text className="text-[10px] font-bold text-white">
+                    {t("membership.best_value")}
+                  </Text>
+                </View>
+              )}
+              <Text
+                className={`font-bold text-sm ${
+                  selectedDuration === duration
+                    ? "text-on_primary"
+                    : "text-muted_foreground"
+                }`}
+              >
+                {duration === 12
+                  ? t("membership.1_year")
+                  : t("membership.month_count", { count: duration })}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <Text className="text-center text-xs text-muted_foreground mt-3 italic opacity-80">
+          {t("membership.save_hint")}
+        </Text>
       </View>
 
       <FlatList
@@ -303,13 +322,13 @@ export default function MembershipScreen() {
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item: tier }) => {
-          // LOGIC: Hide Standard Tier (Level 1) in Yearly View
-          if (isYearly && tier.level === 1) return null;
+          // LOGIC: Hide Standard Tier (Level 1) for packages > 1 Month (Free is forever/monthly)
+          if (selectedDuration > 1 && tier.level === 1) return null;
 
           const relevantPlans = plans.filter((p) => p.tier_id === tier.id);
-          const selectedPlan = isYearly
-            ? relevantPlans.find((p) => p.duration_months >= 12)
-            : relevantPlans.find((p) => p.duration_months === 1);
+          const selectedPlan = relevantPlans.find(
+            (p) => p.duration_months === selectedDuration,
+          );
 
           if (!selectedPlan) return null;
 
@@ -329,6 +348,7 @@ export default function MembershipScreen() {
                   } as any
                 }
                 tier={tier}
+                duration={selectedDuration}
                 onBuy={() => handleBuy(selectedPlan.id)}
                 isLoading={purchasingId === selectedPlan.id}
                 status={getPlanStatus(tier.level, selectedPlan.id)}
