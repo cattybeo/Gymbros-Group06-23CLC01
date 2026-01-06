@@ -103,19 +103,13 @@ export default function MembershipCard({
         </View>
 
         <View className="bg-secondary px-3 py-1 rounded-full ml-2 border border-border">
-          <Text
-            style={{ color: colors.tint }}
-            className="font-semibold text-xs text-primary"
-          >
+          <Text className="font-semibold text-xs text-primary">
             {plan.duration_months} {t("membership.month")}
           </Text>
         </View>
       </View>
 
-      <Text
-        style={{ color: colors.tint }}
-        className="text-3xl font-extrabold my-2 px-2 text-primary"
-      >
+      <Text className="text-3xl font-extrabold my-2 px-2 text-primary">
         {formattedPrice}
       </Text>
 
