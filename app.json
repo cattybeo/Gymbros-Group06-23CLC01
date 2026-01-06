@@ -48,7 +48,12 @@
           "photosPermission": "The app accesses your photos to let you set your avatar."
         }
       ],
-      "@stripe/stripe-react-native"
+      [
+        "@stripe/stripe-react-native",
+        {
+          "enableGooglePay": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

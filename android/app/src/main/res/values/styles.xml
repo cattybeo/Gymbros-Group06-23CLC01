@@ -4,21 +4,11 @@
     <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
     <item name="colorPrimary">@color/colorPrimary</item>
     <item name="android:statusBarColor">#ffffff</item>
-    <!-- Add DatePicker Theme -->
-    <item name="android:datePickerDialogTheme">@style/MyApp.DatePicker</item>
   </style>
-
   <style name="Theme.App.SplashScreen" parent="Theme.SplashScreen">
     <item name="windowSplashScreenBackground">@color/splashscreen_background</item>
     <item name="windowSplashScreenAnimatedIcon">@drawable/splashscreen_logo</item>
     <item name="postSplashScreenTheme">@style/AppTheme</item>
     <item name="android:windowSplashScreenBehavior">icon_preferred</item>
-  </style>
-
-  <!-- Custom DatePicker Style -->
-  <style name="MyApp.DatePicker" parent="Theme.AppCompat.DayNight.Dialog">
-    <item name="colorAccent">#FFA500</item> <!-- Primary Orange -->
-    <item name="android:headerBackground">#FFA500</item>
-    <item name="android:textColorPrimaryInverse">#000000</item> <!-- Text on Header -->
   </style>
 </resources>
