@@ -63,6 +63,7 @@ export default function RootLayout() {
   return (
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}
+      urlScheme="gymbros"
     >
       <AuthProvider>
         <ThemeProvider>
