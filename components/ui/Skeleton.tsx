@@ -6,6 +6,7 @@ import Animated, {
   withRepeat,
   withTiming,
   Easing,
+  cancelAnimation,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -21,6 +22,7 @@ import { LinearGradient } from "expo-linear-gradient";
  * - Dark mode support (uses semantic tokens)
  * - Configurable width, height, borderRadius
  * - Design system compliant (bg-muted for base)
+ * - Optimized: Animation stops on unmount (Rule 15)
  *
  * @example
  * ```tsx
@@ -51,6 +53,7 @@ export function Skeleton({
   const translateX = useSharedValue(-1);
 
   // Start shimmer animation on mount
+  // Rule 15 Optimization: Clean up animation on unmount to save CPU cycles
   React.useEffect(() => {
     translateX.value = withRepeat(
       withTiming(1, {
@@ -60,6 +63,12 @@ export function Skeleton({
       -1, // Infinite loop
       false
     );
+
+    // Cleanup: Stop animation when component unmounts
+    return () => {
+      cancelAnimation(translateX);
+      translateX.value = -1; // Reset to initial position
+    };
   }, []);
 
   // Animated style for shimmer effect
