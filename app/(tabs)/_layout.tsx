@@ -1,6 +1,5 @@
 import Colors from "@/constants/Colors";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { StripeProvider } from "@stripe/stripe-react-native";
 import { Tabs } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { useColorScheme } from "react-native";
@@ -20,22 +19,19 @@ export default function TabLayout() {
   const { t } = useTranslation();
 
   return (
-    <StripeProvider
-      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: colors.tint,
+        tabBarInactiveTintColor: colors.text_secondary,
+        tabBarStyle: {
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
+          paddingBottom: insets.bottom + 5,
+          height: 60 + insets.bottom,
+        },
+        headerShown: false, // Hide default header (each screen uses custom header)
+      }}
     >
-      <Tabs
-        screenOptions={{
-          tabBarActiveTintColor: colors.tint,
-          tabBarInactiveTintColor: colors.text_secondary,
-          tabBarStyle: {
-            backgroundColor: colors.card,
-            borderTopColor: colors.border,
-            paddingBottom: insets.bottom + 5,
-            height: 60 + insets.bottom,
-          },
-          headerShown: false, // Hide default header (each screen uses custom header)
-        }}
-      >
         <Tabs.Screen
           name="index"
           options={{
@@ -69,6 +65,5 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </StripeProvider>
   );
 }
