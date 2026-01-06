@@ -1,11 +1,13 @@
+import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -13,61 +15,63 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ChangePasswordScreen() {
   const { user } = useAuthContext();
   const { t } = useTranslation();
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
+  const insets = useSafeAreaInsets();
 
-  const [oldPassword, setOldPassword] = useState("");
+  const { showAlert, CustomAlertComponent } = useCustomAlert(); // Use Hook
+
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!user || !user.email) return;
-
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      Alert.alert(t("common.error"), t("common.missing_info"));
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      showAlert(t("common.error"), t("common.missing_info"), "error");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      Alert.alert(t("common.error"), t("auth.password_mismatch"));
+      showAlert(t("common.error"), t("auth.password_mismatch"), "error");
       return;
     }
 
     setLoading(true);
-
     try {
-      // 1. Verify Old Password by trying to Sign In
+      if (!user?.email) throw new Error(t("profile.error_user_email"));
+
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,
-        password: oldPassword,
+        password: currentPassword,
       });
 
       if (signInError) {
-        Alert.alert(t("common.error"), t("auth.password_incorrect"));
+        showAlert(t("common.error"), t("auth.password_incorrect"), "error");
         setLoading(false);
         return;
       }
 
-      // 2. Update Password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
-      if (updateError) {
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
-      Alert.alert(t("common.success"), t("profile.change_password_success"), [
-        { text: "OK", onPress: () => router.back() },
-      ]);
+      showAlert(
+        t("common.success"),
+        t("profile.change_password_success"),
+        "success",
+        { onClose: () => router.back() }
+      );
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message);
+      showAlert(t("common.error"), error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -78,74 +82,87 @@ export default function ChangePasswordScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-background"
     >
-      <ScrollView className="flex-1 px-6 pt-12">
+      <ScrollView
+        className="flex-1 px-6"
+        contentContainerStyle={{
+          paddingTop: insets.top + 30,
+        }}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
-          className="mb-6 w-10 h-10 items-center justify-center rounded-full bg-gray-800"
+          className="mb-8 w-10 h-10 items-center justify-center rounded-full bg-card border border-border"
         >
-          <FontAwesome name="arrow-left" size={20} color="white" />
+          <FontAwesome
+            name="arrow-left"
+            size={20}
+            color={colorScheme === "dark" ? "#FFF" : "#000"}
+          />
         </TouchableOpacity>
 
-        <Text className="text-3xl font-bold text-white mb-8">
-          {t("auth.change_password")}
+        <Text className="text-3xl font-bold text-foreground mb-8">
+          {t("profile.change_password")}
         </Text>
 
-        <View className="space-y-4">
+        <View className="space-y-6">
           <View>
-            <Text className="text-gray-400 mb-2 font-medium">
-              {t("auth.old_password")}
+            <Text className="text-muted_foreground mb-2 font-medium">
+              {t("auth.current_password")}
             </Text>
             <TextInput
-              className="bg-surface p-4 rounded-xl text-white border border-gray-700 focus:border-primary"
-              value={oldPassword}
-              onChangeText={setOldPassword}
+              className="bg-card p-4 rounded-xl text-foreground border border-input focus:border-ring"
               secureTextEntry
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
               placeholder="••••••"
-              placeholderTextColor="#6B7280"
+              placeholderTextColor={colors.muted_foreground}
             />
           </View>
 
           <View>
-            <Text className="text-gray-400 mb-2 font-medium">
+            <Text className="text-muted_foreground mb-2 font-medium">
               {t("auth.new_password")}
             </Text>
             <TextInput
-              className="bg-surface p-4 rounded-xl text-white border border-gray-700 focus:border-primary"
+              className="bg-card p-4 rounded-xl text-foreground border border-input focus:border-ring"
+              secureTextEntry
               value={newPassword}
               onChangeText={setNewPassword}
-              secureTextEntry
               placeholder="••••••"
-              placeholderTextColor="#6B7280"
+              placeholderTextColor={colors.muted_foreground}
             />
           </View>
 
           <View>
-            <Text className="text-gray-400 mb-2 font-medium">
-              {t("auth.confirm_password_label")}
+            <Text className="text-muted_foreground mb-2 font-medium">
+              {t("auth.confirm_password")}
             </Text>
             <TextInput
-              className="bg-surface p-4 rounded-xl text-white border border-gray-700 focus:border-primary"
+              className="bg-card p-4 rounded-xl text-foreground border border-input focus:border-ring"
+              secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              secureTextEntry
               placeholder="••••••"
-              placeholderTextColor="#6B7280"
+              placeholderTextColor={colors.muted_foreground}
             />
           </View>
         </View>
 
         <TouchableOpacity
-          className={`mt-8 w-full py-4 rounded-xl items-center ${
-            loading ? "bg-gray-700" : "bg-primary"
+          className={`mt-10 w-full py-4 rounded-xl items-center ${
+            loading ? "bg-secondary" : "bg-primary"
           }`}
-          onPress={handleSubmit}
+          onPress={handleChangePassword}
           disabled={loading}
         >
-          <Text className="text-white font-bold text-lg">
-            {loading ? t("membership.processing") : t("common.save")}
+          <Text
+            className={`${loading ? "text-secondary_foreground" : "text-primary_foreground"} font-bold text-lg`}
+          >
+            {loading ? t("common.processing") : t("common.confirm")}
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <CustomAlertComponent />
     </KeyboardAvoidingView>
   );
 }
