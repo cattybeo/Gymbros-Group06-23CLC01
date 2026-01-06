@@ -1,12 +1,12 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -19,6 +19,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // Screen for adding new body index record
 export default function AddBodyIndexScreen() {
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
+
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
   const [age, setAge] = useState("");
@@ -26,7 +28,7 @@ export default function AddBodyIndexScreen() {
 
   const handleSave = async () => {
     if (!weight || !height) {
-      Alert.alert(t("common.error"), t("common.missing_info"));
+      showAlert(t("common.error"), t("common.missing_info"), "error");
       return;
     }
 
@@ -57,7 +59,7 @@ export default function AddBodyIndexScreen() {
 
       router.replace("/profile/body-index");
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message);
+      showAlert(t("common.error"), error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -75,14 +77,14 @@ export default function AddBodyIndexScreen() {
               onPress={() => router.back()}
               className="w-10 h-10 items-center justify-center bg-surface rounded-full mr-4"
             >
-              <Ionicons name="arrow-back" size={24} color="white" />
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text className="text-white text-xl font-bold">
+            <Text className="text-foreground text-xl font-bold">
               {t("profile.add_record")}
             </Text>
           </View>
 
-          <View className="bg-surface p-6 rounded-2xl border border-gray-800">
+          <View className="bg-surface p-6 rounded-2xl border border-border">
             <InputField
               label={t("onboarding.weight_label") + " (kg)"}
               placeholder="0.0"
@@ -107,7 +109,7 @@ export default function AddBodyIndexScreen() {
           </View>
         </ScrollView>
 
-        <View className="p-4 border-t border-gray-800">
+        <View className="p-4 border-t border-border">
           <Button
             title={t("common.save")}
             onPress={handleSave}
@@ -115,6 +117,7 @@ export default function AddBodyIndexScreen() {
           />
         </View>
       </KeyboardAvoidingView>
+      <CustomAlertComponent />
     </SafeAreaView>
   );
 }

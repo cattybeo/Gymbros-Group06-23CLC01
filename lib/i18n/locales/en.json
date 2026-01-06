@@ -30,7 +30,11 @@
     "old_password": "Old Password",
     "new_password": "New Password",
     "change_password": "Change Password",
-    "password_incorrect": "Incorrect old password"
+    "logout_confirmation": "Are you sure you want to log out?",
+    "user_not_found": "User not found. Please login again.",
+    "current_password": "Current Password",
+    "confirm_password": "Confirm Password",
+    "password_incorrect": "Incorrect password"
   },
   "onboarding": {
     "title": "Tell us about yourself",
@@ -55,9 +59,11 @@
     "add": "Add",
     "feature_coming_soon": "Feature coming soon!",
     "pick_image_error": "Could not pick image.",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "default_user_name": "Gymbro User"
   },
   "membership": {
+    "payment_init_error": "Could not initialize payment",
     "title": "Membership Plans",
     "subtitle": "Choose a plan that fits your goal",
     "buy_now": "Subscribe Now",
@@ -66,7 +72,8 @@
     "no_downgrade": "Downgrade Not Supported",
     "processing": "Processing...",
     "month": "Month",
-    "empty_list": "No plans available at the moment."
+    "empty_list": "No plans available at the moment.",
+    "cancel_success": "Membership cancelled successfully."
   },
   "home": {
     "welcome": "Welcome back,",
@@ -104,6 +111,7 @@
     "tier_standard": "Standard Member",
     "update_success_msg": "Profile updated successfully!",
     "email_change_notice": "Email cannot be changed directly.",
+    "change_password": "Change Password",
     "change_password_success": "Password changed successfully!",
     "body_index": "Body Index",
     "goal_label": "Primary Goal",
@@ -188,7 +196,8 @@
     "class_full": "Class is full.",
     "explore": "Explore Classes",
     "all": "All",
-    "upcoming_schedule": "Upcoming Schedule"
+    "upcoming_schedule": "Upcoming Schedule",
+    "default_class_name": "Group Class"
   },
   "heatmap": {
     "title": "Crowd Meter",
@@ -251,6 +260,11 @@
   },
   "settings": {
     "language": "Language",
-    "theme": "Theme"
+    "theme": {
+      "title": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   }
 }
