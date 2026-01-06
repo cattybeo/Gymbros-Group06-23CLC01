@@ -18,7 +18,7 @@ export default function Button({
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   const bgClass =
-    variant === "primary" ? "bg-primary" : "bg-secondary border border-border"; // Changed to filled gray for better visual weight
+    variant === "primary" ? "bg-primary" : "bg-secondary border border-border";
   const textClass =
     variant === "primary"
       ? "text-on-primary"

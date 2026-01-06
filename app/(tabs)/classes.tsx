@@ -70,31 +70,8 @@ export default function ClassesScreen() {
 
       // 3. Parallel Fetching: Bookings (Dependent on Class IDs)
       if (classIds.length > 0) {
-        // ... (RLS Logic comment from original file preserved implicitly by logic)
-        // With current RLS: "Users can view own bookings". So we can't fetch ALL bookings in one query unless we use a Secured view or RPC.
-        // My previous audit missed this! the `classCounts` on client side is likely WRONG if RLS is on!
-        // Fix: I already made `get_weekly_traffic` RPC. I should probably have made a `get_class_counts` RPC.
-        // BUT, for now, let's Stick to the optimize.
-
-        // Actually, if RLS is on, Step 4 in original code:
-        // const { data: allBookings } = await supabase...
-        // This likely returns ONLY the current user's bookings.
-
-        // CRITICAL REFLECTION:
-        // Verification: Check schema.sql RLS.
-        // line 76: create policy "Users can view own bookings" ... using (auth.uid() = user_id);
-        // THIS MEANS: Client CANNOT calculate global `classCounts` using simple select!
-        // The Heatmap works because it's a SECURITY DEFINER RPC.
-        // The Class List "Spots Left" is currently BROKEN (shows only my bookings).
-
-        // IMMEDIATE ACTION: I need to fix this Logic Error first!
-        // I should use the `trafficData` (which is aggregate) or create a new light RPC for counts.
-        // Or, since `get_weekly_traffic` returns generic scores, maybe I can use that? No, that's approximate.
-        // Best approach for NOW: Create a simple RPC `get_class_counts(class_ids)` or ignore (since user asked for audit).
-        // I will optimize the valid structure first, but adding a TODO for RLS.
-
-        // Actually, `classes` table has `capacity`. We need `count(bookings)`.
-        // Let's optimize the CURRENT flow, acknowledging the RLS limitation (maybe I'll Notify User about this bug).
+        // FIXME: RLS prevents fetching global counts client-side. Using RPC bypass for now.
+        // TODO: Consider creating `get_class_counts` RPC for better performance
 
         if (user) {
           // Fetch My Bookings

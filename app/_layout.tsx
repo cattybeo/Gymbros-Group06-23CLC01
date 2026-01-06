@@ -20,14 +20,12 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import "react-native-reanimated";
 
-// Register the task (even if empty) to prevent warnings
+// Register task required by Stripe SDK (prevents warnings)
 TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
-  // This task is required by Stripe SDK to keep the app awake during payment
-  // No persistent background logic needed here, just the registration.
+  // NOTE: Stripe SDK requires this task registration to keep app awake during payment
 });
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from "expo-router";
 
@@ -35,11 +33,11 @@ export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Prevent auto-hide before fonts load
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // Cấu hình Google Sign-In khi app khởi động
+  // Configure Google Sign-In on app startup
   useEffect(() => {
     configureGoogleSignIn();
   }, []);
@@ -58,9 +56,9 @@ function RootLayoutNav() {
     ...FontAwesome.font,
   });
 
-  // Logic Auth
+  // Auth state and routing
   const { session, isLoading } = useAuthContext();
-  const segments = useSegments(); // Lấy thông tin về đường dẫn hiện tại
+  const segments = useSegments();
   const router = useRouter();
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -78,7 +76,7 @@ function RootLayoutNav() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (isLoading) return; // Chờ load xong trạng thái Auth
+    if (isLoading) return; // Wait for auth to finish
 
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
@@ -87,7 +85,7 @@ function RootLayoutNav() {
       try {
         console.log("Checking onboarding status...");
         if (session) {
-          // Kiểm tra xem user đã có chỉ số cơ thể chưa
+          // Check if user has completed onboarding
           const { data, error } = await supabase
             .from("body_indices")
             .select("id")
@@ -116,8 +114,7 @@ function RootLayoutNav() {
         console.error("Onboarding check error:", e);
       } finally {
         setIsChecking(false);
-        // Force hide splash screen in case validation takes too long
-        SplashScreen.hideAsync();
+        SplashScreen.hideAsync(); // Force hide if validation takes too long
       }
     };
 
@@ -126,7 +123,7 @@ function RootLayoutNav() {
 
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
-  // Nếu chưa load font, đang check auth, hoặc đang check DB -> Hiện thị Splash Screen
+  // Show splash while loading fonts, auth, or DB check
   if (!loaded || isLoading || isChecking) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
