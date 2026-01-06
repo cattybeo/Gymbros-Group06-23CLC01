@@ -24,7 +24,17 @@
     "password_mismatch": "Passwords do not match",
     "sign_up_failed": "Sign up failed",
     "sign_up_success_msg": "Account created! Please check your email to verify.",
-    "confirm_password_label": "Confirm Password"
+    "confirm_password_label": "Confirm Password",
+    "name_label": "Full Name",
+    "name_placeholder": "Ex: John Doe",
+    "old_password": "Old Password",
+    "new_password": "New Password",
+    "change_password": "Change Password",
+    "logout_confirmation": "Are you sure you want to log out?",
+    "user_not_found": "User not found. Please login again.",
+    "current_password": "Current Password",
+    "confirm_password": "Confirm Password",
+    "password_incorrect": "Incorrect password"
   },
   "onboarding": {
     "title": "Tell us about yourself",
@@ -45,9 +55,16 @@
     "success": "Success",
     "save": "Save Changes",
     "cancel": "Cancel",
-    "add": "Add"
+    "confirm": "Confirm",
+    "add": "Add",
+    "feature_coming_soon": "Feature coming soon!",
+    "pick_image_error": "Could not pick image.",
+    "uploading": "Uploading...",
+    "default_user_name": "Gymbro User",
+    "optional": "Optional"
   },
   "membership": {
+    "payment_init_error": "Could not initialize payment",
     "title": "Membership Plans",
     "subtitle": "Choose a plan that fits your goal",
     "buy_now": "Subscribe Now",
@@ -56,7 +73,17 @@
     "no_downgrade": "Downgrade Not Supported",
     "processing": "Processing...",
     "month": "Month",
-    "empty_list": "No plans available at the moment."
+    "empty_list": "No plans available at the moment.",
+    "cancel_success": "Membership cancelled successfully.",
+    "popular": "POPULAR",
+    "best_value": "BEST VALUE",
+    "1_year": "1 Year",
+    "month_count": "{{count}} Months",
+    "save_hint": "* Save up to 30% on long-term plans",
+    "free": "Free",
+    "month_unit": "month",
+    "billed_duration": "Billed {{price}} every {{count}} months",
+    "per_month_approx": "≈ {{price}} / month"
   },
   "home": {
     "welcome": "Welcome back,",
@@ -94,11 +121,61 @@
     "tier_standard": "Standard Member",
     "update_success_msg": "Profile updated successfully!",
     "email_change_notice": "Email cannot be changed directly.",
+    "change_password": "Change Password",
     "change_password_success": "Password changed successfully!",
     "body_index": "Body Index",
+    "goal_label": "Primary Goal",
+    "gender_label": "Gender",
+    "birthday_label": "Date of Birth (YYYY-MM-DD)",
+    "personal_details": "Personal Details",
+    "fitness_profile": "Fitness Profile",
+    "goals": {
+      "lose_weight": "Lose Weight",
+      "build_muscle": "Build Muscle",
+      "maintain": "Maintain Weight",
+      "endurance": "Endurance",
+      "flexibility": "Flexibility"
+    },
+    "genders": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "body_index_history": "Body Metrics History",
+    "start_weight": "Starting Weight",
+    "current_weight": "Current Weight",
+    "total_change": "Total Change",
     "add_record": "Add New Record",
-    "no_records": "No records found. Add your first measurement!"
+    "not_set": "Not Set",
+    "no_records": "No records found. Add your first measurement!",
+    "activity_level_label": "Activity Level",
+    "experience_level_label": "Experience Level",
+    "weekly_availability_label": "Weekly Availability",
+    "activities": {
+      "sedentary": "Sedentary (Office Job)",
+      "light": "Lightly Active (1-2 days/week)",
+      "moderate": "Moderately Active (3-5 days/week)",
+      "active": "Active (6-7 days/week)",
+      "very_active": "Very Active (Athlete)"
+    },
+    "experiences": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "availabilities": {
+      "1_2": "1-2 days/week",
+      "3_4": "3-4 days/week",
+      "5_plus": "5+ days/week"
+    },
+    "error_no_session": "No user on the session!",
+    "error_no_image": "No image data found.",
+    "error_user_email": "User email not found",
+    "version": "Version",
+    "units": {
+      "kg": "kg",
+      "cm": "cm"
+    }
   },
   "plans": {
     "silver_pack": "Silver Pack",
@@ -130,7 +207,32 @@
     "membership_required": "Membership Required",
     "membership_required_msg": "You need an active membership to book classes.",
     "already_booked": "You have already booked this class.",
-    "empty_list": "No upcoming classes found."
+    "empty_list": "No upcoming classes found.",
+    "processing": "Processing...",
+    "spots_left": "{{count}} left",
+    "fetch_error": "Failed to load classes.",
+    "class_full": "Class is full.",
+    "explore": "Explore Classes",
+    "all": "All",
+    "upcoming_schedule": "Upcoming Schedule",
+    "default_class_name": "Group Class"
+  },
+  "heatmap": {
+    "title": "Crowd Meter",
+    "now": "Right Now:",
+    "low": "Not Busy",
+    "med": "Moderate",
+    "high": "Busy",
+    "capacity": "Capacity",
+    "days": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
+    }
   },
   "features": {
     "gym_access": "Gym Access",
@@ -142,5 +244,50 @@
     "pt_1_week": "1 PT Session/week",
     "towel_service": "Towel Service",
     "pt_1_session": "1 PT Session"
+  },
+  "privacy": {
+    "last_updated": "Last Updated",
+    "introduction": {
+      "title": "1. Introduction",
+      "content": "Welcome to Gymbros. We are committed to protecting your personal information and your right to privacy. When you use our mobile application, you trust us with your personal information. We take this privacy very seriously."
+    },
+    "data_collection": {
+      "title": "2. Information We Collect",
+      "content": "We collect personal information that you voluntarily provide to us when you register on the App, such as name, email address, gender, birthday, and profile picture. We also collect health-related data necessary for the app's functionality, including height, weight, fitness goals, and workout history."
+    },
+    "data_usage": {
+      "title": "3. How We Use Your Information",
+      "content": "We use the information we collect or receive to: \n- Facilitate account creation and logon process.\n- Calculate body metrics (BMI, BMR) and track your fitness progress.\n- Manage your class bookings and memberships.\n- Send you administrative information."
+    },
+    "data_sharing": {
+      "title": "4. Will Your Information be Shared?",
+      "content": "We strictly do not sell your personal data. We only share information with your consent, to comply with laws, to provide you with services (e.g., payment processing), to protect your rights, or to fulfill business obligations."
+    },
+    "security": {
+      "title": "5. Data Security",
+      "content": "We represent that we have implemented appropriate technical and organizational security measures designed to protect the security of any personal information we process. However, please also remember that the internet itself is not 100% secure."
+    },
+    "user_rights": {
+      "title": "6. Your Privacy Rights",
+      "content": "You may review, change, or terminate your account at any time. If you wish to delete your account and all associated data, you can do so from the Settings menu or by contacting support."
+    },
+    "contact": {
+      "title": "7. Contact Us",
+      "content": "If you have questions or comments about this policy, you may email us at support@gymbros.com."
+    }
+  },
+  "settings": {
+    "language": "Language",
+    "language_label": "Language",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "theme": {
+      "title": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
   }
 }

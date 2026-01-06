@@ -28,10 +28,10 @@ export default function WelcomeScreen() {
           <Text className="text-primary text-lg font-bold uppercase tracking-widest mb-2">
             {t("welcome.title")}
           </Text>
-          <Text className="text-white text-3xl font-bold text-center mb-4">
+          <Text className="text-foreground text-3xl font-bold text-center mb-4">
             {t("welcome.subtitle")}
           </Text>
-          <Text className="text-gray-400 text-center mb-8 px-4">
+          <Text className="text-muted_foreground text-center mb-8 px-4">
             {t("welcome.description")}
           </Text>
 
