@@ -1,4 +1,6 @@
+import Colors from "@/constants/Colors";
 import { signInWithGoogle } from "@/lib/GoogleAuth";
+import { useThemeContext } from "@/lib/theme";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -6,12 +8,12 @@ import {
   Image,
   Text,
   TouchableOpacity,
-  useColorScheme,
 } from "react-native";
 
 export default function GoogleSignInButton() {
   const [loading, setLoading] = useState(false);
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   async function handlePress() {
     setLoading(true);
@@ -23,16 +25,16 @@ export default function GoogleSignInButton() {
     if (!result.success && !result.cancelled && result.error) {
       Alert.alert("Đăng nhập thất bại", result.error);
     }
-    // Nếu success -> AuthContext tự động điều hướng
+    // AuthContext will auto-redirect on success
   }
 
   if (loading) {
     return (
       <TouchableOpacity
         disabled
-        className="w-full bg-surface border border-gray-700 p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
+        className="w-full bg-card border border-input p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
       >
-        <ActivityIndicator size="small" color="#FFA500" />
+        <ActivityIndicator size="small" color={colors.foreground} />
       </TouchableOpacity>
     );
   }
@@ -40,7 +42,7 @@ export default function GoogleSignInButton() {
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="w-full bg-surface border border-gray-700 p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
+      className="w-full bg-card border border-border p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
       disabled={loading}
     >
       <Image
@@ -48,7 +50,7 @@ export default function GoogleSignInButton() {
         className="w-6 h-6 mr-3"
         resizeMode="contain"
       />
-      <Text className="text-white font-bold text-base">Google</Text>
+      <Text className="text-foreground font-bold text-base">Google</Text>
     </TouchableOpacity>
   );
 }
