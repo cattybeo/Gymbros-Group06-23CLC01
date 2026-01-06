@@ -6,7 +6,7 @@ import {
 } from "@react-native-google-signin/google-signin";
 import { supabase } from "./supabase";
 
-// Cấu hình Google Sign-In (gọi 1 lần duy nhất khi app khởi động)
+// Configure Google Sign-In (call once on app startup)
 export function configureGoogleSignIn() {
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -18,7 +18,6 @@ export type GoogleSignInResult =
   | { success: true; user: any }
   | { success: false; cancelled: boolean; error?: string };
 
-// Hàm đăng nhập với Google
 export async function signInWithGoogle(): Promise<GoogleSignInResult> {
   try {
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -32,7 +31,7 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
         return {
           success: false,
           cancelled: false,
-          error: "Không lấy được ID Token",
+          error: "Failed to get ID Token",
         };
       }
 
@@ -55,22 +54,21 @@ export async function signInWithGoogle(): Promise<GoogleSignInResult> {
         case statusCodes.SIGN_IN_CANCELLED:
           return { success: false, cancelled: true };
         case statusCodes.IN_PROGRESS:
-          return { success: false, cancelled: false, error: "Đang xử lý..." };
+          return { success: false, cancelled: false, error: "In progress..." };
         case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
           return {
             success: false,
             cancelled: false,
-            error: "Play Services không khả dụng",
+            error: "Play Services not available",
           };
         default:
           return { success: false, cancelled: false, error: error.message };
       }
     }
-    return { success: false, cancelled: false, error: "Lỗi không xác định" };
+    return { success: false, cancelled: false, error: "Unknown error" };
   }
 }
 
-// Hàm đăng xuất
 export async function signOutFromGoogle(): Promise<void> {
   await Promise.allSettled([GoogleSignin.signOut(), supabase.auth.signOut()]);
 }

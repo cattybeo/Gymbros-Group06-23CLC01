@@ -1,15 +1,18 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignUp() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,18 +20,18 @@ export default function SignUp() {
 
   async function handleSignUp() {
     if (!email || !password || !confirmPassword) {
-      Alert.alert(t("common.error"), t("common.missing_info"));
+      showAlert(t("common.error"), t("common.missing_info"), "error");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert(t("common.error"), t("auth.password_mismatch"));
+      showAlert(t("common.error"), t("auth.password_mismatch"), "error");
       return;
     }
 
     setLoading(true);
 
-    // 1. Gọi Supabase Sign Up
+    // Call Supabase Sign Up
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -37,24 +40,23 @@ export default function SignUp() {
     setLoading(false);
 
     if (error) {
-      Alert.alert(t("auth.sign_up_failed"), error.message);
+      showAlert(t("auth.sign_up_failed"), error.message, "error");
     } else {
-      // 2. Thông báo thành công
-      Alert.alert(
-        t("common.success"),
-        t("auth.sign_up_success_msg"),
-        [{ text: "OK", onPress: () => router.back() }] // Quay lại trang login
-      );
+      showAlert(t("common.success"), t("auth.sign_up_success_msg"), "success", {
+        onClose: () => router.back(),
+      });
     }
   }
 
   return (
     <SafeAreaView className="flex-1 bg-background px-6 justify-center">
       <View className="items-center mb-8">
-        <Text className="text-3xl font-bold text-white">
+        <Text className="text-3xl font-bold text-foreground">
           {t("auth.sign_up_title")}
         </Text>
-        <Text className="text-gray-400 mt-2">{t("auth.sign_up_subtitle")}</Text>
+        <Text className="text-foreground-muted mt-2 text-center">
+          {t("auth.sign_up_subtitle")}
+        </Text>
       </View>
 
       <View>
@@ -91,11 +93,12 @@ export default function SignUp() {
       </View>
 
       <View className="flex-row justify-center mt-8">
-        <Text className="text-gray-400">{t("auth.has_account")} </Text>
+        <Text className="text-foreground-muted">{t("auth.has_account")} </Text>
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-primary font-bold">{t("auth.login_now")}</Text>
         </TouchableOpacity>
       </View>
+      <CustomAlertComponent />
     </SafeAreaView>
   );
 }
