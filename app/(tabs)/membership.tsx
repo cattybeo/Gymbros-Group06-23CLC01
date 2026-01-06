@@ -71,7 +71,7 @@ export default function MembershipScreen() {
       }
     } catch (error) {
       console.error(error);
-      showAlert(t("common.error"), "Không thể tải dữ liệu gói tập", "error");
+      showAlert(t("common.error"), t("membership.load_failed"), "error");
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ export default function MembershipScreen() {
       if (!user) {
         showAlert(
           t("common.error"),
-          "Vui lòng đăng nhập để mua gói tập.",
+          t("membership.login_required_buy"),
           "error",
           { onClose: () => router.push("/(auth)/sign-in") }
         );
@@ -185,7 +185,7 @@ export default function MembershipScreen() {
           setLoading(false);
           showAlert(
             t("common.success"),
-            "Đăng ký gói tập thành công!",
+            t("membership.activation_success"),
             "success"
           );
           fetchData();
@@ -194,7 +194,7 @@ export default function MembershipScreen() {
           setLoading(false);
           showAlert(
             t("common.success"),
-            "Thanh toán thành công! Gói tập sẽ được kích hoạt trong ít phút.",
+            t("membership.activation_pending"),
             "success"
           );
           fetchData();
@@ -208,12 +208,12 @@ export default function MembershipScreen() {
 
   async function handleCancel() {
     showAlert(
-      "Xác nhận hủy",
-      "Bạn có chắc chắn muốn hủy gói tập hiện tại? Việc này sẽ dừng gia hạn (nếu có) và thay đổi trạng thái gói.",
+      t("common.confirm_buy"),
+      t("common.cancel_membership_confirm"),
       "warning",
       {
-        primaryButtonText: "Hủy gói",
-        secondaryButtonText: "Không",
+        primaryButtonText: t("common.cancel_membership"),
+        secondaryButtonText: t("common.keep_membership"),
         onPrimaryPress: async () => {
           setLoading(true);
           try {
@@ -232,8 +232,8 @@ export default function MembershipScreen() {
 
             if (!mem) {
               showAlert(
-                "Lỗi",
-                "Không tìm thấy gói tập đang hoạt động để hủy.",
+                t("common.error"),
+                t("membership.no_active_found"),
                 "error"
               );
               return;
@@ -281,6 +281,10 @@ export default function MembershipScreen() {
           {durationOptions.map((duration) => (
             <TouchableOpacity
               key={duration}
+              accessibilityRole="button"
+              accessibilityLabel={t("membership.month_count", {
+                count: duration,
+              })}
               className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
                 selectedDuration === duration
                   ? "bg-primary shadow-sm"
@@ -359,11 +363,13 @@ export default function MembershipScreen() {
               />
               {isMyCurrentPlan && (
                 <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel={t("common.cancel_membership")}
                   className="bg-destructive/10 border border-destructive p-3 rounded-lg -mt-2 mb-4 mx-4 items-center"
                   onPress={() => handleCancel()}
                 >
                   <Text className="text-destructive font-bold">
-                    Hủy gói tập (Cancel)
+                    {t("common.cancel_membership")}
                   </Text>
                 </TouchableOpacity>
               )}
