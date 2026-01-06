@@ -1,19 +1,22 @@
 import ClassCard from "@/components/ClassCard";
 import CrowdHeatmap, { TrafficData } from "@/components/CrowdHeatmap";
 import { GYM_IMAGES } from "@/constants/Images";
+import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
   FlatList,
   Image,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
 
 export default function ClassesScreen() {
@@ -21,6 +24,9 @@ export default function ClassesScreen() {
   const [loading, setLoading] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
   const [trafficData, setTrafficData] = useState<TrafficData[]>([]);
   const [myBookings, setMyBookings] = useState<Set<string>>(new Set());
@@ -64,18 +70,8 @@ export default function ClassesScreen() {
 
       // 3. Parallel Fetching: Bookings (Dependent on Class IDs)
       if (classIds.length > 0) {
-        const bookingsQuery = supabase
-          .from("bookings")
-          .select("class_id, user_id, status") // Select only needed columns
-          .in("class_id", classIds)
-          .in("status", ["confirmed", "checked_in"]);
-
-        const requests = [bookingsQuery];
-
-        // If user logged in, fetch their specific bookings too (or derived from above if permission allows, but RLS usually restricts. safe to query twice or optimize if RLS allows shared read)
-        // With current RLS: "Users can view own bookings". So we can't fetch ALL bookings in one query unless we use a secured view or RPC.
-        // Wait, current logic fetches "allBookings" for counts?
-        // NOTE: RLS policy "Users can view own bookings" means `allBookings` query returns ONLY user's bookings unless I use a Service Role or RPC.
+        // ... (RLS Logic comment from original file preserved implicitly by logic)
+        // With current RLS: "Users can view own bookings". So we can't fetch ALL bookings in one query unless we use a Secured view or RPC.
         // My previous audit missed this! the `classCounts` on client side is likely WRONG if RLS is on!
         // Fix: I already made `get_weekly_traffic` RPC. I should probably have made a `get_class_counts` RPC.
         // BUT, for now, let's Stick to the optimize.
@@ -127,7 +123,7 @@ export default function ClassesScreen() {
       }
     } catch (error) {
       console.error(error);
-      Alert.alert(t("common.error"), t("classes.fetch_error"));
+      showAlert(t("common.error"), t("classes.fetch_error"), "error");
     } finally {
       setLoading(false);
     }
@@ -139,7 +135,9 @@ export default function ClassesScreen() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      Alert.alert(t("auth.login_button"), t("classes.login_required"));
+      showAlert(t("auth.login_button"), t("classes.login_required"), "error", {
+        onClose: () => router.push("/(auth)/sign-in"),
+      });
       return;
     }
 
@@ -150,7 +148,7 @@ export default function ClassesScreen() {
       const currentCount = classCounts[classId] || 0;
       const targetClass = classes.find((c) => c.id === classId);
       if (targetClass && currentCount >= targetClass.capacity) {
-        Alert.alert(t("common.error"), t("classes.class_full"));
+        showAlert(t("common.error"), t("classes.class_full"), "error");
         return;
       }
 
@@ -164,9 +162,14 @@ export default function ClassesScreen() {
         .limit(1);
 
       if (memError || !memberships || memberships.length === 0) {
-        Alert.alert(
+        showAlert(
           t("classes.membership_required"),
-          t("classes.membership_required_msg")
+          t("classes.membership_required_msg"),
+          "error",
+          {
+            primaryButtonText: t("common.confirm"),
+            onPrimaryPress: () => router.push("/membership"), // Guide them to membership page
+          }
         );
         setBookingId(null);
         return;
@@ -181,7 +184,7 @@ export default function ClassesScreen() {
         .single();
 
       if (existingBooking) {
-        Alert.alert(t("common.error"), t("classes.already_booked"));
+        showAlert(t("common.error"), t("classes.already_booked"), "error");
         setBookingId(null);
         return;
       }
@@ -197,13 +200,14 @@ export default function ClassesScreen() {
 
       if (bookError) throw bookError;
 
-      Alert.alert(
+      showAlert(
         t("classes.booking_success"),
-        t("classes.booking_success_msg")
+        t("classes.booking_success_msg"),
+        "success"
       );
       fetchData();
     } catch (error: any) {
-      Alert.alert(t("classes.booking_error"), error.message);
+      showAlert(t("classes.booking_error"), error.message, "error");
     } finally {
       setBookingId(null);
     }
@@ -228,7 +232,7 @@ export default function ClassesScreen() {
 
   const renderCatalog = () => (
     <View className="mb-6">
-      <Text className="text-xl font-bold text-white mb-3 px-1">
+      <Text className="text-xl font-bold text-foreground mb-3 px-1">
         {t("classes.explore")}
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -242,18 +246,20 @@ export default function ClassesScreen() {
           >
             <View
               className={`w-16 h-16 rounded-full items-center justify-center mb-2 ${
-                selectedType === "All" ? "bg-primary" : "bg-gray-700"
+                selectedType === "All" ? "bg-primary" : "bg-card"
               }`}
             >
               <Ionicons
                 name="grid-outline"
                 size={24}
-                color={selectedType === "All" ? "white" : "#9ca3af"}
+                color={selectedType === "All" ? colors.primary : colors.muted_foreground}
               />
             </View>
             <Text
               className={`text-xs font-semibold ${
-                selectedType === "All" ? "text-primary" : "text-gray-400"
+                selectedType === "All"
+                  ? "text-primary"
+                  : "text-muted_foreground"
               }`}
             >
               {t("classes.all")}
@@ -279,7 +285,7 @@ export default function ClassesScreen() {
                 />
                 <Text
                   className={`text-xs font-semibold max-w-[80px] text-center ${
-                    isSelected ? "text-primary" : "text-gray-400"
+                    isSelected ? "text-primary" : "text-muted_foreground"
                   }`}
                   numberOfLines={1}
                 >
@@ -296,10 +302,12 @@ export default function ClassesScreen() {
   return (
     <View className="flex-1 bg-background pt-12 px-4">
       <View className="mb-2">
-        <Text className="text-3xl font-bold text-white">
+        <Text className="text-3xl font-bold text-foreground">
           {t("classes.title")}
         </Text>
-        <Text className="text-gray-400 mt-1">{t("classes.subtitle")}</Text>
+        <Text className="text-muted_foreground mt-1">
+          {t("classes.subtitle")}
+        </Text>
       </View>
 
       <FlatList
@@ -309,7 +317,7 @@ export default function ClassesScreen() {
           <>
             {renderCatalog()}
             <CrowdHeatmap data={trafficData} isLoading={loading} />
-            <Text className="text-lg font-bold text-white mb-2 mt-2 px-1">
+            <Text className="text-lg font-bold text-foreground mb-2 mt-2 px-1">
               {t("classes.upcoming_schedule")}
             </Text>
           </>
@@ -335,13 +343,14 @@ export default function ClassesScreen() {
         onRefresh={fetchData}
         ListEmptyComponent={
           !loading ? (
-            <Text className="text-center text-gray-500 mt-10">
+            <Text className="text-center text-muted_foreground mt-10">
               {t("classes.empty_list")}
             </Text>
           ) : null
         }
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+      <CustomAlertComponent />
     </View>
   );
 }

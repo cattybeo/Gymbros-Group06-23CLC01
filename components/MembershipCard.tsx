@@ -57,31 +57,31 @@ export default function MembershipCard({
   const isDisabled = isCurrent || isDowngrade || isLoading;
 
   let buttonText = t("membership.buy_now");
-  let buttonStyle = "bg-primary active:bg-orange-600";
-  let textStyle = "text-white font-bold text-lg";
+  let buttonStyle = "bg-primary active:bg-primary/90";
+  let textStyle = "text-on_primary font-bold text-lg";
 
   if (isLoading) {
     buttonText = t("membership.processing");
-    buttonStyle = "bg-gray-700";
+    buttonStyle = "bg-surface_highlight";
   } else if (isCurrent) {
     buttonText = t("membership.current");
-    buttonStyle = "bg-gray-700 opacity-50";
-    textStyle = "text-gray-400 font-bold text-lg";
+    buttonStyle = "bg-surface_highlight opacity-50";
+    textStyle = "text-foreground-secondary font-bold text-lg";
   } else if (isDowngrade) {
     buttonText = t("membership.no_downgrade");
-    buttonStyle = "bg-gray-800 border border-gray-700";
-    textStyle = "text-gray-500 font-semibold text-base";
+    buttonStyle = "bg-surface border border-border";
+    textStyle = "text-foreground-secondary font-semibold text-base";
   } else if (status === "upgrade") {
     buttonText = t("membership.upgrade");
-    buttonStyle = "bg-green-600 active:bg-green-700";
+    buttonStyle = "bg-success active:bg-success/90";
   } else if (isCancelled) {
     buttonText = "Đã hủy (Hết hạn sớm)";
-    buttonStyle = "bg-red-900 opacity-80";
-    textStyle = "text-red-200 font-bold text-lg";
+    buttonStyle = "bg-error opacity-80";
+    textStyle = "text-error-foreground font-bold text-lg"; // Error is usually red, text on red = white
   }
 
   return (
-    <View className="bg-surface p-4 rounded-2xl shadow-sm mb-4 border border-gray-800 overflow-hidden">
+    <View className="bg-card p-4 rounded-2xl shadow-sm mb-4 border border-border overflow-hidden">
       <Image
         source={imageSource}
         className="w-full h-40 rounded-xl mb-4"
@@ -89,23 +89,23 @@ export default function MembershipCard({
       />
       <View className="flex-row justify-between items-center mb-2 px-2">
         <View className="flex-1">
-          <Text className="text-xl font-bold text-white">
+          <Text className="text-xl font-bold text-card_foreground">
             {/* Try to translate the name (Silver, Gold) or fallback */}
             {tier
               ? t(`home.tier.${tier.code}`, { defaultValue: tier.name })
               : t(`plans.${plan.image_slug}`, { defaultValue: plan.name })}
           </Text>
           {plan.discount_label && (
-            <Text className="text-green-400 text-xs font-bold uppercase mt-1">
+            <Text className="text-success text-xs font-bold uppercase mt-1">
               {plan.discount_label}
             </Text>
           )}
         </View>
 
-        <View className="bg-gray-700 px-3 py-1 rounded-full ml-2">
+        <View className="bg-secondary px-3 py-1 rounded-full ml-2 border border-border">
           <Text
             style={{ color: colors.tint }}
-            className="font-semibold text-xs"
+            className="font-semibold text-xs text-primary"
           >
             {plan.duration_months} {t("membership.month")}
           </Text>
@@ -114,7 +114,7 @@ export default function MembershipCard({
 
       <Text
         style={{ color: colors.tint }}
-        className="text-3xl font-extrabold my-2 px-2"
+        className="text-3xl font-extrabold my-2 px-2 text-primary"
       >
         {formattedPrice}
       </Text>
@@ -125,7 +125,7 @@ export default function MembershipCard({
           {tier.features.map((feature, index) => (
             <View key={index} className="flex-row items-center mb-2">
               <Ionicons name="checkmark-circle" size={16} color={colors.tint} />
-              <Text className="text-gray-300 ml-2 text-sm">
+              <Text className="text-muted_foreground ml-2 text-sm">
                 {/* Provide i18n key or raw feature name */}
                 {t(`features.${feature}`, {
                   defaultValue: feature.replace(/_/g, " "),
@@ -137,7 +137,9 @@ export default function MembershipCard({
       ) : (
         // Fallback to description
         plan.description && (
-          <Text className="text-gray-400 mb-6 px-2">{plan.description}</Text>
+          <Text className="text-muted_foreground mb-6 px-2">
+            {plan.description}
+          </Text>
         )
       )}
 

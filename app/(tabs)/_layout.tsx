@@ -15,6 +15,7 @@ function TabBarIcon(props: {
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
 
@@ -24,13 +25,13 @@ export default function TabLayout() {
     >
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
-          tabBarInactiveTintColor: "#6B7280", // Gray-500
+          tabBarActiveTintColor: colors.tint,
+          tabBarInactiveTintColor: colors.text_secondary,
           tabBarStyle: {
-            backgroundColor: "#1E1E1E", // Surface color (Dark Grey)
-            borderTopColor: "#1E1E1E",
+            backgroundColor: colors.card,
+            borderTopColor: colors.border,
             paddingBottom: insets.bottom + 5,
-            height: 60 + insets.bottom, // Expand height to cover nav bar
+            height: 60 + insets.bottom,
           },
           headerShown: false, // Ẩn Header mặc định để dùng Header riêng của từng trang
         }}

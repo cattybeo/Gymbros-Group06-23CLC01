@@ -30,7 +30,11 @@
     "old_password": "Mật khẩu cũ",
     "new_password": "Mật khẩu mới",
     "change_password": "Đổi Mật Khẩu",
-    "password_incorrect": "Mật khẩu cũ không chính xác"
+    "logout_confirmation": "Bạn có chắc chắn muốn đăng xuất không?",
+    "user_not_found": "Không tìm thấy người dùng. Vui lòng đăng nhập lại.",
+    "current_password": "Mật khẩu hiện tại",
+    "confirm_password": "Xác nhận mật khẩu",
+    "password_incorrect": "Mật khẩu không đúng"
   },
   "onboarding": {
     "title": "Cho chúng tôi biết về bạn",
@@ -54,9 +58,11 @@
     "add": "Thêm",
     "feature_coming_soon": "Tính năng đang được phát triển!",
     "pick_image_error": "Không thể chọn ảnh.",
-    "uploading": "Đang tải lên..."
+    "uploading": "Đang tải lên...",
+    "default_user_name": "Người dùng Gymbro"
   },
   "membership": {
+    "payment_init_error": "Không thể khởi tạo thanh toán",
     "title": "Gói Hội Viên",
     "subtitle": "Chọn gói tập phù hợp với mục tiêu của bạn",
     "buy_now": "Đăng Ký Ngay",
@@ -65,7 +71,8 @@
     "no_downgrade": "Không hỗ trợ hạ gói",
     "processing": "Đang xử lý...",
     "month": "Tháng",
-    "empty_list": "Chưa có gói tập nào được mở bán."
+    "empty_list": "Chưa có gói tập nào được mở bán.",
+    "cancel_success": "Đã hủy gói tập thành công."
   },
   "home": {
     "welcome": "Chào mừng trở lại,",
@@ -103,6 +110,7 @@
     "tier_standard": "Thành Viên Tiêu Chuẩn",
     "update_success_msg": "Cập nhật hồ sơ thành công!",
     "email_change_notice": "Email không thể thay đổi trực tiếp.",
+    "change_password": "Đổi Mật Khẩu",
     "change_password_success": "Đổi mật khẩu thành công!",
     "body_index": "Chỉ số cơ thể",
     "goal_label": "Mục tiêu chính",
@@ -187,7 +195,8 @@
     "class_full": "Lớp học đã đầy.",
     "explore": "Khám phá lớp học",
     "all": "Tất cả",
-    "upcoming_schedule": "Lịch tập sắp tới"
+    "upcoming_schedule": "Lịch tập sắp tới",
+    "default_class_name": "Lớp Nhóm"
   },
   "heatmap": {
     "title": "Biểu Đồ Đông Đúc",
@@ -249,7 +258,12 @@
     }
   },
   "settings": {
-    "language": "Ngôn ngữ",
-    "theme": "Giao diện"
+    "language": "Tiếng Việt",
+    "theme": {
+      "title": "Giao diện",
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
+    }
   }
 }

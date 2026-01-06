@@ -58,22 +58,22 @@ export default function BodyIndexHistoryScreen() {
   const renderItem = ({ item }: { item: BodyIndex }) => {
     const bmi = calculateBMI(item.weight, item.height);
     return (
-      <View className="bg-surface p-4 rounded-xl mb-3 border border-gray-700 flex-row justify-between items-center">
+      <View className="bg-surface p-4 rounded-xl mb-3 border border-border flex-row justify-between items-center">
         <View>
-          <Text className="text-gray-400 text-xs mb-1">
+          <Text className="text-muted_foreground text-xs mb-1">
             {new Date(item.record_day).toLocaleDateString()}
           </Text>
           <View className="flex-row gap-4">
-            <Text className="text-white font-bold text-lg">
+            <Text className="text-foreground font-bold text-lg">
               {item.weight} kg
             </Text>
-            <Text className="text-white font-bold text-lg">
+            <Text className="text-foreground font-bold text-lg">
               {item.height} cm
             </Text>
           </View>
         </View>
-        <View className="items-end bg-gray-800 px-3 py-1 rounded-lg">
-          <Text className="text-xs text-gray-400">BMI</Text>
+        <View className="items-end bg-secondary px-3 py-1 rounded-lg">
+          <Text className="text-xs text-muted_foreground">BMI</Text>
           <Text className="text-primary font-bold">{bmi}</Text>
         </View>
       </View>
@@ -87,22 +87,22 @@ export default function BodyIndexHistoryScreen() {
     const change = current.weight - start.weight;
 
     return (
-      <View className="bg-gray-900 border border-gray-800 p-4 rounded-2xl mb-6 flex-row justify-between items-center">
+      <View className="bg-surface_highlight border border-border p-4 rounded-2xl mb-6 flex-row justify-between items-center">
         <View>
-          <Text className="text-gray-400 text-xs uppercase mb-1">
+          <Text className="text-muted_foreground text-xs uppercase mb-1">
             {t("profile.start_weight")}
           </Text>
-          <Text className="text-white text-xl font-bold">
+          <Text className="text-foreground text-xl font-bold">
             {start.weight} kg
           </Text>
         </View>
         <View className="items-center">
-          <Text className="text-gray-400 text-xs uppercase mb-1">
+          <Text className="text-muted_foreground text-xs uppercase mb-1">
             {t("profile.total_change")}
           </Text>
           <Text
             className={`text-2xl font-black ${
-              change <= 0 ? "text-green-500" : "text-orange-500"
+              change <= 0 ? "text-success" : "text-warning"
             }`}
           >
             {change > 0 ? "+" : ""}
@@ -110,10 +110,10 @@ export default function BodyIndexHistoryScreen() {
           </Text>
         </View>
         <View className="items-end">
-          <Text className="text-gray-400 text-xs uppercase mb-1">
+          <Text className="text-muted_foreground text-xs uppercase mb-1">
             {t("profile.current_weight")}
           </Text>
-          <Text className="text-white text-xl font-bold">
+          <Text className="text-foreground text-xl font-bold">
             {current.weight} kg
           </Text>
         </View>
@@ -131,23 +131,23 @@ export default function BodyIndexHistoryScreen() {
           onPress={() => router.back()}
           className="w-10 h-10 items-center justify-center bg-surface rounded-full mr-4"
         >
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text className="text-white text-xl font-bold flex-1">
+        <Text className="text-foreground text-xl font-bold flex-1">
           {t("profile.body_index_history")}
         </Text>
         <TouchableOpacity
           onPress={() => router.push("/profile/add-body-index")}
           className="bg-primary px-3 py-2 rounded-lg"
         >
-          <Text className="text-black font-bold text-xs">
+          <Text className="text-primary-foreground font-bold text-xs">
             + {t("common.add")}
           </Text>
         </TouchableOpacity>
       </View>
 
       {loading ? (
-        <ActivityIndicator color="#C1FA6B" className="mt-10" />
+        <ActivityIndicator className="mt-10" />
       ) : (
         <FlatList
           data={data}
@@ -155,7 +155,7 @@ export default function BodyIndexHistoryScreen() {
           ListHeaderComponent={renderHeader}
           renderItem={renderItem}
           ListEmptyComponent={
-            <Text className="text-gray-500 text-center mt-10">
+            <Text className="text-muted_foreground text-center mt-10">
               {t("profile.no_records")}
             </Text>
           }
