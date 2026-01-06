@@ -6,7 +6,8 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 
 ### Sửa lỗi (Fixed)
 
-- **Lỗi Navigation Context**: Khắc phục triệt để lỗi "Couldn't find a navigation context" gây crash ứng dụng khi khởi động bằng cách sử dụng `useRootNavigationState` và đưa logic điều hướng vào `AuthGuard` component.
+- **Lỗi Navigation Context**: Khắc phục triệt để lỗi "Couldn't find a navigation context" gây crash ứng dụng khi khởi động bằng cách sử dụng `useRootNavigationState` và đưa logic điều hướng vào `AuthGuard` component. Đã hỗ trợ xử lý độ trễ trên Android.
+- **Sửa lỗi Privacy Policy**: Khắc phục lỗi crash trên Android khi tương tác với các mục trong Chính sách bảo mật do xung đột giữa NativeWind (`ring` classes) và `LayoutAnimation`.
 - **Khôi phục Dark Mode**: Sửa lỗi Dark Mode không hoạt động sau khi refactor root layout. Đã thêm lại container theme và tối ưu hóa màn hình loading.
 - **Cập nhật SafeAreaView**: Thay thế toàn bộ các import `SafeAreaView` từ `react-native` sang `react-native-safe-area-context` để loại bỏ các cảnh báo (warnings) không còn được hỗ trợ.
 
