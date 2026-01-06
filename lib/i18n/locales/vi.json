@@ -26,10 +26,15 @@
     "sign_up_success_msg": "Tài khoản đã được tạo! Vui lòng kiểm tra email để xác thực.",
     "confirm_password_label": "Nhập lại Mật khẩu",
     "name_label": "Họ và Tên",
+    "name_placeholder": "VD: Nguyễn Văn A",
     "old_password": "Mật khẩu cũ",
     "new_password": "Mật khẩu mới",
     "change_password": "Đổi Mật Khẩu",
-    "password_incorrect": "Mật khẩu cũ không chính xác"
+    "logout_confirmation": "Bạn có chắc chắn muốn đăng xuất không?",
+    "user_not_found": "Không tìm thấy người dùng. Vui lòng đăng nhập lại.",
+    "current_password": "Mật khẩu hiện tại",
+    "confirm_password": "Xác nhận mật khẩu",
+    "password_incorrect": "Mật khẩu không đúng"
   },
   "onboarding": {
     "title": "Cho chúng tôi biết về bạn",
@@ -49,9 +54,16 @@
     "success": "Thành công",
     "save": "Lưu thay đổi",
     "cancel": "Hủy",
-    "add": "Thêm"
+    "confirm": "Xác nhận",
+    "add": "Thêm",
+    "feature_coming_soon": "Tính năng đang được phát triển!",
+    "pick_image_error": "Không thể chọn ảnh.",
+    "uploading": "Đang tải lên...",
+    "default_user_name": "Người dùng Gymbro",
+    "optional": "Tùy chọn"
   },
   "membership": {
+    "payment_init_error": "Không thể khởi tạo thanh toán",
     "title": "Gói Hội Viên",
     "subtitle": "Chọn gói tập phù hợp với mục tiêu của bạn",
     "buy_now": "Đăng Ký Ngay",
@@ -60,7 +72,17 @@
     "no_downgrade": "Không hỗ trợ hạ gói",
     "processing": "Đang xử lý...",
     "month": "Tháng",
-    "empty_list": "Chưa có gói tập nào được mở bán."
+    "empty_list": "Chưa có gói tập nào được mở bán.",
+    "cancel_success": "Đã hủy gói tập thành công.",
+    "popular": "PHỔ BIẾN",
+    "best_value": "TỐT NHẤT",
+    "1_year": "1 Năm",
+    "month_count": "{{count}} Tháng",
+    "save_hint": "* Tiết kiệm tới 30% khi đăng ký dài hạn",
+    "free": "Miễn phí",
+    "month_unit": "tháng",
+    "billed_duration": "Thanh toán {{price}} mỗi {{count}} tháng",
+    "per_month_approx": "≈ {{price}} / tháng"
   },
   "home": {
     "welcome": "Chào mừng trở lại,",
@@ -98,11 +120,61 @@
     "tier_standard": "Thành Viên Tiêu Chuẩn",
     "update_success_msg": "Cập nhật hồ sơ thành công!",
     "email_change_notice": "Email không thể thay đổi trực tiếp.",
+    "change_password": "Đổi Mật Khẩu",
     "change_password_success": "Đổi mật khẩu thành công!",
     "body_index": "Chỉ số cơ thể",
+    "goal_label": "Mục tiêu chính",
+    "gender_label": "Giới tính",
+    "birthday_label": "Ngày sinh (YYYY-MM-DD)",
+    "personal_details": "Thông tin cá nhân",
+    "fitness_profile": "Hồ sơ luyện tập",
+    "goals": {
+      "lose_weight": "Giảm cân",
+      "build_muscle": "Tăng cơ",
+      "maintain": "Giữ dáng",
+      "endurance": "Tăng sức bền",
+      "flexibility": "Tăng độ dẻo dai"
+    },
+    "genders": {
+      "male": "Nam",
+      "female": "Nữ",
+      "other": "Khác"
+    },
     "body_index_history": "Lịch sử chỉ số",
+    "start_weight": "Cân nặng khởi điểm",
+    "current_weight": "Cân nặng hiện tại",
+    "total_change": "Thay đổi",
     "add_record": "Thêm bản ghi mới",
-    "no_records": "Chưa có dữ liệu. Hãy thêm bản ghi đầu tiên!"
+    "not_set": "Chưa thiết lập",
+    "no_records": "Chưa có dữ liệu. Hãy thêm bản ghi đầu tiên!",
+    "activity_level_label": "Mức độ vận động",
+    "experience_level_label": "Kinh nghiệm tập luyện",
+    "weekly_availability_label": "Tần suất tập luyện",
+    "activities": {
+      "sedentary": "Ít vận động (Văn phòng)",
+      "light": "Vận động nhẹ (1-2 ngày/tuần)",
+      "moderate": "Vừa phải (3-5 ngày/tuần)",
+      "active": "Năng động (6-7 ngày/tuần)",
+      "very_active": "Rất năng động (VĐV)"
+    },
+    "experiences": {
+      "beginner": "Người mới",
+      "intermediate": "Đã có kinh nghiệm",
+      "advanced": "Chuyên nghiệp"
+    },
+    "availabilities": {
+      "1_2": "1-2 ngày/tuần",
+      "3_4": "3-4 ngày/tuần",
+      "5_plus": "5+ ngày/tuần"
+    },
+    "error_no_session": "Không tìm thấy phiên đăng nhập!",
+    "error_no_image": "Không tìm thấy dữ liệu ảnh.",
+    "error_user_email": "Không tìm thấy email người dùng",
+    "version": "Phiên bản",
+    "units": {
+      "kg": "kg",
+      "cm": "cm"
+    }
   },
   "plans": {
     "silver_pack": "Gói Bạc",
@@ -141,7 +213,8 @@
     "class_full": "Lớp học đã đầy.",
     "explore": "Khám phá lớp học",
     "all": "Tất cả",
-    "upcoming_schedule": "Lịch tập sắp tới"
+    "upcoming_schedule": "Lịch tập sắp tới",
+    "default_class_name": "Lớp Nhóm"
   },
   "heatmap": {
     "title": "Biểu Đồ Đông Đúc",
@@ -170,5 +243,50 @@
     "pt_1_week": "1 buổi PT/tuần",
     "towel_service": "Dịch vụ khăn tắm",
     "pt_1_session": "1 buổi PT định hướng"
+  },
+  "privacy": {
+    "last_updated": "Cập nhật lần cuối",
+    "introduction": {
+      "title": "1. Giới thiệu",
+      "content": "Chào mừng đến với Gymbros. Chúng tôi cam kết bảo vệ thông tin cá nhân và quyền riêng tư của bạn. Khi bạn sử dụng ứng dụng của chúng tôi, bạn tin tưởng chúng tôi với thông tin cá nhân của mình. Chúng tôi rất coi trọng vấn đề bảo mật này."
+    },
+    "data_collection": {
+      "title": "2. Thông tin chúng tôi thu thập",
+      "content": "Chúng tôi thu thập thông tin cá nhân mà bạn tự nguyện cung cấp khi đăng ký Ứng dụng, chẳng hạn như tên, địa chỉ email, giới tính, ngày sinh và ảnh đại diện. Chúng tôi cũng thu thập dữ liệu liên quan đến sức khỏe cần thiết cho chức năng của ứng dụng, bao gồm chiều cao, cân nặng, mục tiêu thể dục và lịch sử tập luyện."
+    },
+    "data_usage": {
+      "title": "3. Cách chúng tôi sử dụng thông tin",
+      "content": "Chúng tôi sử dụng thông tin thu thập được để: \n- Hỗ trợ tạo tài khoản và đăng nhập.\n- Tính toán các chỉ số cơ thể (BMI, BMR) và theo dõi tiến trình của bạn.\n- Quản lý việc đặt lớp và gói hội viên.\n- Gửi cho bạn các thông tin quản trị."
+    },
+    "data_sharing": {
+      "title": "4. Chia sẻ thông tin",
+      "content": "Chúng tôi cam kết KHÔNG bán dữ liệu cá nhân của bạn. Chúng tôi chỉ chia sẻ thông tin khi có sự đồng ý của bạn, để tuân thủ luật pháp, để cung cấp dịch vụ (ví dụ: xử lý thanh toán), hoặc để bảo vệ quyền lợi của bạn."
+    },
+    "security": {
+      "title": "5. Bảo mật dữ liệu",
+      "content": "Chúng tôi đã triển khai các biện pháp bảo mật kỹ thuật và tổ chức phù hợp để bảo vệ an toàn cho mọi thông tin cá nhân mà chúng tôi xử lý. Tuy nhiên, xin lưu ý rằng không có gì trên internet là an toàn 100%."
+    },
+    "user_rights": {
+      "title": "6. Quyền của bạn",
+      "content": "Bạn có thể xem lại, thay đổi hoặc xóa tài khoản của mình bất kỳ lúc nào. Nếu bạn muốn xóa hoàn toàn tài khoản và dữ liệu liên quan, bạn có thể thực hiện trong phần Cài đặt hoặc liên hệ với bộ phận hỗ trợ."
+    },
+    "contact": {
+      "title": "7. Liên hệ",
+      "content": "Nếu bạn có câu hỏi hoặc nhận xét về chính sách này, vui lòng gửi email cho chúng tôi tại support@gymbros.com."
+    }
+  },
+  "settings": {
+    "language": "Tiếng Việt",
+    "language_label": "Ngôn ngữ",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
+    "theme": {
+      "title": "Giao diện",
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
+    }
   }
 }
