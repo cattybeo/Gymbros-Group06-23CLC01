@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { colorScheme as NativeWindColorScheme } from "nativewind";
+import { useColorScheme } from "nativewind";
 
 /**
  * Theme context interface for managing theme state
@@ -65,6 +71,73 @@ export async function savePreference(
     console.error("[Theme] Failed to save preference:", error);
     throw error; // Re-throw to handle in component
   }
+}
+
+/**
+ * ThemeProvider component that manages theme state and provides context
+ * Loads user preference from AsyncStorage on mount, implements priority resolution logic
+ */
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [userPreference, setUserPreference] = useState<
+    "light" | "dark" | "system"
+  >("system");
+  const [isLoading, setIsLoading] = useState(true);
+  const { colorScheme: systemScheme } = useColorScheme();
+
+  // Load preference on mount
+  useEffect(() => {
+    loadPreference().then((preference) => {
+      setUserPreference(preference);
+      setIsLoading(false);
+    });
+  }, []);
+
+  // Resolve actual colorScheme based on priority
+  // Priority: Manual override ("light" or "dark") > System theme
+  const resolvedColorScheme: "light" | "dark" = useMemo(() => {
+    if (userPreference === "light" || userPreference === "dark") {
+      return userPreference;
+    }
+    return systemScheme ?? "light";
+  }, [userPreference, systemScheme]);
+
+  // Update theme preference and persist to AsyncStorage
+  const setColorScheme = async (scheme: "light" | "dark" | "system") => {
+    try {
+      await savePreference(scheme);
+      setUserPreference(scheme);
+    } catch (error) {
+      console.error("[Theme] Failed to save preference:", error);
+      // Still update local state even if save fails
+      setUserPreference(scheme);
+    }
+  };
+
+  return (
+    <ThemeContext.Provider
+      value={{
+        colorScheme: resolvedColorScheme,
+        userPreference,
+        setColorScheme,
+        isLoading,
+      }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+/**
+ * Hook to access theme context
+ * Throws error if used outside ThemeProvider
+ * @returns ThemeContext value
+ */
+export function useThemeContext() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useThemeContext must be used within ThemeProvider");
+  }
+  return context;
 }
 
 // Export types and constants for use in other modules
