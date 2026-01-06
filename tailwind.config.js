@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
-  darkMode: "class",
+  // darkMode: "class", // REMOVED: NativeWind v4 uses media mode (system appearance) by default
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
