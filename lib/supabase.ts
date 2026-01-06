@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createClient, processLock } from "@supabase/supabase-js";
 import "react-native-url-polyfill/auto";
 
-// Tạo một Storage Adapter để tránh lỗi trên Server (Node.js)
+// Storage Adapter for React Native (AsyncStorage)
 const ExpoStorage = {
   getItem: (key: string) => {
     return AsyncStorage.getItem(key);

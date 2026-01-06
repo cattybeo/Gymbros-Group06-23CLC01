@@ -14,7 +14,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
 });
 
-// Hook custome để sử dụng AuthContext
+// Custom hook to access AuthContext
 export function useAuthContext() {
   return useContext(AuthContext);
 }
@@ -25,14 +25,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Kiểm tra session ngay khi mở app
+    // Check session on app start
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
     });
 
-    // Lắng nghe sự thay đổi (Login, Logout, Token Refresh...)
+    // Listen for auth changes (login, logout, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
-      subscription.unsubscribe(); // Hủy lắng nghe khi component unmount
+      subscription.unsubscribe(); // Cleanup on unmount
     };
   }, []);
 

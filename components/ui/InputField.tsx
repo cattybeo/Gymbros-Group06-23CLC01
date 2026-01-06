@@ -12,7 +12,7 @@ import {
 
 interface InputFielProps extends TextInputProps {
   label: string;
-  error?: string; // Để hiển thị lỗi nếu có
+  error?: string;
 }
 
 export default function InputField({
@@ -21,12 +21,10 @@ export default function InputField({
   secureTextEntry,
   ...props
 }: InputFielProps) {
-  // State để quản lý hiển thị mật khẩu
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
-  // Kiểm tra nếu là trường mật khẩu
   const isPasswordField = secureTextEntry === true;
 
   return (
@@ -42,7 +40,7 @@ export default function InputField({
           className="flex-1 py-4 text-foreground h-full"
           placeholderTextColor={colors.muted_foreground}
           secureTextEntry={isPasswordField && !isPasswordVisible}
-          {...props} // Truyền tất cả các props còn lại (onChangeText, value, secureTextEntry...)
+          {...props}
         />
 
         {isPasswordField && (
