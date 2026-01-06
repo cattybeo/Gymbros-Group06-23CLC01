@@ -4,6 +4,7 @@ import { supabase } from "@/lib/supabase";
 import "../global.css";
 
 import { configureGoogleSignIn } from "@/lib/GoogleAuth";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import "@/lib/i18n";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
@@ -43,9 +44,13 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <StripeProvider
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}
+    >
+      <AuthProvider>
+        <RootLayoutNav />
+      </AuthProvider>
+    </StripeProvider>
   );
 }
 
