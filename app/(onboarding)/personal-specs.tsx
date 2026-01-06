@@ -1,11 +1,11 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -36,6 +36,7 @@ const EXPERIENCE_OPTIONS = ["beginner", "intermediate", "advanced"];
 export default function PersonalSpecsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -49,7 +50,7 @@ export default function PersonalSpecsScreen() {
 
   async function handleNext() {
     if (!height || !weight || !age) {
-      Alert.alert(t("common.error"), t("common.missing_info"));
+      showAlert(t("common.error"), t("common.missing_info"), "error");
       return;
     }
 
@@ -61,7 +62,11 @@ export default function PersonalSpecsScreen() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        Alert.alert(t("common.error"), "User not found. Please login again.");
+        showAlert(
+          t("common.error"),
+          "User not found. Please login again.",
+          "error"
+        );
         return;
       }
 
@@ -97,7 +102,7 @@ export default function PersonalSpecsScreen() {
       // Navigate to Home
       router.replace("/(tabs)");
     } catch (error: any) {
-      Alert.alert(t("common.error"), error.message);
+      showAlert(t("common.error"), error.message, "error");
     } finally {
       setLoading(false);
     }
@@ -114,18 +119,20 @@ export default function PersonalSpecsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View className="mb-8 mt-4">
-            <Text className="text-3xl font-bold text-white mb-2">
+            <Text className="text-3xl font-bold text-text mb-2">
               {t("onboarding.title")}
             </Text>
-            <Text className="text-gray-400">{t("onboarding.subtitle")}</Text>
+            <Text className="text-text_secondary">
+              {t("onboarding.subtitle")}
+            </Text>
           </View>
 
           {/* 1. Basic Info */}
-          <Text className="text-white font-bold text-lg mb-4">
+          <Text className="text-text font-bold text-lg mb-4">
             {t("profile.personal_details")}
           </Text>
 
-          <Text className="text-gray-400 mb-2 font-medium">
+          <Text className="text-text_secondary mb-2 font-medium">
             {t("profile.gender_label")}
           </Text>
           <View className="flex-row gap-3 mb-6">
@@ -136,12 +143,12 @@ export default function PersonalSpecsScreen() {
                 className={`flex-1 items-center py-3 rounded-xl border ${
                   gender === g
                     ? "bg-primary border-primary"
-                    : "bg-surface border-gray-700"
+                    : "bg-surface border-border"
                 }`}
               >
                 <Text
                   className={`font-bold capitalize ${
-                    gender === g ? "text-white" : "text-gray-400"
+                    gender === g ? "text-on_primary" : "text-text_secondary"
                   }`}
                 >
                   {t(`profile.genders.${g}`)}
@@ -154,7 +161,7 @@ export default function PersonalSpecsScreen() {
             <View className="flex-1">
               <InputField
                 label={t("onboarding.age_label")}
-                placeholder="25"
+                placeholder={t("onboarding.age_placeholder")}
                 value={age}
                 onChangeText={setAge}
                 keyboardType="numeric"
@@ -163,7 +170,7 @@ export default function PersonalSpecsScreen() {
             <View className="flex-1">
               <InputField
                 label={t("onboarding.height_label")}
-                placeholder="175"
+                placeholder={t("onboarding.height_placeholder")}
                 value={height}
                 onChangeText={setHeight}
                 keyboardType="numeric"
@@ -172,7 +179,7 @@ export default function PersonalSpecsScreen() {
             <View className="flex-1">
               <InputField
                 label={t("onboarding.weight_label")}
-                placeholder="70"
+                placeholder={t("onboarding.weight_placeholder")}
                 value={weight}
                 onChangeText={setWeight}
                 keyboardType="numeric"
@@ -181,11 +188,11 @@ export default function PersonalSpecsScreen() {
           </View>
 
           {/* 2. Goals */}
-          <Text className="text-white font-bold text-lg mb-4 mt-2">
+          <Text className="text-text font-bold text-lg mb-4 mt-2">
             {t("profile.fitness_profile")}
           </Text>
 
-          <Text className="text-gray-400 mb-3 font-medium">
+          <Text className="text-text_secondary mb-3 font-medium">
             {t("profile.goal_label")}
           </Text>
           <View className="flex-row flex-wrap gap-3 mb-6">
@@ -196,12 +203,12 @@ export default function PersonalSpecsScreen() {
                 className={`px-4 py-2 rounded-full border ${
                   goal === g
                     ? "bg-primary border-primary"
-                    : "bg-surface border-gray-700"
+                    : "bg-surface border-border"
                 }`}
               >
                 <Text
                   className={`font-medium ${
-                    goal === g ? "text-white" : "text-gray-400"
+                    goal === g ? "text-on_primary" : "text-text_secondary"
                   }`}
                 >
                   {t(`profile.goals.${g}`)}
@@ -210,7 +217,7 @@ export default function PersonalSpecsScreen() {
             ))}
           </View>
 
-          <Text className="text-gray-400 mb-3 font-medium">
+          <Text className="text-text_secondary mb-3 font-medium">
             {t("profile.activity_level_label")}
           </Text>
           <View className="flex-row flex-wrap gap-3 mb-6">
@@ -221,12 +228,14 @@ export default function PersonalSpecsScreen() {
                 className={`px-4 py-2 rounded-full border ${
                   activityLevel === opt
                     ? "bg-primary border-primary"
-                    : "bg-gray-800 border-gray-700"
+                    : "bg-surface border-border"
                 }`}
               >
                 <Text
                   className={`font-medium ${
-                    activityLevel === opt ? "text-white" : "text-gray-400"
+                    activityLevel === opt
+                      ? "text-on_primary"
+                      : "text-text_secondary"
                   }`}
                 >
                   {t(`profile.activities.${opt}`)}
@@ -235,7 +244,7 @@ export default function PersonalSpecsScreen() {
             ))}
           </View>
 
-          <Text className="text-gray-400 mb-3 font-medium">
+          <Text className="text-text_secondary mb-3 font-medium">
             {t("profile.experience_level_label")}
           </Text>
           <View className="flex-row flex-wrap gap-3 mb-8">
@@ -246,12 +255,14 @@ export default function PersonalSpecsScreen() {
                 className={`px-4 py-2 rounded-full border ${
                   experienceLevel === opt
                     ? "bg-primary border-primary"
-                    : "bg-gray-800 border-gray-700"
+                    : "bg-surface border-border"
                 }`}
               >
                 <Text
                   className={`font-medium ${
-                    experienceLevel === opt ? "text-white" : "text-gray-400"
+                    experienceLevel === opt
+                      ? "text-on_primary"
+                      : "text-text_secondary"
                   }`}
                 >
                   {t(`profile.experiences.${opt}`)}
@@ -269,6 +280,7 @@ export default function PersonalSpecsScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <CustomAlertComponent />
     </SafeAreaView>
   );
 }

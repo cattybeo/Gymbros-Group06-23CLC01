@@ -1,24 +1,27 @@
 import Button from "@/components/ui/Button";
 import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 import InputField from "@/components/ui/InputField";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignIn() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSignIn() {
     if (!email || !password) {
-      Alert.alert(t("common.error"), t("common.missing_info"));
+      showAlert(t("common.error"), t("common.missing_info"), "error");
       return;
     }
 
@@ -32,7 +35,7 @@ export default function SignIn() {
     setLoading(false);
 
     if (error) {
-      Alert.alert(t("common.error"), error.message);
+      showAlert(t("common.error"), error.message, "error");
     }
   }
 
@@ -43,13 +46,15 @@ export default function SignIn() {
         className="items-center mb-8"
         entering={FadeInDown.delay(200).springify()}
       >
-        <View className="w-20 h-20 bg-surface rounded-full items-center justify-center mb-4 border border-primary">
+        <View className="w-20 h-20 bg-card rounded-full items-center justify-center mb-4 border border-border">
           <Text className="text-4xl">💪</Text>
         </View>
-        <Text className="text-3xl font-bold text-white">
+        <Text className="text-3xl font-bold text-foreground">
           {t("auth.welcome_back")}
         </Text>
-        <Text className="text-gray-400 mt-2">{t("auth.login_subtitle")}</Text>
+        <Text className="text-muted_foreground mt-2">
+          {t("auth.login_subtitle")}
+        </Text>
       </Animated.View>
 
       {/* Form */}
@@ -87,7 +92,7 @@ export default function SignIn() {
         className="mt-8"
       >
         <View className="flex-row justify-center mb-8">
-          <Text className="text-gray-400">{t("auth.no_account")} </Text>
+          <Text className="text-muted_foreground">{t("auth.no_account")} </Text>
           <TouchableOpacity onPress={() => router.push("/sign-up")}>
             <Text className="text-primary font-bold">
               {t("auth.register_now")}
@@ -96,13 +101,16 @@ export default function SignIn() {
         </View>
 
         <View className="flex-row items-center mb-6">
-          <View className="flex-1 h-[1px] bg-gray-700" />
-          <Text className="mx-4 text-gray-500">{t("auth.or_continue")}</Text>
-          <View className="flex-1 h-[1px] bg-gray-700" />
+          <View className="flex-1 h-[1px] bg-border" />
+          <Text className="mx-4 text-muted_foreground">
+            {t("auth.or_continue")}
+          </Text>
+          <View className="flex-1 h-[1px] bg-border" />
         </View>
 
         <GoogleSignInButton />
       </Animated.View>
+      <CustomAlertComponent />
     </SafeAreaView>
   );
 }

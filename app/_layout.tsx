@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors";
 import { AuthProvider, useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import "../global.css";
@@ -14,8 +15,9 @@ import { useFonts } from "expo-font";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as TaskManager from "expo-task-manager";
+import { useColorScheme } from "nativewind";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, useColorScheme, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import "react-native-reanimated";
 
 // Register the task (even if empty) to prevent warnings
@@ -50,7 +52,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const { colorScheme } = useColorScheme();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
@@ -83,50 +85,63 @@ function RootLayoutNav() {
 
     const checkOnboarding = async () => {
       try {
+        console.log("Checking onboarding status...");
         if (session) {
           // Kiểm tra xem user đã có chỉ số cơ thể chưa
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from("body_indices")
             .select("id")
             .eq("user_id", session.user.id)
-            .single();
+            .maybeSingle();
+
+          if (error) {
+            console.error("Error fetching body indices:", error);
+          }
 
           const hasBodyIndices = !!data;
+          console.log("Has Body Indices:", hasBodyIndices);
 
           if (!hasBodyIndices && !inOnboardingGroup) {
+            console.log("Redirecting to Welcome");
             router.replace("/(onboarding)/welcome");
           } else if (hasBodyIndices && (inAuthGroup || inOnboardingGroup)) {
+            console.log("Redirecting to Tabs");
             router.replace("/(tabs)");
           }
         } else if (!session && !inAuthGroup) {
+          console.log("Redirecting to Sign In");
           router.replace("/(auth)/sign-in");
         }
       } catch (e) {
         console.error("Onboarding check error:", e);
       } finally {
         setIsChecking(false);
+        // Force hide splash screen in case validation takes too long
+        SplashScreen.hideAsync();
       }
     };
 
     checkOnboarding();
   }, [session, isLoading]);
 
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+
   // Nếu chưa load font, đang check auth, hoặc đang check DB -> Hiện thị Splash Screen
   if (!loaded || isLoading || isChecking) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#FFA500" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
-
-  const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack
         screenOptions={{
-          contentStyle: { backgroundColor },
+          contentStyle: { backgroundColor: colors.background },
+          headerStyle: { backgroundColor: colors.card },
+          headerTintColor: colors.text,
         }}
       >
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
