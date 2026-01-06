@@ -194,7 +194,7 @@ export default function HomeScreen() {
             <Text className="text-card-foreground font-bold text-xl w-2/3">
               TRANSFORM YOUR BODY WITH POWER PUMP
             </Text>
-            <Text style={{ color: colors.tint }} className="font-bold mt-2">
+            <Text className="text-primary font-bold mt-2">
               JOIN NOW &rarr;
             </Text>
           </View>
