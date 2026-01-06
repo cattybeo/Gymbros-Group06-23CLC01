@@ -1,5 +1,7 @@
+import Colors from "@/constants/Colors";
 import { AuthProvider, useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { ThemeProvider, useThemeContext } from "@/lib/theme";
 import "../global.css";
 
 import { configureGoogleSignIn } from "@/lib/GoogleAuth";
@@ -8,60 +10,96 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { useFonts } from "expo-font";
-import { Stack, useRouter, useSegments } from "expo-router";
+import {
+  Stack,
+  router,
+  useRootNavigationState,
+  useSegments,
+} from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as TaskManager from "expo-task-manager";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, useColorScheme, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StyleSheet,
+  UIManager,
+  View,
+} from "react-native";
 import "react-native-reanimated";
 
-// Register the task (even if empty) to prevent warnings
-TaskManager.defineTask("StripeKeepJsAwakeTask", () => {
-  // This task is required by Stripe SDK to keep the app awake during payment
-  // No persistent background logic needed here, just the registration.
+// Enable LayoutAnimation for Android
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+// Register task required by Stripe SDK (prevents warnings)
+TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
+  // NOTE: Stripe SDK requires this task registration to keep app awake during payment
 });
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Prevent auto-hide before fonts load
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  // Cấu hình Google Sign-In khi app khởi động
+  // Configure Google Sign-In on app startup
   useEffect(() => {
     configureGoogleSignIn();
   }, []);
 
   return (
-    <AuthProvider>
-      <RootLayoutNav />
-    </AuthProvider>
+    <StripeProvider
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}
+    >
+      <AuthProvider>
+        <ThemeProvider>
+          <RootLayoutNav />
+        </ThemeProvider>
+      </AuthProvider>
+    </StripeProvider>
+  );
+}
+
+function LoadingScreen({ backgroundColor }: { backgroundColor: string }) {
+  return (
+    <View
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor,
+          zIndex: 50,
+        },
+      ]}
+    >
+      <ActivityIndicator size="large" color={Colors.light.primary} />
+    </View>
   );
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  // Theme state
+  const { colorScheme, isLoading: themeLoading } = useThemeContext();
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
   });
+  const rootNavigationState = useRootNavigationState();
 
-  // Logic Auth
-  const { session, isLoading } = useAuthContext();
-  const segments = useSegments(); // Lấy thông tin về đường dẫn hiện tại
-  const router = useRouter();
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -72,11 +110,61 @@ function RootLayoutNav() {
     }
   }, [loaded]);
 
-  // Navigation Guard / Onboarding Check
+  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const showLoading = !loaded || themeLoading;
+
+  return (
+    <NavigationThemeProvider
+      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
+      <View style={{ flex: 1 }} className={colorScheme}>
+        <Stack
+          screenOptions={{
+            contentStyle: { backgroundColor: colors.background },
+            headerStyle: { backgroundColor: colors.card },
+            headerTintColor: colors.text,
+          }}
+        >
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="profile/change-password"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="profile/body-index"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="profile/add-body-index"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="profile/privacy-policy"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="profile/settings"
+            options={{ headerShown: false }}
+          />
+        </Stack>
+        {rootNavigationState?.key && <AuthGuard />}
+        {showLoading && <LoadingScreen backgroundColor={colors.background} />}
+      </View>
+    </NavigationThemeProvider>
+  );
+}
+
+function AuthGuard() {
+  const { session, isLoading } = useAuthContext();
+  const segments = useSegments();
+  const rootNavigationState = useRootNavigationState();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (isLoading) return; // Chờ load xong trạng thái Auth
+    if (isLoading || !rootNavigationState?.key) return;
 
     const inAuthGroup = segments[0] === "(auth)";
     const inOnboardingGroup = segments[0] === "(onboarding)";
@@ -84,12 +172,11 @@ function RootLayoutNav() {
     const checkOnboarding = async () => {
       try {
         if (session) {
-          // Kiểm tra xem user đã có chỉ số cơ thể chưa
-          const { data } = await supabase
+          const { data, error } = await supabase
             .from("body_indices")
             .select("id")
             .eq("user_id", session.user.id)
-            .single();
+            .maybeSingle();
 
           const hasBodyIndices = !!data;
 
@@ -102,50 +189,14 @@ function RootLayoutNav() {
           router.replace("/(auth)/sign-in");
         }
       } catch (e) {
-        console.error("Onboarding check error:", e);
+        console.error("Auth guard error:", e);
       } finally {
         setIsChecking(false);
       }
     };
 
     checkOnboarding();
-  }, [session, isLoading]);
+  }, [session, isLoading, segments, rootNavigationState?.key]);
 
-  // Nếu chưa load font, đang check auth, hoặc đang check DB -> Hiện thị Splash Screen
-  if (!loaded || isLoading || isChecking) {
-    return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" color="#FFA500" />
-      </View>
-    );
-  }
-
-  const backgroundColor = colorScheme === "dark" ? "#000" : "#fff";
-
-  return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack
-        screenOptions={{
-          contentStyle: { backgroundColor },
-        }}
-      >
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="profile/change-password"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="profile/body-index"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="profile/add-body-index"
-          options={{ headerShown: false }}
-        />
-      </Stack>
-    </ThemeProvider>
-  );
+  return null;
 }

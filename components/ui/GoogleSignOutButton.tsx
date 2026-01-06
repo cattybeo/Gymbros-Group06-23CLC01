@@ -9,9 +9,9 @@ export default function GoogleSignOutButton() {
     setLoading(true);
     try {
       await signOutFromGoogle();
-      // AuthContext sẽ tự động nhận diện session = null và điều hướng về sign-in
+      // AuthContext will detect session = null and redirect to sign-in
     } catch (error) {
-      console.log("Lỗi đăng xuất:", error);
+      console.error("Sign out error:", error);
     } finally {
       setLoading(false);
     }
@@ -21,12 +21,12 @@ export default function GoogleSignOutButton() {
     <TouchableOpacity
       onPress={handleSignOut}
       disabled={loading}
-      className="bg-red-500 p-4 rounded-xl items-center justify-center"
+      className="bg-destructive p-4 rounded-xl items-center justify-center"
     >
       {loading ? (
-        <ActivityIndicator color="#fff" />
+        <ActivityIndicator />
       ) : (
-        <Text className="text-white font-bold">Đăng xuất</Text>
+        <Text className="text-destructive-foreground font-bold">Đăng xuất</Text>
       )}
     </TouchableOpacity>
   );

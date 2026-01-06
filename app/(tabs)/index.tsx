@@ -2,17 +2,11 @@ import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Dimensions,
-  Image,
-  ScrollView,
-  Text,
-  View,
-  useColorScheme,
-} from "react-native";
+import { Dimensions, Image, ScrollView, Text, View } from "react-native";
 import {
   BarcodeCreatorView,
   BarcodeFormat,
@@ -20,11 +14,11 @@ import {
 
 export default function HomeScreen() {
   const { user } = useAuthContext();
-  const screenWidth = Dimensions.get("window").width;
-  const [memberTier, setMemberTier] = useState("STANDARD MEMBER"); // Default state
   const { t, i18n } = useTranslation();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
+  const screenWidth = Dimensions.get("window").width;
+  const [memberTier, setMemberTier] = useState(t("home.tier.standard")); // Default state
 
   const [recentActivity, setRecentActivity] = useState<any>(null);
 
@@ -75,25 +69,25 @@ export default function HomeScreen() {
   const getTierStyle = (tier: string) => {
     if (tier.includes("SILVER")) {
       return {
-        text: "text-gray-300",
+        text: "text-muted_foreground",
         icon: colors.silver,
-        bg: "bg-gray-400",
+        bg: "bg-muted",
         label: t("home.tier.silver"),
       };
     }
     if (tier.includes("GOLD")) {
       return {
-        text: "text-yellow-500",
+        text: "text-warning",
         icon: colors.gold,
-        bg: "bg-yellow-500",
+        bg: "bg-warning/20",
         label: t("home.tier.gold"),
       };
     }
     if (tier.includes("PLATINUM")) {
       return {
-        text: "text-cyan-400",
+        text: "text-info",
         icon: colors.platinum,
-        bg: "bg-cyan-400",
+        bg: "bg-info/20",
         label: t("home.tier.platinum"),
       };
     }
@@ -122,16 +116,18 @@ export default function HomeScreen() {
       overScrollMode="never"
     >
       {/* Header */}
-      <View className="pt-12 px-6 mb-6">
-        <Text className="text-gray-400 text-sm">{t("home.welcome")}</Text>
-        <Text className="text-white text-2xl font-bold">
-          {user?.email?.split("@")[0] || "Gymbro"}
+      <View className="pt-24 px-6 mb-6">
+        <Text className="text-muted_foreground text-sm">
+          {t("home.welcome")}
+        </Text>
+        <Text className="text-foreground text-2xl font-bold">
+          {user?.email?.split("@")[0] || t("common.default_user_name")}
         </Text>
       </View>
 
       {/* Digital Membership Card */}
       <View className="px-6 mb-8">
-        <View className="bg-surface rounded-2xl p-6 border border-gray-800 shadow-sm relative overflow-hidden">
+        <View className="bg-card rounded-2xl p-6 border border-border shadow-sm relative overflow-hidden">
           {/* Card Bg Decoration */}
           <View
             className={`absolute top-0 right-0 w-32 h-32 ${tierStyle.bg} opacity-10 rounded-bl-full translate-x-10 -translate-y-10`}
@@ -144,7 +140,7 @@ export default function HomeScreen() {
               >
                 GYMBROS
               </Text>
-              <Text className="text-gray-500 text-xs tracking-wider">
+              <Text className="text-muted_foreground text-xs tracking-wider">
                 {tierStyle.label}
               </Text>
             </View>
@@ -153,27 +149,27 @@ export default function HomeScreen() {
 
           <View className="flex-row justify-between items-end mb-6">
             <View>
-              <Text className="text-gray-400 text-xs mb-1">
+              <Text className="text-muted_foreground text-xs mb-1">
                 {t("home.member_name")}
               </Text>
-              <Text className="text-white font-bold text-lg uppercase">
-                {user?.email?.split("@")[0] || "MEMBER"}
+              <Text className="text-foreground font-bold text-lg uppercase">
+                {user?.email?.split("@")[0] || t("home.member_name")}
               </Text>
             </View>
           </View>
 
           {/* Barcode - Full Width */}
-          <View className="bg-white pt-4 pb-2 px-2 rounded-xl items-center justify-center w-full overflow-hidden">
+          <View className="bg-card pt-4 pb-2 px-2 rounded-xl items-center justify-center w-full overflow-hidden">
             {user && (
               <BarcodeCreatorView
                 value={user.id}
                 format={BarcodeFormat.CODE128}
-                background="#FFFFFF"
-                foregroundColor="#000000"
+                background={colors.card}
+                foregroundColor={colors.text}
                 style={{ height: 60, width: screenWidth - 48 - 48 }}
               />
             )}
-            <Text className="text-black text-[10px] mt-1 tracking-[4px]">
+            <Text className="text-foreground text-[10px] mt-1 tracking-[4px]">
               {user?.id ? user.id.substring(0, 18).toUpperCase() : ""}
             </Text>
           </View>
@@ -189,35 +185,35 @@ export default function HomeScreen() {
             resizeMode="cover"
           />
           <View className="absolute inset-0 bg-black/40 flex-1 justify-center px-6">
-            <Text className="text-white font-bold text-xl w-2/3">
+            <Text className="text-card-foreground font-bold text-xl w-2/3">
               TRANSFORM YOUR BODY WITH POWER PUMP
             </Text>
-            <Text style={{ color: colors.tint }} className="font-bold mt-2">
-              JOIN NOW &rarr;
-            </Text>
+            <Text className="text-primary font-bold mt-2">JOIN NOW &rarr;</Text>
           </View>
         </View>
       </View>
 
       {/* Grid Menu */}
       <View className="px-6 mb-8">
-        <Text className="text-white font-bold text-lg mb-4">
+        <Text className="text-foreground font-bold text-lg mb-4">
           {t("home.quick_access")}
         </Text>
         <View className="flex-row flex-wrap justify-between">
           {MENU_ITEMS.map((item, index) => (
             <View
               key={index}
-              className="w-[48%] bg-surface p-4 rounded-xl mb-4 items-center border border-gray-800"
+              className="w-[48%] bg-card p-4 rounded-xl mb-4 items-center border border-border"
             >
-              <View className="w-12 h-12 bg-gray-800 rounded-full items-center justify-center mb-2">
+              <View className="w-12 h-12 bg-background rounded-full items-center justify-center mb-2 border border-border">
                 <FontAwesome
                   name={item.icon as any}
                   size={20}
                   color={colors.tint}
                 />
               </View>
-              <Text className="text-gray-300 font-medium">{item.name}</Text>
+              <Text className="text-muted_foreground font-medium">
+                {item.name}
+              </Text>
             </View>
           ))}
         </View>
@@ -225,16 +221,16 @@ export default function HomeScreen() {
 
       {/* Recent Activity */}
       <View className="px-6 pb-20">
-        <Text className="text-white font-bold text-lg mb-4">
+        <Text className="text-foreground font-bold text-lg mb-4">
           {t("home.recent_activity")}
         </Text>
         {recentActivity ? (
-          <View className="bg-surface rounded-xl p-4 border border-gray-800 flex-row items-center">
+          <View className="bg-card rounded-xl p-4 border border-border flex-row items-center">
             <View
               className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
                 new Date(recentActivity.booking_date) > new Date()
-                  ? "bg-blue-900/50"
-                  : "bg-green-900/50"
+                  ? "bg-info/20"
+                  : "bg-success/20"
               }`}
             >
               <FontAwesome
@@ -246,16 +242,16 @@ export default function HomeScreen() {
                 size={16}
                 color={
                   new Date(recentActivity.booking_date) > new Date()
-                    ? "#60A5FA"
-                    : "#4ADE80"
+                    ? colors.info
+                    : colors.success
                 }
               />
             </View>
             <View>
-              <Text className="text-white font-medium">
-                {recentActivity.class?.name || "Group Class"}
+              <Text className="text-foreground font-medium">
+                {recentActivity.class?.name || t("classes.default_class_name")}
               </Text>
-              <Text className="text-gray-500 text-xs">
+              <Text className="text-muted_foreground text-xs">
                 {new Date(recentActivity.booking_date) > new Date()
                   ? t("home.upcoming_class")
                   : t("home.completed_class")}{" "}
@@ -268,7 +264,7 @@ export default function HomeScreen() {
             </View>
           </View>
         ) : (
-          <Text className="text-gray-500 text-center italic">
+          <Text className="text-muted_foreground text-center italic">
             {t("home.no_activity")}
           </Text>
         )}
