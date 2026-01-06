@@ -34,10 +34,14 @@ export default function MembershipCard({
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
 
-  const formattedPrice = new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(plan.price);
+  // LOGIC OVERRIDE: Standard Tier (Level 1) is always Free
+  const isFreeTier = tier?.level === 1;
+  const formattedPrice = isFreeTier
+    ? "Miễn phí"
+    : new Intl.NumberFormat("vi-VN", {
+        style: "currency",
+        currency: "VND",
+      }).format(plan.price);
 
   // Use Tier image if available, else plan image, else default
   const imageKey = tier?.image_slug || plan.image_slug || "default";
