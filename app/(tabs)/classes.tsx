@@ -71,7 +71,6 @@ export default function ClassesScreen() {
       // 3. Parallel Fetching: Bookings (Dependent on Class IDs)
       if (classIds.length > 0) {
         // FIXME: RLS prevents fetching global counts client-side. Using RPC bypass for now.
-        // TODO: Consider creating `get_class_counts` RPC for better performance
 
         if (user) {
           // Fetch My Bookings
