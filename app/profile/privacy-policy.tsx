@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -8,13 +9,14 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PrivacyPolicyScreen() {
   const { t } = useTranslation();
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const toggleSection = (section: string) => {
@@ -76,13 +78,7 @@ export default function PrivacyPolicyScreen() {
             onPress={() => router.back()}
             className="w-10 h-10 items-center justify-center rounded-full bg-secondary mr-4"
           >
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color={
-                Colors[useColorScheme() === "dark" ? "dark" : "light"].text
-              }
-            />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
           <Text className="text-foreground text-xl font-bold flex-1">
             {t("profile.privacy_policy")}
@@ -93,7 +89,7 @@ export default function PrivacyPolicyScreen() {
           className="flex-1 px-4 pt-6"
           showsVerticalScrollIndicator={false}
         >
-          <Text className="text-muted_foreground text-sm mb-6 italic text-center">
+          <Text className="text-foreground-muted text-sm mb-6 italic text-center">
             {t("privacy.last_updated")}: 2026-01-05
           </Text>
 
@@ -119,11 +115,7 @@ export default function PrivacyPolicyScreen() {
                       name={section.icon as any}
                       size={16}
                       color={
-                        expandedSection === section.id
-                          ? "#FFF"
-                          : Colors[
-                              useColorScheme() === "dark" ? "dark" : "light"
-                            ].text
+                        expandedSection === section.id ? "#FFF" : colors.text
                       }
                     />
                   </View>
@@ -146,10 +138,8 @@ export default function PrivacyPolicyScreen() {
                   size={20}
                   color={
                     expandedSection === section.id
-                      ? Colors[useColorScheme() === "dark" ? "dark" : "light"]
-                          .tint
-                      : Colors[useColorScheme() === "dark" ? "dark" : "light"]
-                          .text_secondary
+                      ? colors.tint
+                      : colors.text_secondary
                   }
                 />
               </TouchableOpacity>

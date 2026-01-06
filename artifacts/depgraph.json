@@ -1,5 +1,3 @@
-yarn run v1.22.22
-$ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hooks --include-only "^app|^components|^lib|^hooks" --config .dependency-cruiser.js --output-type json
 {
   "modules": [
     {
@@ -850,6 +848,46 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
       "dependencies": [
         {
           "dynamic": false,
+          "module": "@/components/ui/Skeleton",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "components/ui/Skeleton.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/components/ui/SkeletonCard",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "components/ui/SkeletonCard.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "dynamic": false,
           "module": "@/hooks/useCustomAlert",
           "moduleSystem": "es6",
           "exoticallyRequired": false,
@@ -910,6 +948,43 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
         }
       ],
       "dependents": [],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "components/ui/Skeleton.tsx",
+      "dependencies": [],
+      "dependents": [
+        "app/(tabs)/profile.tsx",
+        "components/ui/SkeletonCard.tsx"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "components/ui/SkeletonCard.tsx",
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "./Skeleton",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "local",
+            "import"
+          ],
+          "resolved": "components/ui/Skeleton.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "app/(tabs)/profile.tsx"
+      ],
       "orphan": false,
       "valid": true
     },
@@ -1009,6 +1084,26 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
           "matchesDoNotFollow": false,
           "circular": false,
           "valid": true
+        },
+        {
+          "dynamic": false,
+          "module": "@/lib/theme",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "lib/theme.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
         }
       ],
       "dependents": [],
@@ -1089,6 +1184,16 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
       "dependencies": [],
       "dependents": [
         "lib/i18n/index.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "lib/theme.tsx",
+      "dependencies": [],
+      "dependents": [
+        "app/_layout.tsx",
+        "app/profile/settings.tsx"
       ],
       "orphan": false,
       "valid": true
@@ -1374,9 +1479,30 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
     },
     {
       "source": "app/profile/settings.tsx",
-      "dependencies": [],
+      "dependencies": [
+        {
+          "dynamic": false,
+          "module": "@/lib/theme",
+          "moduleSystem": "es6",
+          "exoticallyRequired": false,
+          "dependencyTypes": [
+            "aliased",
+            "aliased-tsconfig",
+            "aliased-tsconfig-paths",
+            "local",
+            "import"
+          ],
+          "resolved": "lib/theme.tsx",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
       "dependents": [],
-      "orphan": true,
+      "orphan": false,
       "valid": true
     },
     {
@@ -1414,8 +1540,8 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
     "warn": 0,
     "info": 0,
     "ignore": 0,
-    "totalCruised": 36,
-    "totalDependenciesCruised": 53,
+    "totalCruised": 39,
+    "totalDependenciesCruised": 58,
     "optionsUsed": {
       "baseDir": "F:\\Gymbros-Group06-23CLC01",
       "combinedDependencies": false,
@@ -1469,4 +1595,3 @@ $ F:\Gymbros-Group06-23CLC01\node_modules\.bin\depcruise app components lib hook
     }
   }
 }
-Done in 1.60s.

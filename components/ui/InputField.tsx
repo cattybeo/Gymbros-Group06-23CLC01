@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
@@ -7,7 +8,6 @@ import {
   TextInputProps,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 
 interface InputFielProps extends TextInputProps {
@@ -22,8 +22,8 @@ export default function InputField({
   ...props
 }: InputFielProps) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   const isPasswordField = secureTextEntry === true;
 

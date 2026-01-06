@@ -1,9 +1,10 @@
 import ClassCard from "@/components/ClassCard";
 import CrowdHeatmap, { TrafficData } from "@/components/CrowdHeatmap";
-import { GYM_IMAGES } from "@/constants/Images";
 import Colors from "@/constants/Colors";
+import { GYM_IMAGES } from "@/constants/Images";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
@@ -16,7 +17,6 @@ import {
   Text,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 
 export default function ClassesScreen() {
@@ -25,8 +25,8 @@ export default function ClassesScreen() {
   const [bookingId, setBookingId] = useState<string | null>(null);
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   const [trafficData, setTrafficData] = useState<TrafficData[]>([]);
   const [myBookings, setMyBookings] = useState<Set<string>>(new Set());
@@ -228,7 +228,11 @@ export default function ClassesScreen() {
               <Ionicons
                 name="grid-outline"
                 size={24}
-                color={selectedType === "All" ? colors.primary : colors.muted_foreground}
+                color={
+                  selectedType === "All"
+                    ? colors.primary
+                    : colors.muted_foreground
+                }
               />
             </View>
             <Text

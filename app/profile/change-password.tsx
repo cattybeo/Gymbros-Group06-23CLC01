@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -14,15 +15,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ChangePasswordScreen() {
   const { user } = useAuthContext();
   const { t } = useTranslation();
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
   const insets = useSafeAreaInsets();
 
   const { showAlert, CustomAlertComponent } = useCustomAlert(); // Use Hook
@@ -45,7 +45,7 @@ export default function ChangePasswordScreen() {
 
     setLoading(true);
     try {
-      if (!user?.email) throw new Error("User email not found");
+      if (!user?.email) throw new Error(t("profile.error_user_email"));
 
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: user.email,

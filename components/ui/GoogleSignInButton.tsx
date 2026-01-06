@@ -1,5 +1,6 @@
 import Colors from "@/constants/Colors";
 import { signInWithGoogle } from "@/lib/GoogleAuth";
+import { useThemeContext } from "@/lib/theme";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -7,13 +8,12 @@ import {
   Image,
   Text,
   TouchableOpacity,
-  useColorScheme,
 } from "react-native";
 
 export default function GoogleSignInButton() {
   const [loading, setLoading] = useState(false);
-  const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
 
   async function handlePress() {
     setLoading(true);
@@ -34,10 +34,7 @@ export default function GoogleSignInButton() {
         disabled
         className="w-full bg-card border border-input p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
       >
-        <ActivityIndicator
-          size="small"
-          color={colors.foreground}
-        />
+        <ActivityIndicator size="small" color={colors.foreground} />
       </TouchableOpacity>
     );
   }
