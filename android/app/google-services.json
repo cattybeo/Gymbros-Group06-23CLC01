@@ -1,1 +1,46 @@
-{"installed":{"client_id":"985952096028-ek83hvtoumfogf4s079g3450a6rqq2gn.apps.googleusercontent.com","project_id":"gymbros-479510","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs"}}
+{
+  "project_info": {
+    "project_number": "985952096028",
+    "project_id": "gymbros-479510",
+    "storage_bucket": "gymbros-479510.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:985952096028:android:c49a0ee9d557f0fb5134d9",
+        "android_client_info": {
+          "package_name": "com.gymbros"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "985952096028-d7rjis69dskpoeh1nglhtibiiam4r4n9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIoJuqE5-dGTFZ6xfBTW8jq3DmxfJh15E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "985952096028-d7rjis69dskpoeh1nglhtibiiam4r4n9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "985952096028-jnf0efo1nuupeul5jo7188aqrb48rekm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gymbros"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
