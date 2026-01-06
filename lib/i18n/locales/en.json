@@ -60,7 +60,8 @@
     "feature_coming_soon": "Feature coming soon!",
     "pick_image_error": "Could not pick image.",
     "uploading": "Uploading...",
-    "default_user_name": "Gymbro User"
+    "default_user_name": "Gymbro User",
+    "optional": "Optional"
   },
   "membership": {
     "payment_init_error": "Could not initialize payment",
@@ -73,7 +74,16 @@
     "processing": "Processing...",
     "month": "Month",
     "empty_list": "No plans available at the moment.",
-    "cancel_success": "Membership cancelled successfully."
+    "cancel_success": "Membership cancelled successfully.",
+    "popular": "POPULAR",
+    "best_value": "BEST VALUE",
+    "1_year": "1 Year",
+    "month_count": "{{count}} Months",
+    "save_hint": "* Save up to 30% on long-term plans",
+    "free": "Free",
+    "month_unit": "month",
+    "billed_duration": "Billed {{price}} every {{count}} months",
+    "per_month_approx": "≈ {{price}} / month"
   },
   "home": {
     "welcome": "Welcome back,",
@@ -157,6 +167,14 @@
       "1_2": "1-2 days/week",
       "3_4": "3-4 days/week",
       "5_plus": "5+ days/week"
+    },
+    "error_no_session": "No user on the session!",
+    "error_no_image": "No image data found.",
+    "error_user_email": "User email not found",
+    "version": "Version",
+    "units": {
+      "kg": "kg",
+      "cm": "cm"
     }
   },
   "plans": {
@@ -260,6 +278,11 @@
   },
   "settings": {
     "language": "Language",
+    "language_label": "Language",
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "English"
+    },
     "theme": {
       "title": "Appearance",
       "light": "Light",

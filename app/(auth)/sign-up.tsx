@@ -54,7 +54,7 @@ export default function SignUp() {
         <Text className="text-3xl font-bold text-foreground">
           {t("auth.sign_up_title")}
         </Text>
-        <Text className="text-muted_foreground mt-2">
+        <Text className="text-foreground-muted mt-2 text-center">
           {t("auth.sign_up_subtitle")}
         </Text>
       </View>
@@ -93,7 +93,7 @@ export default function SignUp() {
       </View>
 
       <View className="flex-row justify-center mt-8">
-        <Text className="text-muted_foreground">{t("auth.has_account")} </Text>
+        <Text className="text-foreground-muted">{t("auth.has_account")} </Text>
         <TouchableOpacity onPress={() => router.back()}>
           <Text className="text-primary font-bold">{t("auth.login_now")}</Text>
         </TouchableOpacity>
