@@ -79,21 +79,19 @@ export default function PersonalSpecsScreen() {
 
       if (dbError) throw dbError;
 
-      // 2. Update user_metadata (Profile Snapshot)
-      const { error: authError } = await supabase.auth.updateUser({
-        data: {
+      // 2. Update Profiles Table (Canonical Source)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
           gender,
           goal,
           activity_level: activityLevel,
           experience_level: experienceLevel,
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          age: parseInt(age),
-          setup_completed: true,
-        },
-      });
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
 
-      if (authError) throw authError;
+      if (profileError) throw profileError;
 
       // Navigate to Home (Root determines role-based path)
       router.replace("/");
