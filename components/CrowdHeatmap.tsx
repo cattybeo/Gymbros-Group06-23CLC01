@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Skeleton } from "./ui/Skeleton";
 
 export interface TrafficData {
   day_of_week: number; // 0 = Sun, 1 = Mon...
@@ -76,6 +77,51 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
 
   const currentHour = new Date().getHours();
   const currentDay = new Date().getDay();
+
+  if (isLoading) {
+    return (
+      <View className="mb-6">
+        <View className="mb-2 px-1">
+          <Skeleton width={150} height={24} borderRadius={4} />
+        </View>
+        <View className="bg-surface rounded-xl p-3 border border-border">
+          <View className="mb-4 border-b border-border pb-2">
+            <Skeleton width="100%" height={20} borderRadius={4} />
+          </View>
+          <View className="flex-row">
+            <View className="mt-8 mr-2">
+              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <View key={i} className="h-8 m-0.5 justify-center">
+                  <Skeleton width={32} height={12} borderRadius={4} />
+                </View>
+              ))}
+            </View>
+            <View className="flex-1">
+              <View className="flex-row mb-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <View key={i} className="w-8 m-0.5 items-center">
+                    <Skeleton width={20} height={10} borderRadius={2} />
+                  </View>
+                ))}
+              </View>
+              {[1, 2, 3, 4].map((i) => (
+                <View key={i} className="flex-row">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((j) => (
+                    <View
+                      key={j}
+                      className="w-8 h-8 m-0.5 rounded-md bg-surface_highlight"
+                    >
+                      <Skeleton width="100%" height="100%" borderRadius={6} />
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="mb-6">
