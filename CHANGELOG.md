@@ -2,6 +2,25 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.6.0] - 2026-01-10
+
+### Thêm mới (Added)
+
+- **AI Coach Assistant (Trainer-specific)**:
+  - Triển khai **Supabase Edge Function** mới `gymbros-coach-ai` dành riêng cho PT.
+  - Tích hợp tính năng **Weekly Recap**: Tóm tắt hiệu suất lớp học và xu hướng tham gia của học viên.
+  - Tính năng **Retention Alerts**: Tự động phát hiện học viên có nguy cơ nghỉ học dựa trên lịch sử điểm danh.
+  - **Smart Broadcasts**: Dự thảo tin nhắn động lực hoặc thông báo gửi cho nhóm lớp.
+- **Attendance Data Pipeline**:
+  - Tự động ghi nhận `access_logs` khi Trainer điểm danh học viên trong lớp.
+  - Cập nhật cơ sở dữ liệu hỗ trợ `class_id` trong nhật ký truy cập.
+
+### Thay đổi (Changed)
+
+- **Role-Based AI Architecture**:
+  - Tách biệt hoàn toàn `gymbros-ai` (Gợi ý lớp học cho Member) và `gymbros-coach-ai` (Trợ lý hiệu suất cho PT).
+  - Nâng cấp logic gợi ý Member sử dụng **Gemini 2.0 Flash Thinking** để cá nhân hóa sâu hơn theo Goals/Injuries.
+
 ## [v1.5.0] - 2026-01-08
 
 ### Thêm mới (Added)

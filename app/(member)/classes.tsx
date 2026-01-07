@@ -4,6 +4,7 @@ import { LiveClassList } from "@/components/LiveClassList";
 import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { AISuggestion, getAISmartSuggestion } from "@/lib/ai";
+import { useAuthContext } from "@/lib/AuthContext";
 import i18n from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
@@ -22,6 +23,7 @@ import {
 } from "react-native";
 
 export default function ClassesScreen() {
+  const { profile } = useAuthContext();
   const [classes, setClasses] = useState<GymClass[]>([]);
   const [trafficData, setTrafficData] = useState<TrafficData[] | undefined>(
     undefined
@@ -93,10 +95,10 @@ export default function ClassesScreen() {
         }
 
         // AI Analysis Trigger - Enhanced with persistent caching
-        if (user) {
+        if (user && profile) {
           setAiLoading(true);
           getAISmartSuggestion(
-            user.user_metadata,
+            profile, // Use full profile with goals/metrics instead of user_metadata
             {
               availableClasses: classesData,
               userBookings: userBookedIds,
@@ -120,14 +122,14 @@ export default function ClassesScreen() {
           }
           setDataReady(true);
         }
-      } catch (error) {
+      } catch {
         if (!silent)
           showAlert(t("common.error"), t("classes.fetch_error"), "error");
       } finally {
         if (!silent) setLoading(false);
       }
     },
-    [contentOpacity, t, showAlert]
+    [contentOpacity, t, showAlert, profile]
   );
 
   useFocusEffect(

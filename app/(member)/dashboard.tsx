@@ -72,7 +72,7 @@ export default function HomeScreen() {
               setRecentActivity(activityResponse.data);
             }
           }
-        } catch (error) {
+        } catch {
           // Rule 11: Silence in failure (unless critical)
         }
       };
