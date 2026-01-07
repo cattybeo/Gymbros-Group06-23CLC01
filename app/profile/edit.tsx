@@ -177,17 +177,13 @@ export default function EditProfileScreen() {
     if (!user) return;
 
     // 1. Update Profile table
-    await supabase
+    const { error } = await supabase
       .from("profiles")
       .update({ avatar_url: url })
       .eq("id", user.id);
 
-    // 2. Sync with Auth
-    const { error } = await supabase.auth.updateUser({
-      data: { avatar_url: url },
-    });
     if (error) {
-      console.error("Error updating user avatar:", error);
+      console.error("Error updating user avatar in profiles:", error);
     }
   };
 
@@ -214,25 +210,6 @@ export default function EditProfileScreen() {
       showAlert(t("common.error"), profileError.message, "error");
       setLoading(false);
       return;
-    }
-
-    // 2. Sync with Auth Metadata (Redundancy for security/efficiency in hooks)
-    const { error: authError } = await supabase.auth.updateUser({
-      data: {
-        full_name: fullName,
-        avatar_url: avatarUrl,
-        goal,
-        gender,
-        birthday: birthday ? birthday.toISOString().split("T")[0] : null,
-        activity_level: activityLevel,
-        experience_level: experienceLevel,
-        weekly_availability: weeklyAvailability,
-      },
-    });
-
-    if (authError) {
-      // We don't block since Profile is already updated
-      console.warn("Auth metadata sync failed:", authError.message);
     }
 
     showAlert(t("common.success"), t("profile.update_success_msg"), "success", {
