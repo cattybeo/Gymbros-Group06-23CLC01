@@ -187,12 +187,12 @@ export default function ClassesScreen() {
 
         if (bookError) throw bookError;
 
+        await fetchData();
         showAlert(
           t("classes.booking_success"),
           t("classes.booking_success_msg"),
           "success"
         );
-        fetchData();
       } catch (error: any) {
         showAlert(t("classes.booking_error"), error.message, "error");
       } finally {
@@ -223,7 +223,7 @@ export default function ClassesScreen() {
           <Animated.View
             style={{ flex: 1, opacity: contentOpacity, marginTop: 48 }}
           >
-            <View className="flex-row items-center bg-card border border-border rounded-token-lg px-3 py-2 mb-4">
+            <View className="flex-row items-center bg-card px-4 py-3 rounded-xl border border-border mb-4">
               <Ionicons
                 name="search"
                 size={20}

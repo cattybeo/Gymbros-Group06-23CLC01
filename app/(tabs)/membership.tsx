@@ -67,12 +67,14 @@ export default function MembershipScreen() {
 
       const user = authRes.data.user;
       if (user) {
+        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD for date comparison
         const { data: membershipData, error: membershipError } = await supabase
           .from("user_memberships")
           .select("plan_id, plan:membership_plans(*), status")
           .eq("user_id", user.id)
           .eq("status", "active") // Only show 'active' as the current plan
-          .gte("end_date", new Date().toISOString())
+          .lte("start_date", today) // Must have started
+          .gte("end_date", today) // Must not have expired
           .order("end_date", { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -99,18 +101,19 @@ export default function MembershipScreen() {
 
   function getPlanStatus(
     tierLevel: number,
-    targetPlanId: string
+    targetTierId: string
   ): "default" | "current" | "upgrade" | "downgrade" {
     if (!currentPlan) {
       if (tierLevel === 1) return "current";
       return "upgrade";
     }
 
-    if (currentPlan.id === targetPlanId) return "current";
-
     const currentTierId = currentPlan.tier_id;
     const currentTier = tiers.find((t) => t.id === currentTierId);
     if (!currentTier) return "default";
+
+    // Same tier = current (user already has this tier, regardless of duration)
+    if (currentTierId === targetTierId) return "current";
 
     if (tierLevel > currentTier.level) return "upgrade";
     if (tierLevel < currentTier.level) return "downgrade";
@@ -165,9 +168,11 @@ export default function MembershipScreen() {
 
       if (paymentError) {
         if (paymentError.code !== "Canceled") {
+          await new Promise((resolve) => setTimeout(resolve, 500));
           showAlert(t("common.error"), paymentError.message, "error");
         }
       } else {
+        await new Promise((resolve) => setTimeout(resolve, 500));
         await waitForMembershipActivation(user.id, planId);
       }
     } catch (e: any) {
@@ -196,22 +201,22 @@ export default function MembershipScreen() {
 
         if (data) {
           clearInterval(interval);
-          setLoading(false);
+          // Fetch data first, then show alert after completion
+          await fetchData();
           showAlert(
             t("common.success"),
             t("membership.activation_success"),
             "success"
           );
-          fetchData();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
-          setLoading(false);
+          // Fetch data first, then show alert after completion
+          await fetchData();
           showAlert(
             t("common.success"),
             t("membership.activation_pending"),
             "success"
           );
-          fetchData();
         }
       } catch (e) {
         if (attempts >= maxAttempts) {
@@ -326,11 +331,10 @@ export default function MembershipScreen() {
                 <TouchableOpacity
                   key={duration}
                   accessibilityRole="button"
-                  className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
-                    selectedDuration === duration
-                      ? "bg-primary shadow-sm"
-                      : "bg-transparent"
-                  }`}
+                  className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${selectedDuration === duration
+                    ? "bg-primary shadow-sm"
+                    : "bg-transparent"
+                    }`}
                   onPress={() => setSelectedDuration(duration as any)}
                 >
                   {duration === 6 && (
@@ -348,11 +352,10 @@ export default function MembershipScreen() {
                     </View>
                   )}
                   <Text
-                    className={`font-bold text-sm ${
-                      selectedDuration === duration
-                        ? "text-on_primary"
-                        : "text-muted_foreground"
-                    }`}
+                    className={`font-bold text-sm ${selectedDuration === duration
+                      ? "text-on_primary"
+                      : "text-muted_foreground"
+                      }`}
                   >
                     {duration === 12
                       ? t("membership.1_year")
@@ -383,7 +386,7 @@ export default function MembershipScreen() {
               const isMyCurrentPlan =
                 currentPlan?.id === selectedPlan.id &&
                 tier.level ===
-                  tiers.find((t) => t.id === currentPlan.tier_id)?.level;
+                tiers.find((t) => t.id === currentPlan.tier_id)?.level;
 
               return (
                 <View>
@@ -399,7 +402,7 @@ export default function MembershipScreen() {
                     duration={selectedDuration}
                     onBuy={() => handleBuy(selectedPlan.id)}
                     isLoading={purchasingId === selectedPlan.id}
-                    status={getPlanStatus(tier.level, selectedPlan.id)}
+                    status={getPlanStatus(tier.level, tier.id)}
                   />
                   {isMyCurrentPlan && (
                     <TouchableOpacity

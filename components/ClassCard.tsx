@@ -82,17 +82,21 @@ const ClassCard = memo(function ClassCard({
   // Determine Button State
   let buttonText = t("classes.book_now");
   let buttonStyle = "bg-primary active:bg-primary/90";
+  let textStyle = "text-on_primary";
   let isDisabled = isBooking || isBooked || isFull;
 
   if (isBooking) {
     buttonText = t("classes.processing");
-    buttonStyle = "bg-surface_highlight opacity-50";
+    buttonStyle = "bg-muted border border-border";
+    textStyle = "text-muted_foreground";
   } else if (isBooked) {
     buttonText = t("classes.booked");
-    buttonStyle = "bg-success opacity-90 border border-success";
+    buttonStyle = "bg-muted border border-border";
+    textStyle = "text-muted_foreground";
   } else if (isFull) {
     buttonText = t("classes.full");
     buttonStyle = "bg-error opacity-90";
+    textStyle = "text-on_error";
   }
 
   return (
@@ -160,7 +164,7 @@ const ClassCard = memo(function ClassCard({
         onPress={() => onBook(gymClass.id)}
         disabled={isDisabled}
       >
-        <Text className="text-on_primary font-bold">{buttonText}</Text>
+        <Text className={`${textStyle} font-bold`}>{buttonText}</Text>
       </TouchableOpacity>
     </View>
   );
