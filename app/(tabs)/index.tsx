@@ -60,8 +60,8 @@ export default function HomeScreen() {
             if (tierResponse.data && tierResponse.data.membership_plans) {
               const membershipPlans = tierResponse.data
                 .membership_plans as unknown as {
-                membership_tiers: { name: string };
-              };
+                  membership_tiers: { name: string };
+                };
               const tierName = membershipPlans.membership_tiers?.name;
               if (tierName) {
                 setMemberTier(tierName.toUpperCase());
@@ -173,15 +173,15 @@ export default function HomeScreen() {
             </View>
           </View>
 
-          {/* Barcode - Full Width */}
+          {/* QR Code - Full Width */}
           <View className="bg-card pt-4 pb-2 px-2 rounded-xl items-center justify-center w-full overflow-hidden">
             {user && (
               <BarcodeCreatorView
                 value={user.id}
-                format={BarcodeFormat.CODE128}
+                format={BarcodeFormat.QR}
                 background={colors.card}
                 foregroundColor={colors.text}
-                style={{ height: 60, width: screenWidth - 48 - 48 }}
+                style={{ height: 180, width: 180 }}
               />
             )}
             <Text className="text-foreground text-[10px] mt-1 tracking-[4px]">
@@ -218,11 +218,10 @@ export default function HomeScreen() {
         {recentActivity ? (
           <View className="bg-card rounded-xl p-4 border border-border flex-row items-center">
             <View
-              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
-                new Date(recentActivity.booking_date) > new Date()
+              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${new Date(recentActivity.booking_date) > new Date()
                   ? "bg-info/20"
                   : "bg-success/20"
-              }`}
+                }`}
             >
               <FontAwesome
                 name={
