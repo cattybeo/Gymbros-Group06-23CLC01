@@ -1,5 +1,6 @@
 import { GYM_IMAGES } from "@/constants/Images";
 import { GymClass } from "@/lib/types";
+import React, { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
@@ -12,7 +13,7 @@ interface ClassCardProps {
   spotsLeft?: number;
 }
 
-export default function ClassCard({
+const ClassCard = memo(function ClassCard({
   gymClass,
   onBook,
   isBooking,
@@ -65,7 +66,7 @@ export default function ClassCard({
         <View className="flex-1 justify-between">
           <View>
             <Text
-              className="text-lg font-bold text-card_foreground"
+              className="text-lg font-bold text-foreground"
               numberOfLines={1}
             >
               {gymClass.name}
@@ -110,4 +111,6 @@ export default function ClassCard({
       </TouchableOpacity>
     </View>
   );
-}
+});
+
+export default ClassCard;

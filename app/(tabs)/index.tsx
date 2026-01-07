@@ -31,8 +31,9 @@ export default function HomeScreen() {
           // 1. Fetch Tier
           supabase
             .from("user_memberships")
-            .select("end_date, plan:membership_plans(name)")
+            .select("end_date, plan:membership_plans(membership_tiers(name))")
             .eq("user_id", user.id)
+            .eq("status", "active")
             .gte("end_date", new Date().toISOString())
             .order("end_date", { ascending: false })
             .limit(1)
@@ -48,10 +49,9 @@ export default function HomeScreen() {
         ]);
 
         if (tierResponse.data && tierResponse.data.plan) {
-          const planData = tierResponse.data.plan as unknown as {
-            name: string;
-          };
-          setMemberTier(planData.name.toUpperCase());
+          const planData = tierResponse.data.plan as any;
+          const tierName = planData.membership_tiers?.name || "STANDARD";
+          setMemberTier(tierName.toUpperCase());
         }
 
         if (activityResponse.data) {
