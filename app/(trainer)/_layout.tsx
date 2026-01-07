@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import { useThemeContext } from "@/lib/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TabBarIcon(props: {
@@ -13,6 +14,7 @@ function TabBarIcon(props: {
 
 export default function TrainerLayout() {
   const { colorScheme } = useThemeContext();
+  const { t } = useTranslation();
   const colors = Colors[colorScheme];
   const insets = useSafeAreaInsets();
 
@@ -33,7 +35,7 @@ export default function TrainerLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Dashboard",
+          title: t("trainer.tabs.dashboard"),
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="dashboard" color={color} />
           ),
@@ -42,7 +44,7 @@ export default function TrainerLayout() {
       <Tabs.Screen
         name="schedule"
         options={{
-          title: "Của tôi", // My Schedule
+          title: t("trainer.tabs.schedule"),
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="calendar-o" color={color} />
           ),
@@ -51,14 +53,14 @@ export default function TrainerLayout() {
       <Tabs.Screen
         name="students"
         options={{
-          title: "Học viên",
+          title: t("trainer.tabs.students"),
           tabBarIcon: ({ color }) => <TabBarIcon name="group" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Hồ sơ",
+          title: t("trainer.tabs.profile"),
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="user-md" color={color} />
           ),
