@@ -2,6 +2,32 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.5.0] - 2026-01-08
+
+### Thêm mới (Added)
+
+- **Rich Trainer Profiles**:
+  - Hỗ trợ hiển thị hồ sơ Trainer chi tiết: Số năm kinh nghiệm, Chứng chỉ, Kỹ năng chuyên môn.
+  - Tích hợp **Social Deep Linking**: Liên kết trực tiếp đến Zalo (qua SĐT) và Facebook Messenger (qua Username) của PT.
+  - Cập nhật Database Schema mới: `experience_years`, `social_links` (JSONB), `certificates`.
+
+### Thay đổi (Changed)
+
+- **Safe Default UX (Cancellation Logic)**:
+  - Áp dụng nguyên tắc **"Safe Default"** cho toàn bộ các thao tác hủy (Lớp học, Membership).
+  - Nút **Primary** (Nổi bật) luôn là hành động an toàn ("Giữ lại gói", "Không hủy").
+  - Nút **Secondary** (Ghost/Red) mới thực hiện hành động hủy ("Hủy gói", "Có").
+  - Nâng cấp `CustomAlertModal` hỗ trợ sự kiện `onSecondaryPress` riêng biệt.
+- **Class Detail Safety**:
+  - Thêm hộp thoại xác nhận (Confirm Dialog) khi hủy lớp trong màn hình Chi tiết lớp học, ngăn chặn thao tác nhầm lẫn.
+
+### Sửa lỗi (Fixed)
+
+- **UI & Stability**:
+  - Khắc phục lỗi `Invariant Violation: scrollToIndex` khi cuộn danh sách lớp học (Thêm cơ chế retry).
+  - Sửa lỗi nút "Đặt chỗ ngay" bị cắt chữ (Text Truncation) trên màn hình nhỏ.
+  - Bổ sung toàn bộ các keys i18n còn thiếu cho các hộp thoại chung (`common.yes`, `common.no`, `common.processing`).
+
 ## [v1.4.3] - 2026-01-08
 
 ### Thay đổi (Changed)

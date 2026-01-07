@@ -1,6 +1,6 @@
 import { AISuggestionCard } from "@/components/AISuggestionCard";
 import ClassCard from "@/components/ClassCard";
-import CrowdHeatmap from "@/components/CrowdHeatmap";
+import CrowdHeatmap, { TrafficData } from "@/components/CrowdHeatmap";
 import Colors from "@/constants/Colors";
 import { AISuggestion } from "@/lib/ai";
 import { supabase } from "@/lib/supabase";
@@ -37,6 +37,7 @@ interface LiveClassListProps {
   aiLoading?: boolean;
   allClasses?: GymClass[];
   onResetFilters?: () => void;
+  trafficData?: TrafficData[];
 }
 
 export const LiveClassList = ({
@@ -51,6 +52,7 @@ export const LiveClassList = ({
   aiLoading,
   allClasses = [],
   onResetFilters,
+  trafficData,
 }: LiveClassListProps) => {
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
@@ -190,6 +192,16 @@ export const LiveClassList = ({
         removeClippedSubviews={Platform.OS === "android"}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        onScrollToIndexFailed={(info) => {
+          const wait = new Promise((resolve) => setTimeout(resolve, 500));
+          wait.then(() => {
+            listRef.current?.scrollToIndex({
+              index: info.index,
+              animated: true,
+              viewPosition: 0.5,
+            });
+          });
+        }}
         ListHeaderComponent={
           <>
             <View className="mb-4">
@@ -206,7 +218,7 @@ export const LiveClassList = ({
                 onPressClass={scrollToClass}
               />
             )}
-            <CrowdHeatmap isLoading={isLoading} />
+            <CrowdHeatmap isLoading={isLoading} initialData={trafficData} />
             <Text className="text-lg font-bold text-foreground mb-2 mt-4 px-1">
               {t("classes.upcoming_schedule")}
             </Text>

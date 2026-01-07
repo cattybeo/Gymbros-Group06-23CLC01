@@ -28,14 +28,18 @@ const DAYS = [1, 2, 3, 4, 5, 6, 0]; // Mon to Sun order
 
 export default function CrowdHeatmap({
   isLoading: parentLoading,
-}: CrowdHeatmapProps) {
+  initialData,
+}: CrowdHeatmapProps & { initialData?: TrafficData[] }) {
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
   const pulseAnim = useRef(new Animated.Value(0.6)).current;
 
-  const [data, setData] = useState<TrafficData[]>([]);
-  const [internalLoading, setInternalLoading] = useState(true);
+  // If initialData is provided, we don't need to show loading state
+  const [data, setData] = useState<TrafficData[]>(initialData || []);
+  const [internalLoading, setInternalLoading] = useState(
+    initialData === undefined
+  );
 
   const fetchTraffic = async () => {
     try {
@@ -50,7 +54,10 @@ export default function CrowdHeatmap({
   };
 
   useEffect(() => {
-    fetchTraffic();
+    // Only fetch immediately if we don't have initial data
+    if (initialData === undefined) {
+      fetchTraffic();
+    }
 
     // Subscribe to Realtime Bookings for Instant Demo Updates
     const channel = supabase
@@ -67,7 +74,16 @@ export default function CrowdHeatmap({
     return () => {
       supabase.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Update local state if initialData changes (e.g. pull-to-refresh from parent)
+  useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+      setInternalLoading(false);
+    }
+  }, [initialData]);
 
   const isLoading = parentLoading || internalLoading;
 
