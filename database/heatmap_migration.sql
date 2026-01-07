@@ -19,9 +19,9 @@ BEGIN
         -- We use a fixed offset '+07' or 'Asia/Ho_Chi_Minh' to ensure "18:00" means 6PM locally.
         EXTRACT(DOW FROM booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh')::INT as day_of_week,
         EXTRACT(HOUR FROM booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh')::INT as hour_of_day,
-        -- Calculate score: Count bookings / Max Capacity (e.g., 50)
+        -- Calculate score: Count bookings / Max Capacity (e.g., 25 for demo realism)
         -- Cap at 1.0
-        LEAST(COUNT(id)::FLOAT / 50.0, 1.0) as traffic_score
+        LEAST(COUNT(id)::FLOAT / 25.0, 1.0) as traffic_score
     FROM bookings
     WHERE booking_date >= (NOW() - INTERVAL '30 days') -- Analyze last 30 days
     GROUP BY 1, 2
