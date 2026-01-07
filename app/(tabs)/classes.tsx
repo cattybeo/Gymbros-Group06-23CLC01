@@ -43,7 +43,39 @@ export default function ClassesScreen() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+
+    // 2026 Best Practice: Background polling for "Live" status (30s interval)
+    // This keeps the heatmap and class capacity fresh without draining battery.
+    const pollInterval = setInterval(() => {
+      refreshLiveStatus();
+    }, 30000);
+
+    return () => clearInterval(pollInterval);
+  }, [classes]);
+
+  async function refreshLiveStatus() {
+    try {
+      const [trafficResponse, countsResponse] = await Promise.all([
+        supabase.rpc("get_weekly_traffic"),
+        supabase.rpc("get_class_counts", {
+          class_ids: classes.map((c) => c.id),
+        }),
+      ]);
+
+      if (!trafficResponse.error) setTrafficData(trafficResponse.data || []);
+      if (!countsResponse.error && countsResponse.data) {
+        const counts: Record<string, number> = {};
+        countsResponse.data.forEach(
+          (item: { class_id: string; count: number }) => {
+            counts[item.class_id] = Number(item.count);
+          }
+        );
+        setClassCounts(counts);
+      }
+    } catch (e) {
+      console.warn("[LiveStatus] Silent refresh failed", e);
+    }
+  }
 
   // Premium Fade-in Transition
   useEffect(() => {
