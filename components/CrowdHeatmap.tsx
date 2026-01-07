@@ -1,9 +1,15 @@
 import Colors from "@/constants/Colors";
 import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Skeleton } from "./ui/Skeleton";
 
 export interface TrafficData {
@@ -24,13 +30,34 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
+  const pulseAnim = useRef(new Animated.Value(0.6)).current;
 
-  // Helper to get color based on score
+  // Pulse effect for the current hour cell (High-end UI feel)
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.6,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
+
+  // Helper to get color based on score (2025-2026 Modern Spectrum)
   const getColor = (score: number) => {
     if (score === 0) return "bg-surface_highlight"; // Empty
-    if (score < 0.3) return "bg-success"; // Low
-    if (score < 0.7) return "bg-warning"; // Med
-    return "bg-error"; // High
+    if (score < 0.2) return "bg-success/60"; // Very Low
+    if (score < 0.45) return "bg-success"; // Low
+    if (score < 0.65) return "bg-warning"; // Moderate
+    if (score < 0.85) return "bg-error/80"; // Busy
+    return "bg-error"; // Peak
   };
 
   const getIntensityLabel = (score: number) => {
@@ -47,6 +74,9 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
     });
     return map;
   }, [data]);
+
+  const currentHour = new Date().getHours();
+  const currentDay = new Date().getDay();
 
   const [selectedCell, setSelectedCell] = useState<{
     day: number;
@@ -65,18 +95,25 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
       ? "border-2 border-primary"
       : "border border-transparent";
 
+    const isCurrentTime = day === currentDay && hour === currentHour;
+
     return (
       <TouchableOpacity
         key={key}
-        className={`w-8 h-8 m-0.5 rounded-md ${colorClass} ${borderClass}`}
         onPress={() => setSelectedCell({ day, hour, score })}
         activeOpacity={0.7}
-      />
+      >
+        <Animated.View
+          className={`w-8 h-8 m-0.5 rounded-md ${colorClass} ${borderClass}`}
+          style={
+            isCurrentTime
+              ? { opacity: pulseAnim, transform: [{ scale: pulseAnim }] }
+              : {}
+          }
+        />
+      </TouchableOpacity>
     );
   };
-
-  const currentHour = new Date().getHours();
-  const currentDay = new Date().getDay();
 
   if (isLoading) {
     return (
