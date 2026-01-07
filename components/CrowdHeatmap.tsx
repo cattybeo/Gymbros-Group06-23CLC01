@@ -51,8 +51,22 @@ export default function CrowdHeatmap({
 
   useEffect(() => {
     fetchTraffic();
-    const interval = setInterval(fetchTraffic, 30000); // 2026 BP: Isolated Polling
-    return () => clearInterval(interval);
+
+    // Subscribe to Realtime Bookings for Instant Demo Updates
+    const channel = supabase
+      .channel("heatmap_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => {
+          fetchTraffic();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const isLoading = parentLoading || internalLoading;
