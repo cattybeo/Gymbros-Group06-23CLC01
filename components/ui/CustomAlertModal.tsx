@@ -92,32 +92,31 @@ export default function CustomAlertModal({
           </Text>
 
           <View
-            className={secondaryButtonText ? "flex-row gap-3 w-full" : "w-full"}
+            className={secondaryButtonText ? "flex-col gap-2 w-full" : "w-full"}
           >
+            <TouchableOpacity
+              onPress={handlePrimaryPress}
+              accessibilityRole="button"
+              accessibilityLabel={effectivePrimaryText}
+              className="w-full py-4 rounded-2xl bg-primary items-center shadow-sm shadow-primary/20"
+            >
+              <Text className="text-on_primary font-bold text-lg">
+                {effectivePrimaryText}
+              </Text>
+            </TouchableOpacity>
+
             {secondaryButtonText && (
               <TouchableOpacity
                 onPress={onClose}
                 accessibilityRole="button"
                 accessibilityLabel={secondaryButtonText}
-                className="flex-1 py-3.5 rounded-xl bg-secondary border border-border items-center"
+                className="w-full py-4 rounded-2xl bg-transparent items-center"
               >
-                <Text className="text-secondary_foreground font-bold text-lg">
+                <Text className="text-muted_foreground font-semibold text-base">
                   {secondaryButtonText}
                 </Text>
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              onPress={handlePrimaryPress}
-              accessibilityRole="button"
-              accessibilityLabel={effectivePrimaryText}
-              className={`${
-                secondaryButtonText ? "flex-1" : "w-full"
-              } py-3.5 rounded-xl bg-primary items-center shadow-sm`}
-            >
-              <Text className="text-primary-foreground font-bold text-lg">
-                {effectivePrimaryText}
-              </Text>
-            </TouchableOpacity>
           </View>
         </View>
       </View>
