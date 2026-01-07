@@ -16,7 +16,6 @@ interface LiveClassListProps {
   handleBook: (id: string, count: number) => void;
   bookingId: string | null;
   myBookings: Set<string>;
-  renderCatalog: () => React.ReactNode;
   isLoading: boolean;
   onRefresh: () => void;
   aiSuggestion?: AISuggestion | null;
@@ -30,7 +29,6 @@ export const LiveClassList = ({
   handleBook,
   bookingId,
   myBookings,
-  renderCatalog,
   isLoading,
   onRefresh,
   aiSuggestion,
@@ -133,15 +131,12 @@ export const LiveClassList = ({
       removeClippedSubviews={true}
       ListHeaderComponent={
         <>
-          <View className="mb-2">
+          <View className="mb-4">
             <Text className="text-3xl font-bold text-foreground">
               {t("classes.title")}
             </Text>
-            <Text className="text-muted_foreground mt-1">
-              {t("classes.subtitle")}
-            </Text>
           </View>
-          {renderCatalog()}
+
           {(aiSuggestion || aiLoading) && (
             <AISuggestionCard
               suggestion={aiSuggestion!}
@@ -151,7 +146,7 @@ export const LiveClassList = ({
             />
           )}
           <CrowdHeatmap isLoading={isLoading} />
-          <Text className="text-lg font-bold text-foreground mb-2 mt-2 px-1">
+          <Text className="text-lg font-bold text-foreground mb-2 mt-4 px-1">
             {t("classes.upcoming_schedule")}
           </Text>
         </>
@@ -186,7 +181,8 @@ export const LiveClassList = ({
           </TouchableOpacity>
         </View>
       }
-      contentContainerStyle={{ paddingBottom: 20 }}
+      contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 4 }}
+      className="overflow-visible"
     />
   );
 };
