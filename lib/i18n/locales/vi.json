@@ -247,7 +247,12 @@
     "view_recommendation": "Xem gợi ý",
     "ai_loading": "AI đang phân tích...",
     "ai_recommended": "Gợi ý bởi AI",
-    "no_classes_title": "Không tìm thấy lớp học"
+    "no_classes_title": "Không tìm thấy lớp học",
+    "about_title": "Về lớp học này",
+    "no_description": "Chưa có mô tả cho lớp học này.",
+    "default_location": "Trung tâm Gymbros Fitness",
+    "default_studio": "Tầng 2, Phòng A",
+    "unknown_trainer": "Huấn luyện viên"
   },
   "journey": {
     "subtitle": "Lịch trình tập luyện cá nhân của bạn",

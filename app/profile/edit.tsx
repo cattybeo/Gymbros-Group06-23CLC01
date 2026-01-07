@@ -10,7 +10,7 @@ import "dayjs/locale/en";
 import "dayjs/locale/vi";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -66,6 +66,30 @@ export default function EditProfileScreen() {
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState<DateType>(dayjs());
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (data && !error) {
+        setFullName(data.full_name || "");
+        setAvatarUrl(data.avatar_url || "");
+        setGoal(data.goal || "maintain");
+        setGender(data.gender || "male");
+        setBirthday(data.birthday ? new Date(data.birthday) : null);
+        setActivityLevel(data.activity_level || "sedentary");
+        setExperienceLevel(data.experience_level || "beginner");
+        setWeeklyAvailability(data.weekly_availability || "1_2");
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
 
   const GOAL_OPTIONS = [
     "lose_weight",
@@ -150,6 +174,15 @@ export default function EditProfileScreen() {
   };
 
   const updateUserMetadata = async (url: string) => {
+    if (!user) return;
+
+    // 1. Update Profile table
+    await supabase
+      .from("profiles")
+      .update({ avatar_url: url })
+      .eq("id", user.id);
+
+    // 2. Sync with Auth
     const { error } = await supabase.auth.updateUser({
       data: { avatar_url: url },
     });
@@ -163,7 +196,28 @@ export default function EditProfileScreen() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.updateUser({
+    // 1. Update Public Profiles Table (Diamond Standard)
+    const { error: profileError } = await supabase.from("profiles").upsert({
+      id: user.id,
+      full_name: fullName,
+      avatar_url: avatarUrl,
+      goal,
+      gender,
+      birthday: birthday ? birthday.toISOString().split("T")[0] : null,
+      activity_level: activityLevel,
+      experience_level: experienceLevel,
+      weekly_availability: weeklyAvailability,
+      updated_at: new Date().toISOString(),
+    });
+
+    if (profileError) {
+      showAlert(t("common.error"), profileError.message, "error");
+      setLoading(false);
+      return;
+    }
+
+    // 2. Sync with Auth Metadata (Redundancy for security/efficiency in hooks)
+    const { error: authError } = await supabase.auth.updateUser({
       data: {
         full_name: fullName,
         avatar_url: avatarUrl,
@@ -176,16 +230,14 @@ export default function EditProfileScreen() {
       },
     });
 
-    if (error) {
-      showAlert(t("common.error"), error.message, "error");
-    } else {
-      showAlert(
-        t("common.success"),
-        t("profile.update_success_msg"),
-        "success",
-        { onClose: () => router.back() }
-      );
+    if (authError) {
+      // We don't block since Profile is already updated
+      console.warn("Auth metadata sync failed:", authError.message);
     }
+
+    showAlert(t("common.success"), t("profile.update_success_msg"), "success", {
+      onClose: () => router.back(),
+    });
     setLoading(false);
   };
 

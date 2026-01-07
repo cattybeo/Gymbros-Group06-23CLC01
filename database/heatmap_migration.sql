@@ -1,11 +1,8 @@
 -- ==========================================
--- MIGRATION: Heatmap & AI Forecast Support
+-- MIGRATION: Heatmap & AI Forecast Support (V3 - REALISTIC)
 -- ==========================================
 
--- 1. Create RPC to get Weekly Traffic Heatmap
--- Logic: Aggregates bookings by Day of Week (0=Sun, 6=Sat) and Hour (0-23).
--- Returns a traffic score (0.0 to 1.0) based on an estimated Gym Capacity (e.g., 50 concurrent users).
-
+-- 1. Create RPC to get Weekly Traffic Heatmap (Aggregated 30 Days)
 CREATE OR REPLACE FUNCTION get_weekly_traffic()
 RETURNS TABLE (
     day_of_week INT,
@@ -15,72 +12,91 @@ RETURNS TABLE (
 BEGIN
     RETURN QUERY
     SELECT 
-        -- Fix: Convert to Vietnam Time (UTC+7) before extracting Hour/DOW
-        -- We use a fixed offset '+07' or 'Asia/Ho_Chi_Minh' to ensure "18:00" means 6PM locally.
-        EXTRACT(DOW FROM booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh')::INT as day_of_week,
-        EXTRACT(HOUR FROM booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh')::INT as hour_of_day,
-        -- Calculate score: Count bookings / Max Capacity (e.g., 25 for demo realism)
-        -- Cap at 1.0
-        LEAST(COUNT(id)::FLOAT / 25.0, 1.0) as traffic_score
-    FROM bookings
-    WHERE booking_date >= (NOW() - INTERVAL '30 days') -- Analyze last 30 days
+        EXTRACT(DOW FROM (booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as day_of_week,
+        EXTRACT(HOUR FROM (booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as hour_of_day,
+        -- Scoring Adjustment:
+        -- Data is aggregated over 30 days (approx 4.2 weeks).
+        -- Class capacity ~20. Total capacity over 30 days ~ 20 * 4.2 = ~85.
+        -- We set denominator to 60.0 means: Avg 15 people/class => 100% Busy (Red).
+        -- Avg 7.5 people/class => 50% Moderate (Yellow).
+        -- Avg <5 people/class => Not Busy (Green).
+        LEAST(COUNT(id)::FLOAT / 60.0, 1.0) as traffic_score
+    FROM public.bookings
+    WHERE status IN ('confirmed', 'checked_in', 'completed')
+    AND booking_date >= (NOW() - INTERVAL '30 days')
     GROUP BY 1, 2
     ORDER BY 1, 2;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER; -- Fix: Bypass RLS to read all bookings
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
--- 2. Mock Data Generator (Run manually if needed)
--- This block inserts dummy bookings to simulate a busy gym.
--- It avoids inserting if data already exists to prevent duplicate spam on re-runs.
-
+-- 2. Mock Data Generator (Enhanced for Colorful Heatmap)
 DO $$
 DECLARE
-    dummy_class_id UUID;
-    dummy_user_id UUID;
+    target_class_id UUID;
+    mock_user_id UUID;
     i INT;
     simulated_date TIMESTAMP;
     random_hour INT;
-    random_day_offset INT;
+    dow INT;
+    weight FLOAT;
 BEGIN
-    -- Get a valid class and user to link bookings to (fallback if empty table)
-    SELECT id INTO dummy_user_id FROM auth.users LIMIT 1;
-    SELECT id INTO dummy_class_id FROM public.classes LIMIT 1;
+    -- CLEANUP OLD MOCK DATA
+    DELETE FROM public.bookings WHERE status = 'completed';
 
-    -- Only insert if we have a class and user, and table is relatively empty (< 10 rows)
-    IF dummy_class_id IS NOT NULL AND dummy_user_id IS NOT NULL AND (SELECT COUNT(*) FROM bookings) < 10 THEN
+    -- Get a user ID for bookings
+    SELECT id INTO mock_user_id FROM auth.users LIMIT 1;
+    
+    -- Increase sample size to 2500 for better density coverage
+    FOR i IN 1..2500 LOOP 
+        SELECT id INTO target_class_id FROM public.classes ORDER BY RANDOM() LIMIT 1;
         
-        -- Insert 1500 mock bookings to create a realistic density
-        FOR i IN 1..1500 LOOP
-            -- Random class from existing classes
-            SELECT id INTO dummy_class_id FROM public.classes ORDER BY RANDOM() LIMIT 1;
-            
-            -- Peak Hour Logic: Most gym goers come at 5PM-8PM (17-20) or 6AM-8AM (6-8)
-            IF RANDOM() > 0.6 THEN
-                -- Afternoon Peak
-                random_hour := 17 + FLOOR(RANDOM() * 4);
-            ELSIF RANDOM() > 0.8 THEN
-                -- Morning Peak
-                random_hour := 6 + FLOOR(RANDOM() * 3);
-            ELSE
-                -- Normal Hours
-                random_hour := 9 + FLOOR(RANDOM() * 8);
-            END IF;
+        IF target_class_id IS NOT NULL AND mock_user_id IS NOT NULL THEN
+            -- Random date in last 30 days
+            simulated_date := DATE_TRUNC('day', NOW()) - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL;
+            dow := EXTRACT(DOW FROM simulated_date)::INT;
 
-            random_day_offset := FLOOR(RANDOM() * 14); -- Over 14 days for more data points
+            -- REJECTION SAMPLING FOR REALISTIC CURVES
+            -- Loop until we find an hour that fits the probability curve
+            LOOP
+                random_hour := 6 + FLOOR(RANDOM() * 16); -- 6 AM to 10 PM
+                weight := RANDOM();
+                
+                -- Weekdays (Mon=1 to Fri=5)
+                IF dow IN (1, 2, 3, 4, 5) THEN 
+                    -- Super Peak (Red): 17h-19h (High probability)
+                    IF random_hour IN (17, 18, 19) AND weight < 0.85 THEN EXIT;
+                    -- Morning Rush (Yellow/Red): 6h-8h
+                    ELSIF random_hour IN (6, 7, 8) AND weight < 0.65 THEN EXIT;
+                    -- Lunch Break (Yellow): 11h-13h
+                    ELSIF random_hour IN (11, 12, 13) AND weight < 0.40 THEN EXIT;
+                    -- Dead Zones (Green): 9h-10h, 14h-16h
+                    ELSIF random_hour IN (9, 10, 14, 15, 16) AND weight < 0.15 THEN EXIT;
+                    -- Late Night (Green)
+                    ELSIF random_hour >= 20 AND weight < 0.10 THEN EXIT;
+                    END IF;
+                
+                -- Weekends (Sun=0, Sat=6)
+                ELSE 
+                    -- Late Mornings (Yellow/Red): 8h-11h
+                    IF random_hour IN (8, 9, 10, 11) AND weight < 0.60 THEN EXIT;
+                    -- Lazy Afternoons (Green/Yellow): 14h-17h
+                    ELSIF random_hour IN (14, 15, 16, 17) AND weight < 0.30 THEN EXIT;
+                    -- Other (rare)
+                     ELSIF weight < 0.05 THEN EXIT;
+                    END IF;
+                END IF;
+            END LOOP;
 
-            simulated_date := NOW() - (random_day_offset || ' days')::INTERVAL;
-            -- Set hour and add random minutes/seconds for realism
-            simulated_date := DATE_TRUNC('hour', simulated_date) + (random_hour || ' hours')::INTERVAL + (FLOOR(RANDOM() * 60) || ' minutes')::INTERVAL;
+            -- Set final timestamp
+            simulated_date := simulated_date + (random_hour || ' hours')::INTERVAL + (FLOOR(RANDOM() * 60) || ' minutes')::INTERVAL;
 
             INSERT INTO public.bookings (user_id, class_id, booking_date, status)
-            VALUES (dummy_user_id, dummy_class_id, simulated_date, 'confirmed');
-        END LOOP;
-        
-        RAISE NOTICE 'Inserted 1500 mock bookings for Heatmap simulation.';
-    ELSE
-        RAISE NOTICE 'Skipping mock data: Classes/Users missing or Bookings table already populated.';
-    END IF;
+            VALUES (mock_user_id, target_class_id, simulated_date, 'completed');
+        END IF;
+    END LOOP;
+
+    RAISE NOTICE 'Realistic Colorful Heatmap data generated.';
 END $$;
 
 -- 3. NEW: Get Class Counts (Bypass RLS)
