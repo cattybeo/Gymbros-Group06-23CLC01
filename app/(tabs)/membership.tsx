@@ -1,5 +1,7 @@
 import MembershipCard from "@/components/MembershipCard";
-import { SkeletonCard } from "@/components/ui/SkeletonCard";
+import { DurationSelectorSkeleton } from "@/components/ui/DurationSelectorSkeleton";
+import { MembershipCardSkeleton } from "@/components/ui/MembershipCardSkeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
@@ -29,12 +31,12 @@ export default function MembershipScreen() {
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
 
-  // Fade in content when loading completes
+  // Premium Fade-in Transition
   useEffect(() => {
     if (!loading) {
       Animated.timing(contentOpacity, {
         toValue: 1,
-        duration: 400,
+        duration: 500, // Smoother timing for premium feel
         useNativeDriver: true,
       }).start();
     }
@@ -48,7 +50,6 @@ export default function MembershipScreen() {
     setLoading(true);
     contentOpacity.setValue(0);
     try {
-      // Parallel Fetch for efficiency
       const [tiersRes, plansRes, authRes] = await Promise.all([
         supabase
           .from("membership_tiers")
@@ -277,127 +278,92 @@ export default function MembershipScreen() {
     );
   }
 
-  const MembershipSkeleton = () => (
-    <ScrollView showsVerticalScrollIndicator={false} className="mt-2">
-      {[1, 2].map((i) => (
-        <View
-          key={i}
-          className="bg-card p-4 rounded-3xl shadow-sm mb-6 border border-border overflow-hidden"
-        >
-          <SkeletonCard
-            height={192}
-            borderRadius={16}
-            lines={0}
-            padding={0}
-            testID={`membership-image-skeleton-${i}`}
-          />
-          <View className="mt-4 px-2">
-            <SkeletonCard
-              height={40}
-              width="70%"
-              borderRadius={4}
-              lines={1}
-              padding={0}
-              testID={`membership-price-skeleton-${i}`}
-            />
-            <View className="mt-6 space-y-3">
-              {[1, 2, 3].map((j) => (
-                <View key={j} className="flex-row items-center">
-                  <SkeletonCard
-                    width={18}
-                    height={18}
-                    borderRadius={9}
-                    lines={0}
-                    padding={0}
-                  />
-                  <View className="ml-3 flex-1">
-                    <SkeletonCard
-                      height={14}
-                      width="80%"
-                      borderRadius={4}
-                      lines={1}
-                      padding={0}
-                    />
-                  </View>
-                </View>
-              ))}
-            </View>
-            <View className="mt-8">
-              <SkeletonCard
-                height={54}
-                borderRadius={16}
-                lines={1}
-                padding={0}
-              />
-            </View>
-          </View>
+  const PageSkeleton = () => (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      className="flex-1"
+      contentContainerStyle={{ paddingTop: 24, paddingBottom: 40 }}
+    >
+      {/* Header Skeleton */}
+      <View className="mb-4">
+        <Skeleton width={200} height={36} borderRadius={4} />
+        <View className="mt-2">
+          <Skeleton width={150} height={16} borderRadius={4} />
         </View>
-      ))}
+      </View>
+
+      {/* Duration Selector Skeleton */}
+      <DurationSelectorSkeleton />
+
+      {/* Cards Skeleton */}
+      <MembershipCardSkeleton />
+      <MembershipCardSkeleton />
     </ScrollView>
   );
 
   return (
     <View className="flex-1 bg-background pt-24 px-4">
-      <View className="mb-4">
-        <Text className="text-3xl font-bold text-foreground">
-          {t("membership.title")}
-        </Text>
-        <Text className="text-muted_foreground mt-1">
-          {t("membership.subtitle")}
-        </Text>
-      </View>
-
-      {/* Duration Selector */}
-      <View className="mb-6">
-        <View className="flex-row bg-card p-1 rounded-3xl border border-border justify-between relative shadow-sm">
-          {durationOptions.map((duration) => (
-            <TouchableOpacity
-              key={duration}
-              accessibilityRole="button"
-              className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
-                selectedDuration === duration
-                  ? "bg-primary shadow-sm"
-                  : "bg-transparent"
-              }`}
-              onPress={() => setSelectedDuration(duration as any)}
-            >
-              {duration === 6 && (
-                <View className="absolute -top-3 z-20 bg-accent px-2 py-0.5 rounded-full shadow-sm border border-white/20">
-                  <Text className="text-[10px] font-bold text-on_accent">
-                    {t("membership.popular")}
-                  </Text>
-                </View>
-              )}
-              {duration === 12 && (
-                <View className="absolute -top-3 z-20 bg-error px-2 py-0.5 rounded-full shadow-sm border border-white/20">
-                  <Text className="text-[10px] font-bold text-white">
-                    {t("membership.best_value")}
-                  </Text>
-                </View>
-              )}
-              <Text
-                className={`font-bold text-sm ${
-                  selectedDuration === duration
-                    ? "text-on_primary"
-                    : "text-muted_foreground"
-                }`}
-              >
-                {duration === 12
-                  ? t("membership.1_year")
-                  : t("membership.month_count", { count: duration })}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Text className="text-center text-xs text-muted_foreground mt-3 italic opacity-80">
-          {t("membership.save_hint")}
-        </Text>
-      </View>
-
       {loading ? (
-        <MembershipSkeleton />
+        <PageSkeleton />
       ) : (
         <Animated.View style={{ flex: 1, opacity: contentOpacity }}>
+          {/* Actual Content */}
+          <View className="mb-4">
+            <Text className="text-3xl font-bold text-foreground">
+              {t("membership.title")}
+            </Text>
+            <Text className="text-muted_foreground mt-1">
+              {t("membership.subtitle")}
+            </Text>
+          </View>
+
+          {/* Duration Selector */}
+          <View className="mb-6">
+            <View className="flex-row bg-card p-1 rounded-3xl border border-border justify-between relative shadow-sm">
+              {durationOptions.map((duration) => (
+                <TouchableOpacity
+                  key={duration}
+                  accessibilityRole="button"
+                  className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
+                    selectedDuration === duration
+                      ? "bg-primary shadow-sm"
+                      : "bg-transparent"
+                  }`}
+                  onPress={() => setSelectedDuration(duration as any)}
+                >
+                  {duration === 6 && (
+                    <View className="absolute -top-3 z-20 bg-accent px-2 py-0.5 rounded-full shadow-sm border border-white/20">
+                      <Text className="text-[10px] font-bold text-on_accent">
+                        {t("membership.popular")}
+                      </Text>
+                    </View>
+                  )}
+                  {duration === 12 && (
+                    <View className="absolute -top-3 z-20 bg-error px-2 py-0.5 rounded-full shadow-sm border border-white/20">
+                      <Text className="text-[10px] font-bold text-white">
+                        {t("membership.best_value")}
+                      </Text>
+                    </View>
+                  )}
+                  <Text
+                    className={`font-bold text-sm ${
+                      selectedDuration === duration
+                        ? "text-on_primary"
+                        : "text-muted_foreground"
+                    }`}
+                  >
+                    {duration === 12
+                      ? t("membership.1_year")
+                      : t("membership.month_count", { count: duration })}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text className="text-center text-xs text-muted_foreground mt-3 italic opacity-80">
+              {t("membership.save_hint")}
+            </Text>
+          </View>
+
           <FlatList
             data={tiers}
             keyExtractor={(item) => item.id}
