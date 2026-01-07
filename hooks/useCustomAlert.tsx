@@ -9,6 +9,7 @@ interface AlertConfig {
   primaryButtonText?: string;
   secondaryButtonText?: string;
   onPrimaryPress?: () => void;
+  onSecondaryPress?: () => void;
   onClose?: () => void;
 }
 
@@ -31,6 +32,7 @@ export function useCustomAlert() {
         primaryButtonText?: string;
         secondaryButtonText?: string; // If provided, shows confirmation style
         onPrimaryPress?: () => void; // Action for primary button
+        onSecondaryPress?: () => void; // Action for secondary button
         onClose?: () => void; // Action after closing (or secondary press)
       }
     ) => {
@@ -42,6 +44,7 @@ export function useCustomAlert() {
         primaryButtonText: options?.primaryButtonText,
         secondaryButtonText: options?.secondaryButtonText,
         onPrimaryPress: options?.onPrimaryPress,
+        onSecondaryPress: options?.onSecondaryPress,
         onClose: options?.onClose,
       });
     },
@@ -63,14 +66,16 @@ export function useCustomAlert() {
       primaryButtonText={alertConfig.primaryButtonText}
       secondaryButtonText={alertConfig.secondaryButtonText}
       onPrimaryPress={() => {
-        // If specific action provided, run it.
-        // Important: logic inside CustomAlertModal handles "onPrimaryPress" separate from "onClose"
-        // But implementation there was: if onPrimaryPress, call it, else onClose.
-        // We usually want to Close after Primary Press too unless it's async?
-        // Let's assume onPrimaryPress handles closing or we wrap it here.
-        // To be safe, let's wrap:
         if (alertConfig.onPrimaryPress) {
           alertConfig.onPrimaryPress();
+          setAlertConfig((prev) => ({ ...prev, visible: false }));
+        } else {
+          hideAlert();
+        }
+      }}
+      onSecondaryPress={() => {
+        if (alertConfig.onSecondaryPress) {
+          alertConfig.onSecondaryPress();
           setAlertConfig((prev) => ({ ...prev, visible: false }));
         } else {
           hideAlert();

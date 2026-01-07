@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Animated,
@@ -31,22 +31,7 @@ export default function MembershipScreen() {
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
 
-  // Premium Fade-in Transition
-  useEffect(() => {
-    if (!loading) {
-      Animated.timing(contentOpacity, {
-        toValue: 1,
-        duration: 500, // Smoother timing for premium feel
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [loading, contentOpacity]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     contentOpacity.setValue(0);
     try {
@@ -67,12 +52,14 @@ export default function MembershipScreen() {
 
       const user = authRes.data.user;
       if (user) {
+        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD for date comparison
         const { data: membershipData, error: membershipError } = await supabase
           .from("user_memberships")
           .select("plan_id, plan:membership_plans(*), status")
           .eq("user_id", user.id)
           .eq("status", "active") // Only show 'active' as the current plan
-          .gte("end_date", new Date().toISOString())
+          .lte("start_date", today) // Must have started
+          .gte("end_date", today) // Must not have expired
           .order("end_date", { ascending: false })
           .limit(1)
           .maybeSingle();
@@ -93,24 +80,40 @@ export default function MembershipScreen() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [contentOpacity, t, showAlert]);
+
+  // Premium Fade-in Transition
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 500, // Smoother timing for premium feel
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [loading, contentOpacity]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
   function getPlanStatus(
     tierLevel: number,
-    targetPlanId: string
+    targetTierId: string
   ): "default" | "current" | "upgrade" | "downgrade" {
     if (!currentPlan) {
       if (tierLevel === 1) return "current";
       return "upgrade";
     }
 
-    if (currentPlan.id === targetPlanId) return "current";
-
     const currentTierId = currentPlan.tier_id;
     const currentTier = tiers.find((t) => t.id === currentTierId);
     if (!currentTier) return "default";
+
+    // Same tier = current (user already has this tier, regardless of duration)
+    if (currentTierId === targetTierId) return "current";
 
     if (tierLevel > currentTier.level) return "upgrade";
     if (tierLevel < currentTier.level) return "downgrade";
@@ -124,8 +127,9 @@ export default function MembershipScreen() {
 
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
 
       if (!user) {
         showAlert(
@@ -152,6 +156,8 @@ export default function MembershipScreen() {
         customerId: customer,
         customerEphemeralKeySecret: ephemeralKey,
         paymentIntentClientSecret: paymentIntent,
+        allowsDelayedPaymentMethods: false,
+        returnURL: "gymbros://stripe-redirect",
         defaultBillingDetails: {
           name: "Gymbro Member",
         },
@@ -159,15 +165,17 @@ export default function MembershipScreen() {
 
       if (initError) throw new Error(initError.message);
 
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const { error: paymentError } = await presentPaymentSheet();
 
       if (paymentError) {
         if (paymentError.code !== "Canceled") {
+          await new Promise((resolve) => setTimeout(resolve, 500));
           showAlert(t("common.error"), paymentError.message, "error");
         }
       } else {
+        await new Promise((resolve) => setTimeout(resolve, 500));
         await waitForMembershipActivation(user.id, planId);
       }
     } catch (e: any) {
@@ -196,24 +204,24 @@ export default function MembershipScreen() {
 
         if (data) {
           clearInterval(interval);
-          setLoading(false);
+          // Fetch data first, then show alert after completion
+          await fetchData();
           showAlert(
             t("common.success"),
             t("membership.activation_success"),
             "success"
           );
-          fetchData();
         } else if (attempts >= maxAttempts) {
           clearInterval(interval);
-          setLoading(false);
+          // Fetch data first, then show alert after completion
+          await fetchData();
           showAlert(
             t("common.success"),
             t("membership.activation_pending"),
             "success"
           );
-          fetchData();
         }
-      } catch (e) {
+      } catch {
         if (attempts >= maxAttempts) {
           clearInterval(interval);
           setLoading(false);
@@ -228,9 +236,9 @@ export default function MembershipScreen() {
       t("common.cancel_membership_confirm"),
       "warning",
       {
-        primaryButtonText: t("common.cancel_membership"),
-        secondaryButtonText: t("common.keep_membership"),
-        onPrimaryPress: async () => {
+        primaryButtonText: t("common.keep_membership"),
+        secondaryButtonText: t("common.cancel_membership"),
+        onSecondaryPress: async () => {
           setLoading(true);
           try {
             const {
@@ -399,7 +407,7 @@ export default function MembershipScreen() {
                     duration={selectedDuration}
                     onBuy={() => handleBuy(selectedPlan.id)}
                     isLoading={purchasingId === selectedPlan.id}
-                    status={getPlanStatus(tier.level, selectedPlan.id)}
+                    status={getPlanStatus(tier.level, tier.id)}
                   />
                   {isMyCurrentPlan && (
                     <TouchableOpacity

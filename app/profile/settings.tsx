@@ -38,7 +38,7 @@ export default function SettingsScreen() {
             color={colorScheme === "dark" ? "white" : "black"}
           />
         </View>
-        <Text className="text-text font-medium text-lg">{label}</Text>
+        <Text className="text-foreground font-medium text-lg">{label}</Text>
       </View>
       {userPreference === value && (
         <Ionicons name="checkmark-circle" size={24} color={Colors.light.tint} />
@@ -61,13 +61,13 @@ export default function SettingsScreen() {
               color={colorScheme === "dark" ? "white" : "black"}
             />
           </TouchableOpacity>
-          <Text className="text-text text-xl font-bold flex-1">
+          <Text className="text-foreground text-xl font-bold flex-1">
             {t("profile.settings")}
           </Text>
         </View>
 
         <View className="p-4">
-          <Text className="text-text_secondary text-sm font-bold uppercase mb-4 mt-2">
+          <Text className="text-foreground-secondary text-sm font-bold uppercase mb-4 mt-2">
             {t("settings.language_label")}
           </Text>
 
@@ -79,7 +79,7 @@ export default function SettingsScreen() {
             >
               <View className="flex-row items-center">
                 <Text className="text-2xl mr-3">🇻🇳</Text>
-                <Text className="text-text font-medium text-lg">
+                <Text className="text-foreground font-medium text-lg">
                   {t("settings.languages.vi")}
                 </Text>
               </View>
@@ -99,7 +99,7 @@ export default function SettingsScreen() {
             >
               <View className="flex-row items-center">
                 <Text className="text-2xl mr-3">🇬🇧</Text>
-                <Text className="text-text font-medium text-lg">
+                <Text className="text-foreground font-medium text-lg">
                   {t("settings.languages.en")}
                 </Text>
               </View>
@@ -114,7 +114,7 @@ export default function SettingsScreen() {
           </View>
 
           {/* Theme Settings */}
-          <Text className="text-text_secondary text-sm font-bold uppercase mb-4 mt-8">
+          <Text className="text-foreground-secondary text-sm font-bold uppercase mb-4 mt-8">
             {t("settings.theme.title")}
           </Text>
 
@@ -142,7 +142,7 @@ export default function SettingsScreen() {
           </View>
 
           <Text className="text-muted_foreground text-xs mt-4 text-center">
-            {t("profile.version")} 1.0.0 (Gold)
+            {t("profile.version")} 1.5.0 (Diamond)
           </Text>
         </View>
       </View>

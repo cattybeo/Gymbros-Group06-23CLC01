@@ -75,7 +75,7 @@ create table public.body_indices (
 alter table public.bookings enable row level security;
 create policy "Users can view own bookings" on public.bookings for select using (auth.uid() = user_id);
 create policy "Users can create bookings" on public.bookings for insert with check (auth.uid() = user_id);
--- (Optional) Prevent deleting bookings for now, or add policy later.
+create policy "Users can update own bookings" on public.bookings for update using (auth.uid() = user_id);
 
 
 -- SEED DATA (Updated with image_slugs)

@@ -16,6 +16,7 @@ interface CustomAlertModalProps {
   primaryButtonText?: string;
   secondaryButtonText?: string;
   onPrimaryPress?: () => void;
+  onSecondaryPress?: () => void;
 }
 
 export default function CustomAlertModal({
@@ -27,6 +28,7 @@ export default function CustomAlertModal({
   primaryButtonText,
   secondaryButtonText,
   onPrimaryPress,
+  onSecondaryPress,
 }: CustomAlertModalProps) {
   const { t } = useTranslation();
   const effectivePrimaryText = primaryButtonText || t("common.confirm");
@@ -107,7 +109,7 @@ export default function CustomAlertModal({
 
             {secondaryButtonText && (
               <TouchableOpacity
-                onPress={onClose}
+                onPress={onSecondaryPress || onClose}
                 accessibilityRole="button"
                 accessibilityLabel={secondaryButtonText}
                 className="w-full py-4 rounded-2xl bg-transparent items-center"

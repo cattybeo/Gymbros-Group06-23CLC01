@@ -2,6 +2,7 @@ import Colors from "@/constants/Colors";
 import { signInWithGoogle } from "@/lib/GoogleAuth";
 import { useThemeContext } from "@/lib/theme";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Alert,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 
 export default function GoogleSignInButton() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
@@ -23,7 +25,7 @@ export default function GoogleSignInButton() {
     setLoading(false);
 
     if (!result.success && !result.cancelled && result.error) {
-      Alert.alert("Đăng nhập thất bại", result.error);
+      Alert.alert(t("auth.login_failed"), result.error);
     }
     // AuthContext will auto-redirect on success
   }
