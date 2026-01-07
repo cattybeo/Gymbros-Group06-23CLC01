@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
+import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -43,7 +44,7 @@ export default function ClassDetailScreen() {
         supabase
           .from("classes")
           .select(
-            "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
+            "*, trainer:trainer_id(id, full_name, avatar_url, bio, experience_years, social_links, certificates), location:locations(*)"
           )
           .eq("id", id)
           .maybeSingle(),
@@ -93,19 +94,39 @@ export default function ClassDetailScreen() {
 
       if (isBooked) {
         // Cancel logic
-        const { error } = await supabase
-          .from("bookings")
-          .update({ status: "cancelled" })
-          .eq("class_id", id)
-          .eq("user_id", user.id);
-
-        if (error) throw error;
-        setIsBooked(false);
-        setBookedCount((prev) => prev - 1);
         showAlert(
-          t("common.success"),
-          t("classes.cancel_success_msg"),
-          "success"
+          t("common.confirm"),
+          t("classes.cancel_confirm_msg"),
+          "warning",
+          {
+            primaryButtonText: t("common.no"),
+            secondaryButtonText: t("common.yes"),
+            onSecondaryPress: async () => {
+              try {
+                const { error } = await supabase
+                  .from("bookings")
+                  .update({ status: "cancelled" })
+                  .eq("class_id", id)
+                  .eq("user_id", user.id);
+
+                if (error) throw error;
+                setIsBooked(false);
+                setBookedCount((prev) => prev - 1);
+                showAlert(
+                  t("common.success"),
+                  t("classes.cancel_success_msg"),
+                  "success"
+                );
+              } catch (error) {
+                console.error("Cancellation error:", error);
+                showAlert(
+                  t("common.error"),
+                  t("classes.booking_error"),
+                  "error"
+                );
+              }
+            },
+          }
         );
       } else {
         // Book logic
@@ -286,7 +307,7 @@ export default function ClassDetailScreen() {
 
           {/* Trainer Profile Section */}
           {gymClass.trainer && (
-            <View className="mb-20 bg-surface p-6 rounded-3xl border border-border">
+            <View className="mb-8">
               <View className="flex-row items-center mb-4">
                 <View className="w-16 h-16 rounded-full bg-primary/10 items-center justify-center overflow-hidden border border-border">
                   {gymClass.trainer.avatar_url ? (
@@ -305,13 +326,81 @@ export default function ClassDetailScreen() {
                   <Text className="text-primary font-bold text-sm">
                     {t("classes.trainer")}
                   </Text>
+                  {/* Experience Badge */}
+                  {gymClass.trainer.experience_years && (
+                    <View className="bg-secondary/20 self-start px-2 py-0.5 rounded-md mt-1">
+                      <Text className="text-secondary text-[10px] font-bold">
+                        {gymClass.trainer.experience_years}{" "}
+                        {t("classes.years_exp")}
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
+
+              {/* Bio */}
               {gymClass.trainer.bio && (
-                <Text className="text-foreground-secondary leading-6 italic">
+                <Text className="text-foreground-secondary leading-6 italic mb-4">
                   "{gymClass.trainer.bio}"
                 </Text>
               )}
+
+              {/* Specialties & Certificates Grid */}
+              <View className="flex-row flex-wrap gap-2 mb-4">
+                {gymClass.trainer.specialties?.map((skill, index) => (
+                  <View
+                    key={`skill-${index}`}
+                    className="bg-accent/10 px-3 py-1 rounded-full border border-accent/20"
+                  >
+                    <Text className="text-accent text-xs font-medium">
+                      #{skill}
+                    </Text>
+                  </View>
+                ))}
+                {gymClass.trainer.certificates?.map((cert, index) => (
+                  <View
+                    key={`cert-${index}`}
+                    className="bg-muted px-3 py-1 rounded-full border border-border"
+                  >
+                    <Text className="text-muted_foreground text-xs font-medium">
+                      🏆 {cert}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+
+              {/* Contact Actions (Zalo & Messenger) */}
+              <View className="flex-row space-x-3 mt-2">
+                {gymClass.trainer.social_links?.zalo && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      const zaloId = gymClass.trainer?.social_links?.zalo;
+                      Linking.openURL(`https://zalo.me/${zaloId}`);
+                    }}
+                    className="flex-1 bg-[#0068FF] py-2 rounded-xl flex-row items-center justify-center shadow-sm"
+                  >
+                    <Ionicons
+                      name="chatbubble-ellipses"
+                      size={18}
+                      color="white"
+                    />
+                    <Text className="text-white font-bold ml-2">Zalo</Text>
+                  </TouchableOpacity>
+                )}
+
+                {gymClass.trainer.social_links?.messenger && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      const msgId = gymClass.trainer?.social_links?.messenger;
+                      Linking.openURL(`https://m.me/${msgId}`);
+                    }}
+                    className="flex-1 bg-[#0084FF] py-2 rounded-xl flex-row items-center justify-center shadow-sm"
+                  >
+                    <Ionicons name="logo-facebook" size={18} color="white" />
+                    <Text className="text-white font-bold ml-2">Messenger</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           )}
         </View>

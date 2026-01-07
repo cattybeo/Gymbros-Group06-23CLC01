@@ -4,7 +4,8 @@ import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { FontAwesome } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dimensions, Image, ScrollView, Text, View } from "react-native";
 import {
@@ -23,63 +24,66 @@ export default function HomeScreen() {
   const [recentActivity, setRecentActivity] = useState<any>(null);
 
   // Fetch Member Tier & Recent Activity
-  useEffect(() => {
-    if (!user) return;
-    const fetchData = async () => {
-      try {
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format for date comparison
-        const [tierResponse, activityResponse] = await Promise.all([
-          // 1. Fetch Tier (must be active, started, and not expired)
-          supabase
-            .from("user_memberships")
-            .select(
-              "end_date, plan_id, membership_plans!inner(tier_id, membership_tiers!inner(name))"
-            )
-            .eq("user_id", user.id)
-            .eq("status", "active")
-            .lte("start_date", today) // Must have started
-            .gte("end_date", today) // Must not have expired
-            .order("end_date", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-          // 2. Fetch Recent Activity (Latest Booking)
-          supabase
-            .from("bookings")
-            .select("booking_date, class:classes(name)")
-            .eq("user_id", user.id)
-            .order("booking_date", { ascending: false })
-            .limit(1)
-            .maybeSingle(),
-        ]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      let isActive = true;
 
-        if (tierResponse.data && tierResponse.data.membership_plans) {
-          const membershipPlans = tierResponse.data
-            .membership_plans as unknown as {
-            membership_tiers: { name: string };
-          };
-          const tierName = membershipPlans.membership_tiers?.name;
-          console.log("🔍 [Home] Membership data:", {
-            tierName: tierName,
-            upperCase: tierName?.toUpperCase(),
-            endDate: tierResponse.data.end_date,
-          });
-          if (tierName) {
-            setMemberTier(tierName.toUpperCase());
+      const fetchData = async () => {
+        try {
+          const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format for date comparison
+          const [tierResponse, activityResponse] = await Promise.all([
+            // 1. Fetch Tier (must be active, started, and not expired)
+            supabase
+              .from("user_memberships")
+              .select(
+                "end_date, plan_id, membership_plans!inner(tier_id, membership_tiers!inner(name))"
+              )
+              .eq("user_id", user.id)
+              .eq("status", "active")
+              .lte("start_date", today) // Must have started
+              .gte("end_date", today) // Must not have expired
+              .order("end_date", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+            // 2. Fetch Recent Activity (Latest Booking)
+            supabase
+              .from("bookings")
+              .select("booking_date, class:classes(name)")
+              .eq("user_id", user.id)
+              .order("booking_date", { ascending: false })
+              .limit(1)
+              .maybeSingle(),
+          ]);
+
+          if (isActive) {
+            if (tierResponse.data && tierResponse.data.membership_plans) {
+              const membershipPlans = tierResponse.data
+                .membership_plans as unknown as {
+                membership_tiers: { name: string };
+              };
+              const tierName = membershipPlans.membership_tiers?.name;
+              if (tierName) {
+                setMemberTier(tierName.toUpperCase());
+              }
+            }
+
+            if (activityResponse.data) {
+              setRecentActivity(activityResponse.data);
+            }
           }
-        } else {
-          console.log("⚠️ [Home] No active membership found", tierResponse);
+        } catch (error) {
+          // Rule 11: Silence in failure (unless critical)
         }
+      };
 
-        if (activityResponse.data) {
-          setRecentActivity(activityResponse.data);
-        }
-      } catch (error) {
-        console.error("Error fetching home data:", error);
-      }
-    };
+      fetchData();
 
-    fetchData();
-  }, [user]);
+      return () => {
+        isActive = false;
+      };
+    }, [user])
+  );
 
   // Tier Styling Logic
   const getTierStyle = (tier: string) => {
@@ -117,13 +121,6 @@ export default function HomeScreen() {
 
   const tierStyle = getTierStyle(memberTier);
 
-  const MENU_ITEMS = [
-    { name: t("home.workout"), icon: "bicycle" },
-    { name: t("home.diet"), icon: "leaf" },
-    { name: t("home.shop"), icon: "shopping-cart" },
-    { name: t("home.blog"), icon: "newspaper-o" },
-  ];
-
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -160,7 +157,9 @@ export default function HomeScreen() {
                 {tierStyle.label}
               </Text>
             </View>
-            <FontAwesome name="diamond" size={24} color={tierStyle.icon} />
+            {tierStyle.label !== t("home.tier.standard") && (
+              <FontAwesome name="diamond" size={24} color={tierStyle.icon} />
+            )}
           </View>
 
           <View className="flex-row justify-between items-end mb-6">
@@ -208,30 +207,6 @@ export default function HomeScreen() {
               {t("home.join_now")} &rarr;
             </Text>
           </View>
-        </View>
-      </View>
-
-      {/* Grid Menu */}
-      <View className="px-6 mb-8">
-        <Text className="text-foreground font-bold text-lg mb-4">
-          {t("home.quick_access")}
-        </Text>
-        <View className="flex-row flex-wrap justify-between">
-          {MENU_ITEMS.map((item, index) => (
-            <View
-              key={index}
-              className="w-[48%] bg-card p-4 rounded-xl mb-4 items-center border border-border"
-            >
-              <View className="w-12 h-12 bg-background rounded-full items-center justify-center mb-2 border border-border">
-                <FontAwesome
-                  name={item.icon as any}
-                  size={20}
-                  color={colors.tint}
-                />
-              </View>
-              <Text className="text-foreground font-medium">{item.name}</Text>
-            </View>
-          ))}
         </View>
       </View>
 

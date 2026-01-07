@@ -30,7 +30,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 
--- 2. Mock Data Generator (Enhanced for Colorful Heatmap)
+-- 2. Mock Data Generator (Enhanced for Colorful Heatmap & Clean History)
 DO $$
 DECLARE
     target_class_id UUID;
@@ -41,17 +41,39 @@ DECLARE
     dow INT;
     weight FLOAT;
 BEGIN
-    -- CLEANUP OLD MOCK DATA
-    DELETE FROM public.bookings WHERE status = 'completed';
+    -- A. GET OR CREATE MOCK USER (Bot)
+    -- This prevents polluting the developer's real account with 2000+ bookings.
+    SELECT id INTO mock_user_id FROM auth.users WHERE email = 'heatmap_bot@gymbros.io' LIMIT 1;
 
-    -- Get a user ID for bookings
-    SELECT id INTO mock_user_id FROM auth.users LIMIT 1;
-    
+    IF mock_user_id IS NULL THEN
+        mock_user_id := gen_random_uuid();
+        -- Insert a dummy user into auth.users (requires Postgres role privileges)
+        INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, role, aud, created_at, updated_at)
+        VALUES (
+            mock_user_id,
+            'heatmap_bot@gymbros.io',
+            '$2a$10$dummyhashdummyhashdummyhashdummyhashdummyhash', -- Fake password hash
+            NOW(),
+            'authenticated',
+            'authenticated',
+            NOW(),
+            NOW()
+        );
+        RAISE NOTICE 'Created new Mock User: heatmap_bot@gymbros.io';
+    ELSE 
+        RAISE NOTICE 'Using existing Mock User: %', mock_user_id;
+    END IF;
+
+    -- B. CLEANUP ONLY MOCK DATA
+    -- Only delete bookings belonging to the bot or old completed bookings that might be orphaned
+    DELETE FROM public.bookings WHERE user_id = mock_user_id;
+
+    -- C. GENERATE HEATMAP DATA
     -- Increase sample size to 2500 for better density coverage
     FOR i IN 1..2500 LOOP 
         SELECT id INTO target_class_id FROM public.classes ORDER BY RANDOM() LIMIT 1;
         
-        IF target_class_id IS NOT NULL AND mock_user_id IS NOT NULL THEN
+        IF target_class_id IS NOT NULL THEN
             -- Random date in last 30 days
             simulated_date := DATE_TRUNC('day', NOW()) - (FLOOR(RANDOM() * 30) || ' days')::INTERVAL;
             dow := EXTRACT(DOW FROM simulated_date)::INT;

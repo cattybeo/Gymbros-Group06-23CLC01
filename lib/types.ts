@@ -49,6 +49,13 @@ export interface Profile {
   experience_level?: string | null;
   weekly_availability?: string | null;
   specialties?: string[] | null;
+  experience_years?: number | null;
+  social_links?: {
+    zalo?: string;
+    messenger?: string;
+    facebook?: string;
+  } | null;
+  certificates?: string[] | null;
   metadata?: any;
 }
 
