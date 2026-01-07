@@ -30,7 +30,7 @@ export const AISuggestionCard = ({
   onPressClass,
   isLoading,
 }: AISuggestionCardProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
 
@@ -58,7 +58,7 @@ export const AISuggestionCard = ({
       -1,
       true
     );
-  }, []);
+  }, [borderOpacity, iconScale]);
 
   const animatedBorderStyle = useAnimatedStyle(() => ({
     opacity: borderOpacity.value,
@@ -70,29 +70,35 @@ export const AISuggestionCard = ({
 
   if (isLoading) {
     return (
-      <View className="mb-6 rounded-token-xl overflow-hidden bg-card border border-border p-4 shadow-sm">
+      <View className="mb-6 rounded-3xl overflow-hidden bg-card border border-border p-4 shadow-sm">
         <View className="flex-row items-center justify-between mb-4">
           <View className="flex-row items-center">
-            <Skeleton width={24} height={24} borderRadius={12} />
-            <View className="ml-2">
-              <Skeleton width={80} height={12} borderRadius={4} />
+            <View className="mr-3">
+              <Skeleton width={40} height={40} borderRadius={20} />
+            </View>
+            <View>
+              <Skeleton width={100} height={18} borderRadius={4} />
+              <View className="mt-1">
+                <Skeleton width={140} height={12} borderRadius={4} />
+              </View>
             </View>
           </View>
-          <View className="flex-row gap-1">
-            <Skeleton width={40} height={16} borderRadius={4} />
-            <Skeleton width={40} height={16} borderRadius={4} />
-          </View>
+          <Skeleton width={80} height={24} borderRadius={12} />
         </View>
-        <Skeleton width="100%" height={24} borderRadius={6} />
-        <View className="mt-2">
-          <Skeleton width="90%" height={16} borderRadius={4} />
-          <View className="mt-1">
-            <Skeleton width="75%" height={16} borderRadius={4} />
-          </View>
+
+        <View className="space-y-2 mb-4">
+          <Skeleton width="100%" height={14} borderRadius={4} />
+          <Skeleton width="90%" height={14} borderRadius={4} />
+          <Skeleton width="40%" height={14} borderRadius={4} />
         </View>
-        <View className="mt-4 gap-2">
-          <Skeleton width="100%" height={40} borderRadius={8} />
-          <Skeleton width="100%" height={40} borderRadius={8} />
+
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <Skeleton width="100%" height={48} borderRadius={12} />
+          </View>
+          <View className="flex-1">
+            <Skeleton width="100%" height={48} borderRadius={12} />
+          </View>
         </View>
       </View>
     );
@@ -209,7 +215,7 @@ export const AISuggestionCard = ({
                       </Text>
                       <Text className="text-foreground-secondary text-[10px]">
                         {new Date(targetClass.start_time).toLocaleTimeString(
-                          [],
+                          i18n.language === "vi" ? "vi-VN" : "en-US",
                           { hour: "2-digit", minute: "2-digit" }
                         )}
                       </Text>

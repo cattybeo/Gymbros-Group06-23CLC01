@@ -62,11 +62,7 @@ export default function PersonalSpecsScreen() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        showAlert(
-          t("common.error"),
-          "User not found. Please login again.",
-          "error"
-        );
+        showAlert(t("common.error"), t("auth.user_not_found"), "error");
         return;
       }
 
@@ -119,20 +115,20 @@ export default function PersonalSpecsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View className="mb-8 mt-4">
-            <Text className="text-3xl font-bold text-text mb-2">
+            <Text className="text-3xl font-bold text-foreground mb-2">
               {t("onboarding.title")}
             </Text>
-            <Text className="text-text_secondary">
+            <Text className="text-foreground-secondary">
               {t("onboarding.subtitle")}
             </Text>
           </View>
 
           {/* 1. Basic Info */}
-          <Text className="text-text font-bold text-lg mb-4">
+          <Text className="text-foreground font-bold text-lg mb-4">
             {t("profile.personal_details")}
           </Text>
 
-          <Text className="text-text_secondary mb-2 font-medium">
+          <Text className="text-foreground-secondary mb-2 font-medium">
             {t("profile.gender_label")}
           </Text>
           <View className="flex-row gap-3 mb-6">
@@ -148,7 +144,7 @@ export default function PersonalSpecsScreen() {
               >
                 <Text
                   className={`font-bold capitalize ${
-                    gender === g ? "text-on_primary" : "text-text_secondary"
+                    gender === g ? "text-on_primary" : "text-foreground-secondary"
                   }`}
                 >
                   {t(`profile.genders.${g}`)}
@@ -188,11 +184,11 @@ export default function PersonalSpecsScreen() {
           </View>
 
           {/* 2. Goals */}
-          <Text className="text-text font-bold text-lg mb-4 mt-2">
+          <Text className="text-foreground font-bold text-lg mb-4 mt-2">
             {t("profile.fitness_profile")}
           </Text>
 
-          <Text className="text-text_secondary mb-3 font-medium">
+          <Text className="text-foreground-secondary mb-3 font-medium">
             {t("profile.goal_label")}
           </Text>
           <View className="flex-row flex-wrap gap-3 mb-6">
@@ -208,7 +204,7 @@ export default function PersonalSpecsScreen() {
               >
                 <Text
                   className={`font-medium ${
-                    goal === g ? "text-on_primary" : "text-text_secondary"
+                    goal === g ? "text-on_primary" : "text-foreground-secondary"
                   }`}
                 >
                   {t(`profile.goals.${g}`)}
@@ -217,7 +213,7 @@ export default function PersonalSpecsScreen() {
             ))}
           </View>
 
-          <Text className="text-text_secondary mb-3 font-medium">
+          <Text className="text-foreground-secondary mb-3 font-medium">
             {t("profile.activity_level_label")}
           </Text>
           <View className="flex-row flex-wrap gap-3 mb-6">
@@ -235,7 +231,7 @@ export default function PersonalSpecsScreen() {
                   className={`font-medium ${
                     activityLevel === opt
                       ? "text-on_primary"
-                      : "text-text_secondary"
+                      : "text-foreground-secondary"
                   }`}
                 >
                   {t(`profile.activities.${opt}`)}
@@ -244,7 +240,7 @@ export default function PersonalSpecsScreen() {
             ))}
           </View>
 
-          <Text className="text-text_secondary mb-3 font-medium">
+          <Text className="text-foreground-secondary mb-3 font-medium">
             {t("profile.experience_level_label")}
           </Text>
           <View className="flex-row flex-wrap gap-3 mb-8">
@@ -262,7 +258,7 @@ export default function PersonalSpecsScreen() {
                   className={`font-medium ${
                     experienceLevel === opt
                       ? "text-on_primary"
-                      : "text-text_secondary"
+                      : "text-foreground-secondary"
                   }`}
                 >
                   {t(`profile.experiences.${opt}`)}

@@ -15,6 +15,7 @@ import Animated, {
 interface ClassCardProps {
   gymClass: GymClass;
   onBook: (classId: string) => void;
+  onCancel?: (classId: string) => void;
   isBooking?: boolean;
   isBooked?: boolean;
   isFull?: boolean;
@@ -25,6 +26,7 @@ interface ClassCardProps {
 const ClassCard = memo(function ClassCard({
   gymClass,
   onBook,
+  onCancel,
   isBooking,
   isBooked,
   isFull,
@@ -34,6 +36,25 @@ const ClassCard = memo(function ClassCard({
   const { t, i18n } = useTranslation();
   const startTime = new Date(gymClass.start_time);
   const endTime = new Date(gymClass.end_time);
+
+  // Milestone 3: Advanced UI Logic
+  const now = new Date();
+  const diffInMs = startTime.getTime() - now.getTime();
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+  const isStartingSoon = diffInMinutes > 0 && diffInMinutes <= 60;
+
+  // Placeholder Trainer Name (until DB join is implemented)
+  const trainerNames = [
+    "Alex Nguyen",
+    "Trainer Khanh",
+    "Coach Minh",
+    "Sarayu",
+    "John Wick of Gym",
+  ];
+  const trainerName =
+    trainerNames[
+      parseInt(gymClass.id.substring(0, 8), 16) % trainerNames.length
+    ];
 
   // Pulse effect for AI Recommended border
   const borderPulse = useSharedValue(0.5);
@@ -51,7 +72,7 @@ const ClassCard = memo(function ClassCard({
     } else {
       borderPulse.value = 0.5;
     }
-  }, [isAIRecommended]);
+  }, [isAIRecommended, borderPulse]);
 
   const animatedBorderStyle = useAnimatedStyle(() => ({
     borderColor: isAIRecommended ? "#EAB308" : "transparent", // accent color
@@ -80,29 +101,57 @@ const ClassCard = memo(function ClassCard({
   const imageSource = GYM_IMAGES[gymClass.image_slug] || GYM_IMAGES["default"];
 
   // Determine Button State
+  const isPast = now > startTime;
+  const isOngoing = now >= startTime && now <= endTime;
+
   let buttonText = t("classes.book_now");
   let buttonStyle = "bg-primary active:bg-primary/90";
   let textStyle = "text-on_primary";
-  let isDisabled = isBooking || isBooked || isFull;
+  let isDisabled = isBooking || isBooked || isFull || isPast;
 
   if (isBooking) {
     buttonText = t("classes.processing");
     buttonStyle = "bg-muted border border-border";
     textStyle = "text-muted_foreground";
   } else if (isBooked) {
-    buttonText = t("classes.booked");
-    buttonStyle = "bg-muted border border-border";
-    textStyle = "text-muted_foreground";
+    if (!isPast && !isOngoing && onCancel) {
+      buttonText = t("classes.cancel_booking");
+      buttonStyle = "bg-error/10 border border-error shadow-none";
+      textStyle = "text-error";
+      isDisabled = false;
+    } else {
+      buttonText = t("classes.booked");
+      buttonStyle = "bg-success opacity-90 border border-success";
+      isDisabled = true;
+    }
   } else if (isFull) {
     buttonText = t("classes.full");
     buttonStyle = "bg-error opacity-90";
-    textStyle = "text-on_error";
+  } else if (isPast) {
+    buttonText = isOngoing ? t("classes.ongoing") : t("classes.expired");
+    buttonStyle = "bg-muted opacity-60";
   }
+
+  const handlePress = () => {
+    if (isBooked && onCancel && !isPast && !isOngoing) {
+      onCancel(gymClass.id);
+    } else {
+      onBook(gymClass.id);
+    }
+  };
 
   return (
     <View
       className={`bg-card p-4 rounded-2xl shadow-sm mb-4 border ${isAIRecommended ? "border-accent shadow-lg" : "border-border"}`}
     >
+      {isStartingSoon && !isPast && (
+        <View className="absolute top-2 left-2 z-10 bg-error px-2 py-0.5 rounded-full flex-row items-center">
+          <Ionicons name="time-outline" size={10} color="white" />
+          <Text className="text-[10px] font-bold text-white ml-1 uppercase">
+            {t("classes.starting_soon")}
+          </Text>
+        </View>
+      )}
       {isAIRecommended && (
         <>
           <Animated.View style={animatedBorderStyle} />
@@ -128,7 +177,10 @@ const ClassCard = memo(function ClassCard({
             >
               {gymClass.name}
             </Text>
-            <Text className="text-primary font-medium text-xs mt-1">
+            <Text className="text-muted_foreground text-[10px] mb-1">
+              {t("classes.lead_by")} {trainerName}
+            </Text>
+            <Text className="text-primary font-medium text-xs">
               {formatDate(startTime)}
             </Text>
             <Text className="text-muted_foreground text-xs">
@@ -161,10 +213,10 @@ const ClassCard = memo(function ClassCard({
 
       <TouchableOpacity
         className={`w-full py-3 rounded-xl items-center ${buttonStyle}`}
-        onPress={() => onBook(gymClass.id)}
+        onPress={handlePress}
         disabled={isDisabled}
       >
-        <Text className={`${textStyle} font-bold`}>{buttonText}</Text>
+        <Text className={`font-bold ${textStyle}`}>{buttonText}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -12,8 +12,9 @@ import {
   DefaultTheme,
   ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
-import { StripeProvider } from "@stripe/stripe-react-native";
+import { StripeProvider, useStripe } from "@stripe/stripe-react-native";
 import { useFonts } from "expo-font";
+import * as Linking from "expo-linking";
 import {
   Stack,
   router,
@@ -47,14 +48,16 @@ export default function RootLayout() {
     configureGoogleSignIn();
   }, []);
 
+  const stripeKey = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  if (!stripeKey) {
+    console.warn(
+      "[Stripe] Warning: EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY is not defined in environment variables. Payment will fail."
+    );
+  }
+
   return (
     <SafeAreaProvider>
-      <StripeProvider
-        publishableKey={
-          process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
-        }
-        urlScheme="gymbros"
-      >
+      <StripeProvider publishableKey={stripeKey as string} urlScheme="gymbros">
         <AuthProvider>
           <ThemeProvider>
             <RootLayoutNav />
@@ -104,6 +107,34 @@ function RootLayoutNav() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  // Forward deep links to Stripe so SDK can complete 3DS / redirect flows
+  const { handleURLCallback } = useStripe();
+  useEffect(() => {
+    const onUrl = async ({ url }: { url: string }) => {
+      if (!url) return;
+      try {
+        await handleURLCallback(url);
+      } catch (err) {
+        console.warn("[Stripe] handleURLCallback error", err);
+      }
+    };
+
+    const sub = Linking.addEventListener("url", onUrl);
+
+    (async () => {
+      try {
+        const initialUrl = await Linking.getInitialURL();
+        if (initialUrl) await handleURLCallback(initialUrl);
+      } catch (err) {
+        console.warn("[Stripe] handleURLCallback initial error", err);
+      }
+    })();
+
+    return () => {
+      if (sub && typeof sub.remove === "function") sub.remove();
+    };
+  }, [handleURLCallback]);
 
   const colors = Colors[colorScheme];
   const showLoading = !loaded || themeLoading;

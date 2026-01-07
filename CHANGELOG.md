@@ -2,6 +2,28 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.3.2] - 2026-01-07
+
+### Thay đổi (Changed)
+
+- **i18n & Localization Audit**:
+  - Loại bỏ hoàn toàn các chuỗi văn bản hardcoded và `defaultValue` trong mã nguồn.
+  - Đồng bộ hóa logic dịch thuật cho 100% các thành phần UI (Classes, Membership, Heatmap).
+  - Cập nhật thuật ngữ chuyên ngành Gym cho tiếng Việt tự nhiên hơn.
+- **Code Quality & Stability**:
+  - Nâng cấp lên ESLint 9 (Flat Config) với các quy tắc nghiêm ngặt hơn.
+  - Giải quyết triệt để các cảnh báo React Hook (dependency array) và biến không sử dụng.
+  - Sửa lỗi TypeScript nghiêm trọng liên quan đến thứ tự khai báo biến (Block-scoped variable errors).
+  - Sửa các lớp Tailwind CSS không hợp lệ (`text-text`, `text-text_secondary`) để đảm bảo hiển thị đúng trên mọi thiết bị.
+
+## [v1.3.1] - 2026-01-07
+
+### Sửa lỗi (Fixed)
+
+- **Stripe Android Critical Fix**:
+  - Triển khai xử lý deep-linking (`returnURL`) trong root layout để ổn định quá trình thanh toán trên thiết bị Android.
+  - Sửa lỗi PaymentSheet không tự động đóng sau khi thanh toán thành công.
+
 ## [v1.2.0] - 2026-01-07
 
 ### Thêm mới (Added)
