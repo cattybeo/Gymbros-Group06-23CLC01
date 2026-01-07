@@ -1,6 +1,7 @@
 # Nhật ký thay đổi (Changelog)
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
+
 ## [v1.0.0] - 2026-01-07
 
 ### Thêm mới
@@ -32,6 +33,7 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 - **Android**: Gỡ bỏ cảnh báo `setLayoutAnimationEnabledExperimental` trên kiến trúc mới.
 - **Database**: Sửa lỗi truy vấn cột không tồn tại sau khi thiết kế lại Schema.
 - **Logic**: Sửa lỗi người dùng vẫn thấy gói tập đã hủy cho đến khi hết hạn.
+
 ## [v0.9.1] - 2026-01-07
 
 ### Sửa lỗi (Fixed)
