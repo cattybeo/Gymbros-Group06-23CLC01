@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -19,18 +20,42 @@ export interface TrafficData {
 }
 
 interface CrowdHeatmapProps {
-  data: TrafficData[];
   isLoading?: boolean;
 }
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6 AM to 22 PM (10 PM)
 const DAYS = [1, 2, 3, 4, 5, 6, 0]; // Mon to Sun order
 
-export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
+export default function CrowdHeatmap({
+  isLoading: parentLoading,
+}: CrowdHeatmapProps) {
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
   const pulseAnim = useRef(new Animated.Value(0.6)).current;
+
+  const [data, setData] = useState<TrafficData[]>([]);
+  const [internalLoading, setInternalLoading] = useState(true);
+
+  const fetchTraffic = async () => {
+    try {
+      const { data: trafficData, error } =
+        await supabase.rpc("get_weekly_traffic");
+      if (!error && trafficData) {
+        setData(trafficData);
+      }
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTraffic();
+    const interval = setInterval(fetchTraffic, 30000); // 2026 BP: Isolated Polling
+    return () => clearInterval(interval);
+  }, []);
+
+  const isLoading = parentLoading || internalLoading;
 
   // Pulse effect for the current hour cell (High-end UI feel)
   useEffect(() => {
