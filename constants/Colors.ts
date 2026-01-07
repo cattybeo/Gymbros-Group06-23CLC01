@@ -20,9 +20,9 @@ export default {
     // Alias for text (maintained for backward compatibility)
     foreground: "#111827",
     // Secondary text, descriptions, body content
-    foreground_secondary: "#4B5563",
+    foreground_secondary: "#374151",
     // Tertiary text, captions, disabled states
-    foreground_muted: "#9CA3AF",
+    foreground_muted: "#4B5563",
 
     // ----- Brand Colors (Premium Orange Palette) -----
     // Primary buttons, links, key interactive elements
@@ -65,7 +65,7 @@ export default {
     popover_foreground: "#111827",
     primary_foreground: "#FFFFFF",
     secondary_foreground: "#111827",
-    muted_foreground: "#9CA3AF",
+    muted_foreground: "#4B5563",
     accent_foreground: "#111827",
     destructive: "#EF4444",
     destructive_foreground: "#FFFFFF",

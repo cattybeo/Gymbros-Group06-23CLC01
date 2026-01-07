@@ -1,0 +1,1 @@
+Move 'debug.keystore' vào thư mục '/.android/' nằm tại root, nếu chưa có '/.android/' thì hãy tạo mới
