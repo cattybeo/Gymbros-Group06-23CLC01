@@ -95,8 +95,8 @@ export default function PersonalSpecsScreen() {
 
       if (authError) throw authError;
 
-      // Navigate to Home
-      router.replace("/(tabs)");
+      // Navigate to Home (Root determines role-based path)
+      router.replace("/");
     } catch (error: any) {
       showAlert(t("common.error"), error.message, "error");
     } finally {
@@ -144,7 +144,9 @@ export default function PersonalSpecsScreen() {
               >
                 <Text
                   className={`font-bold capitalize ${
-                    gender === g ? "text-on_primary" : "text-foreground-secondary"
+                    gender === g
+                      ? "text-on_primary"
+                      : "text-foreground-secondary"
                   }`}
                 >
                   {t(`profile.genders.${g}`)}

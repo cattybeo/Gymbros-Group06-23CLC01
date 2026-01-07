@@ -3,48 +3,40 @@
 ## Goal
 
 - Build a robust gym management mobile app (Gymbros) using Expo, Supabase, and Stripe.
-- Current Sprint: EPIC v1.4 - Class Detail View & Refinements.
+- Current Sprint: Phase 3 - AI Coach Integration (Trainer Assistant).
+- Objective: Implement a Virtual Assistant for Trainers (PT) to analyze class performance and student retention.
 
 ## Constraints/Assumptions
 
 - Framework: Expo SDK 54 (React Native 0.81.5).
-- Styling: NativeWind (Tailwind).
-- Stripe: Must work on Android (requires returnURL and specific init).
-- i18n: Strict usage of `t()` without hardcoded fallbacks or `defaultValue`.
+- Styling: NativeWind (Tailwind); Trainer App uses "Deep Indigo / Dark Teal" palette.
+- Database: Supabase (`access_logs`, `bookings` with attendance status).
+- AI Standard: Use dedicated Edge Function `gymbros-coach-ai` for Trainer logic.
 
 ## Key decisions
 
-- Use `initStripe` hook in `membership.tsx`.
-- Standardized AI pattern: `@google/genai` (Gemini 3 Flash).
-- EPIC v1.4: Use dynamic routing `/class/[id]` for detailed views.
-- **Rule of Data Safety**: All mock data scripts must use `status = 'completed'` and be scoped to mock IDs to avoid polluting real user journeys.
-- **Rule of Payload Optimization**: Always deduplicate and trim UUID lists before calling AI services.
+- **Separation of Concerns**: `gymbros-ai` remains for Member Class Suggestions. `gymbros-coach-ai` is newly created for Trainer Intelligence.
+- **AI Coach Functions**: Class recaps, retention alerts, and smart message drafting.
+- **Privacy**: Anonymize student data (IDs/First Names only) before sending to Gemini.
 
 ## State
 
 - Done:
-  - Fixed TS/ESLint errors and released v1.3.2.
-  - Implemented Class Detail UI & Navigation.
-  - Resolved "Booking Pollutant" bug by cleaning up 390+ junk bookings.
-  - Fixed Heatmap rendering (timezone & scoring adjustment).
-  - Optimized AI Token usage via Unique ID filtering.
-  - Implemented `profiles` and `locations` database schema and mock migration.
-  - Updated `ClassDetailScreen` to fetch dynamic trainer and location data.
-  - Implemented unified roles (`Admin`, `Staff`, `PT`, `Member`) and localized HCMC locations.
-  - Fixed `PGRST200` relation error by updating Supabase join syntax to `location:locations(*)`.
-  - UI: Enhanced `ClassCard` with location information.
+  - Phase 1: Refactored Folder Structure (`(auth)`, `(member)`, `(trainer)`).
+  - Phase 2: Trainer App Basics (Dashboard, Attendance, Student List).
+  - Phase 3: AI Coach Integration (Trainer Assistant) and Member AI refinement.
 - Now:
-  - EPIC v1.4: Refining UI animations and cross-platform consistency.
+  - Phase 4: Admin Web Console (React).
 - Next:
-  - Shared Element Transitions between `ClassCard` and `ClassDetail`.
-  - Verify trainer/location rendering on physical devices.
+  - Phase 5: Production Hardening & Final Test Report.
 
 ## Open questions
 
-- Should we add a share button to the class detail view?
+- (None)
 
 ## Working set
 
-- [app/class/[id].tsx](app/class/[id].tsx)
-- [components/ClassCard.tsx](components/ClassCard.tsx)
-- [app/\_layout.tsx](app/_layout.tsx)
+- [app/(trainer)/dashboard.tsx](<app/(trainer)/dashboard.tsx>)
+- [app/(trainer)/session/[id].tsx](<app/(trainer)/session/[id].tsx>)
+- [supabase/functions/gymbros-coach-ai/index.ts](supabase/functions/gymbros-coach-ai/index.ts)
+- [docs_need_to_work/PT_UX_Flow_Plan.md](docs_need_to_work/PT_UX_Flow_Plan.md)
