@@ -1,5 +1,8 @@
 import ClassCard from "@/components/ClassCard";
 import CrowdHeatmap, { TrafficData } from "@/components/CrowdHeatmap";
+import { CatalogSkeleton } from "@/components/ui/CatalogSkeleton";
+import { ClassCardSkeleton } from "@/components/ui/ClassCardSkeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
@@ -8,9 +11,10 @@ import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Animated,
   FlatList,
   Image,
   ScrollView,
@@ -21,7 +25,9 @@ import {
 
 export default function ClassesScreen() {
   const [classes, setClasses] = useState<GymClass[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [dataReady, setDataReady] = useState(false);
+  const [contentOpacity] = useState(new Animated.Value(0));
   const [bookingId, setBookingId] = useState<string | null>(null);
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
@@ -39,10 +45,22 @@ export default function ClassesScreen() {
     fetchData();
   }, []);
 
+  // Premium Fade-in Transition
+  useEffect(() => {
+    if (dataReady) {
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [dataReady, contentOpacity]);
+
   async function fetchData() {
     setLoading(true);
+    setDataReady(false);
+    contentOpacity.setValue(0);
     try {
-      // Parallel Fetching: User, Traffic, Classes
       const [userResponse, trafficResponse, classesResponse] =
         await Promise.all([
           supabase.auth.getUser(),
@@ -50,30 +68,23 @@ export default function ClassesScreen() {
           supabase
             .from("classes")
             .select("*")
-            // .gte("start_time", new Date().toISOString()) // Uncomment for Prod
             .order("start_time", { ascending: true }),
         ]);
 
       const user = userResponse.data.user;
 
-      // 1. Set Traffic
       if (!trafficResponse.error) {
         setTrafficData(trafficResponse.data || []);
       }
 
-      // 2. Set Classes
       if (classesResponse.error) throw classesResponse.error;
       const classesData = classesResponse.data || [];
       setClasses(classesData);
 
       const classIds = classesData.map((c) => c.id);
 
-      // 3. Parallel Fetching: Bookings (Dependent on Class IDs)
       if (classIds.length > 0) {
-        // FIXME: RLS prevents fetching global counts client-side. Using RPC bypass for now.
-
         if (user) {
-          // Fetch My Bookings
           const { data: myBookingsData } = await supabase
             .from("bookings")
             .select("class_id")
@@ -84,7 +95,6 @@ export default function ClassesScreen() {
           setMyBookings(new Set(myBookingsData?.map((b) => b.class_id)));
         }
 
-        // Fetch Global Counts via RPC (Bypass RLS)
         const { data: countsData } = await supabase.rpc("get_class_counts", {
           class_ids: classIds,
         });
@@ -97,6 +107,7 @@ export default function ClassesScreen() {
         }
         setClassCounts(counts);
       }
+      setDataReady(true);
     } catch (error) {
       console.error(error);
       showAlert(t("common.error"), t("classes.fetch_error"), "error");
@@ -105,95 +116,97 @@ export default function ClassesScreen() {
     }
   }
 
-  async function handleBook(classId: string) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const handleBook = useCallback(
+    async (classId: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (!user) {
-      showAlert(t("auth.login_button"), t("classes.login_required"), "error", {
-        onClose: () => router.push("/(auth)/sign-in"),
-      });
-      return;
-    }
-
-    setBookingId(classId);
-
-    try {
-      // 0. Check Capacity
-      const currentCount = classCounts[classId] || 0;
-      const targetClass = classes.find((c) => c.id === classId);
-      if (targetClass && currentCount >= targetClass.capacity) {
-        showAlert(t("common.error"), t("classes.class_full"), "error");
-        return;
-      }
-
-      // 1. Check Active Membership
-      const { data: memberships, error: memError } = await supabase
-        .from("user_memberships")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .gte("end_date", new Date().toISOString())
-        .limit(1);
-
-      if (memError || !memberships || memberships.length === 0) {
+      if (!user) {
         showAlert(
-          t("classes.membership_required"),
-          t("classes.membership_required_msg"),
+          t("auth.login_button"),
+          t("classes.login_required"),
           "error",
           {
-            primaryButtonText: t("common.confirm"),
-            onPrimaryPress: () => router.push("/membership"), // Guide them to membership page
+            onClose: () => router.push("/(auth)/sign-in"),
           }
         );
-        setBookingId(null);
         return;
       }
 
-      // 2. Check duplicate
-      const { data: existingBooking } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("class_id", classId)
-        .single();
+      setBookingId(classId);
 
-      if (existingBooking) {
-        showAlert(t("common.error"), t("classes.already_booked"), "error");
+      try {
+        const currentCount = classCounts[classId] || 0;
+        const targetClass = classes.find((c) => c.id === classId);
+        if (targetClass && currentCount >= targetClass.capacity) {
+          showAlert(t("common.error"), t("classes.class_full"), "error");
+          return;
+        }
+
+        const { data: memberships, error: memError } = await supabase
+          .from("user_memberships")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .gte("end_date", new Date().toISOString())
+          .limit(1);
+
+        if (memError || !memberships || memberships.length === 0) {
+          showAlert(
+            t("classes.membership_required"),
+            t("classes.membership_required_msg"),
+            "error",
+            {
+              primaryButtonText: t("common.confirm"),
+              onPrimaryPress: () => router.push("/membership"),
+            }
+          );
+          setBookingId(null);
+          return;
+        }
+
+        const { data: existingBooking } = await supabase
+          .from("bookings")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("class_id", classId)
+          .single();
+
+        if (existingBooking) {
+          showAlert(t("common.error"), t("classes.already_booked"), "error");
+          setBookingId(null);
+          return;
+        }
+
+        const { error: bookError } = await supabase.from("bookings").insert({
+          user_id: user.id,
+          class_id: classId,
+          booking_date: new Date().toISOString(),
+          status: "confirmed",
+          status_payment: "unpaid",
+        });
+
+        if (bookError) throw bookError;
+
+        showAlert(
+          t("classes.booking_success"),
+          t("classes.booking_success_msg"),
+          "success"
+        );
+        fetchData();
+      } catch (error: any) {
+        showAlert(t("classes.booking_error"), error.message, "error");
+      } finally {
         setBookingId(null);
-        return;
       }
+    },
+    [classes, classCounts, t, showAlert]
+  );
 
-      // 3. Create Booking
-      const { error: bookError } = await supabase.from("bookings").insert({
-        user_id: user.id,
-        class_id: classId,
-        booking_date: new Date().toISOString(),
-        status: "confirmed",
-        status_payment: "unpaid",
-      });
-
-      if (bookError) throw bookError;
-
-      showAlert(
-        t("classes.booking_success"),
-        t("classes.booking_success_msg"),
-        "success"
-      );
-      fetchData();
-    } catch (error: any) {
-      showAlert(t("classes.booking_error"), error.message, "error");
-    } finally {
-      setBookingId(null);
-    }
-  }
-
-  // --- Derived State for Catalog ---
   const uniqueClassTypes = useMemo(() => {
     const typesMap = new Map<string, { name: string; image_slug: string }>();
     classes.forEach((c) => {
-      // Use name as key to ensure uniqueness
       if (!typesMap.has(c.name)) {
         typesMap.set(c.name, { name: c.name, image_slug: c.image_slug });
       }
@@ -206,6 +219,28 @@ export default function ClassesScreen() {
     return classes.filter((c) => c.name === selectedType);
   }, [classes, selectedType]);
 
+  const PageSkeleton = () => (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      className="flex-1 mt-12"
+      contentContainerStyle={{ paddingBottom: 40 }}
+    >
+      <View className="mb-4">
+        <Skeleton width={200} height={36} borderRadius={4} />
+        <View className="mt-2">
+          <Skeleton width={150} height={16} borderRadius={4} />
+        </View>
+      </View>
+      <CatalogSkeleton />
+      <CrowdHeatmap data={[]} isLoading={true} />
+      <View className="mb-4">
+        <Skeleton width={180} height={24} borderRadius={4} />
+      </View>
+      <ClassCardSkeleton />
+      <ClassCardSkeleton />
+    </ScrollView>
+  );
+
   const renderCatalog = () => (
     <View className="mb-6">
       <Text className="text-xl font-bold text-foreground mb-3 px-1">
@@ -213,7 +248,6 @@ export default function ClassesScreen() {
       </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View className="flex-row">
-          {/* 'All' Option */}
           <TouchableOpacity
             onPress={() => setSelectedType("All")}
             className={`mr-3 items-center ${
@@ -230,7 +264,7 @@ export default function ClassesScreen() {
                 size={24}
                 color={
                   selectedType === "All"
-                    ? colors.primary
+                    ? colors.on_primary
                     : colors.muted_foreground
                 }
               />
@@ -246,7 +280,6 @@ export default function ClassesScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Dynamic Types */}
           {uniqueClassTypes.map((type) => {
             const isSelected = selectedType === type.name;
             const imageSource =
@@ -279,57 +312,71 @@ export default function ClassesScreen() {
     </View>
   );
 
+  const renderItem = useCallback(
+    ({ item }: { item: GymClass }) => {
+      const bookedCount = classCounts[item.id] || 0;
+      const isBooked = myBookings.has(item.id);
+      const isFull = bookedCount >= item.capacity;
+      const spotsLeft = item.capacity - bookedCount;
+
+      return (
+        <ClassCard
+          gymClass={item}
+          onBook={handleBook}
+          isBooking={bookingId === item.id}
+          isBooked={isBooked}
+          isFull={isFull}
+          spotsLeft={spotsLeft}
+        />
+      );
+    },
+    [classCounts, myBookings, bookingId, handleBook]
+  );
+
   return (
     <View className="flex-1 bg-background pt-12 px-4">
-      <View className="mb-2">
-        <Text className="text-3xl font-bold text-foreground">
-          {t("classes.title")}
-        </Text>
-        <Text className="text-muted_foreground mt-1">
-          {t("classes.subtitle")}
-        </Text>
-      </View>
-
-      <FlatList
-        data={filteredClasses}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <>
-            {renderCatalog()}
-            <CrowdHeatmap data={trafficData} isLoading={loading} />
-            <Text className="text-lg font-bold text-foreground mb-2 mt-2 px-1">
-              {t("classes.upcoming_schedule")}
-            </Text>
-          </>
-        }
-        renderItem={({ item }) => {
-          const bookedCount = classCounts[item.id] || 0;
-          const isBooked = myBookings.has(item.id);
-          const isFull = bookedCount >= item.capacity;
-          const spotsLeft = item.capacity - bookedCount;
-
-          return (
-            <ClassCard
-              gymClass={item}
-              onBook={handleBook}
-              isBooking={bookingId === item.id}
-              isBooked={isBooked}
-              isFull={isFull}
-              spotsLeft={spotsLeft}
-            />
-          );
-        }}
-        refreshing={loading}
-        onRefresh={fetchData}
-        ListEmptyComponent={
-          !loading ? (
-            <Text className="text-center text-muted_foreground mt-10">
-              {t("classes.empty_list")}
-            </Text>
-          ) : null
-        }
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
+      {!dataReady ? (
+        <PageSkeleton />
+      ) : (
+        <Animated.View
+          style={{ flex: 1, opacity: contentOpacity, marginTop: 48 }}
+        >
+          <FlatList
+            data={filteredClasses}
+            keyExtractor={(item) => item.id}
+            initialNumToRender={5}
+            maxToRenderPerBatch={5}
+            windowSize={5}
+            removeClippedSubviews={true}
+            ListHeaderComponent={
+              <>
+                <View className="mb-2">
+                  <Text className="text-3xl font-bold text-foreground">
+                    {t("classes.title")}
+                  </Text>
+                  <Text className="text-muted_foreground mt-1">
+                    {t("classes.subtitle")}
+                  </Text>
+                </View>
+                {renderCatalog()}
+                <CrowdHeatmap data={trafficData} isLoading={loading} />
+                <Text className="text-lg font-bold text-foreground mb-2 mt-2 px-1">
+                  {t("classes.upcoming_schedule")}
+                </Text>
+              </>
+            }
+            renderItem={renderItem}
+            refreshing={loading}
+            onRefresh={fetchData}
+            ListEmptyComponent={
+              <Text className="text-center text-muted_foreground mt-10">
+                {t("classes.empty_list")}
+              </Text>
+            }
+            contentContainerStyle={{ paddingBottom: 20 }}
+          />
+        </Animated.View>
+      )}
       <CustomAlertComponent />
     </View>
   );

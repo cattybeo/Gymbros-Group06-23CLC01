@@ -44,37 +44,40 @@ DECLARE
     random_day_offset INT;
 BEGIN
     -- Get a valid class and user to link bookings to (fallback if empty table)
-    -- Get a valid user to link bookings to (fallback if empty table)
     SELECT id INTO dummy_user_id FROM auth.users LIMIT 1;
+    SELECT id INTO dummy_class_id FROM public.classes LIMIT 1;
 
     -- Only insert if we have a class and user, and table is relatively empty (< 10 rows)
     IF dummy_class_id IS NOT NULL AND dummy_user_id IS NOT NULL AND (SELECT COUNT(*) FROM bookings) < 10 THEN
         
-        -- Insert 200 mock bookings dispersed over last week
-        FOR i IN 1..200 LOOP
+        -- Insert 1500 mock bookings to create a realistic density
+        FOR i IN 1..1500 LOOP
             -- Random class from existing classes
             SELECT id INTO dummy_class_id FROM public.classes ORDER BY RANDOM() LIMIT 1;
             
-            -- Random hour between 6 (6AM) and 22 (10PM) with bias towards peak (17-19)
-            -- Simple Rand: 6 + Floor(Random * 16)
-            random_hour := 6 + FLOOR(RANDOM() * 16);
-            
-            -- Peak Hour Boost: If > 0.7, force to 17-19 (5PM-7PM)
-            IF RANDOM() > 0.7 THEN
-                random_hour := 17 + FLOOR(RANDOM() * 3);
+            -- Peak Hour Logic: Most gym goers come at 5PM-8PM (17-20) or 6AM-8AM (6-8)
+            IF RANDOM() > 0.6 THEN
+                -- Afternoon Peak
+                random_hour := 17 + FLOOR(RANDOM() * 4);
+            ELSIF RANDOM() > 0.8 THEN
+                -- Morning Peak
+                random_hour := 6 + FLOOR(RANDOM() * 3);
+            ELSE
+                -- Normal Hours
+                random_hour := 9 + FLOOR(RANDOM() * 8);
             END IF;
 
-            random_day_offset := FLOOR(RANDOM() * 7); -- 0 to 6 days ago
+            random_day_offset := FLOOR(RANDOM() * 14); -- Over 14 days for more data points
 
             simulated_date := NOW() - (random_day_offset || ' days')::INTERVAL;
-            -- Set hour
-            simulated_date := DATE_TRUNC('hour', simulated_date) + (random_hour || ' hours')::INTERVAL;
+            -- Set hour and add random minutes/seconds for realism
+            simulated_date := DATE_TRUNC('hour', simulated_date) + (random_hour || ' hours')::INTERVAL + (FLOOR(RANDOM() * 60) || ' minutes')::INTERVAL;
 
             INSERT INTO public.bookings (user_id, class_id, booking_date, status)
             VALUES (dummy_user_id, dummy_class_id, simulated_date, 'confirmed');
         END LOOP;
         
-        RAISE NOTICE 'Inserted 200 mock bookings for Heatmap simulation.';
+        RAISE NOTICE 'Inserted 1500 mock bookings for Heatmap simulation.';
     ELSE
         RAISE NOTICE 'Skipping mock data: Classes/Users missing or Bookings table already populated.';
     END IF;
