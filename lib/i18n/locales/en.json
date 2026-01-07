@@ -61,7 +61,12 @@
     "pick_image_error": "Could not pick image.",
     "uploading": "Uploading...",
     "default_user_name": "Gymbro User",
-    "optional": "Optional"
+    "optional": "Optional",
+    "confirm_buy": "Confirm Subscription",
+    "cancel_membership": "Cancel Membership",
+    "cancel_membership_confirm": "Are you sure you want to cancel your current membership? This will stop any future renewals (if any) and change your membership status.",
+    "keep_membership": "Keep Membership",
+    "not_logged_in": "Please log in to continue."
   },
   "membership": {
     "payment_init_error": "Could not initialize payment",
@@ -78,12 +83,20 @@
     "popular": "POPULAR",
     "best_value": "BEST VALUE",
     "1_year": "1 Year",
-    "month_count": "{{count}} Months",
+    "month_count_one": "{{count}} Month",
+    "month_count_other": "{{count}} Months",
     "save_hint": "* Save up to 30% on long-term plans",
     "free": "Free",
-    "month_unit": "month",
+    "month_unit_one": "month",
+    "month_unit_other": "months",
     "billed_duration": "Billed {{price}} every {{count}} months",
-    "per_month_approx": "≈ {{price}} / month"
+    "per_month_approx": "≈ {{price}} / month",
+    "activation_success": "Membership activated successfully!",
+    "activation_pending": "Payment successful! Your membership will be active in a few minutes.",
+    "load_failed": "Failed to load membership plans.",
+    "login_required_buy": "Please log in to purchase a plan.",
+    "no_active_found": "No active membership found to cancel.",
+    "cancelled_early": "Cancelled (Early Expiry)"
   },
   "home": {
     "welcome": "Welcome back,",

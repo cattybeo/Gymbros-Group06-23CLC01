@@ -1,4 +1,7 @@
 import MembershipCard from "@/components/MembershipCard";
+import { DurationSelectorSkeleton } from "@/components/ui/DurationSelectorSkeleton";
+import { MembershipCardSkeleton } from "@/components/ui/MembershipCardSkeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { supabase } from "@/lib/supabase";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
@@ -6,12 +9,20 @@ import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  FlatList,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function MembershipScreen() {
   const [tiers, setTiers] = useState<MembershipTier[]>([]);
   const [plans, setPlans] = useState<MembershipPlan[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [contentOpacity] = useState(new Animated.Value(0));
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const [currentPlan, setCurrentPlan] = useState<MembershipPlan | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3 | 6 | 12>(1);
@@ -20,42 +31,47 @@ export default function MembershipScreen() {
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
 
+  // Premium Fade-in Transition
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 500, // Smoother timing for premium feel
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [loading, contentOpacity]);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   async function fetchData() {
     setLoading(true);
+    contentOpacity.setValue(0);
     try {
-      // 1. Fetch Tiers
-      const { data: tiersData, error: tiersError } = await supabase
-        .from("membership_tiers")
-        .select("*")
-        .order("level", { ascending: true });
+      const [tiersRes, plansRes, authRes] = await Promise.all([
+        supabase
+          .from("membership_tiers")
+          .select("*")
+          .order("level", { ascending: true }),
+        supabase.from("membership_plans").select("*").eq("is_active", true),
+        supabase.auth.getUser(),
+      ]);
 
-      if (tiersError) throw tiersError;
-      setTiers(tiersData || []);
+      if (tiersRes.error) throw tiersRes.error;
+      if (plansRes.error) throw plansRes.error;
 
-      // 2. Fetch Plans
-      const { data: plansData, error: plansError } = await supabase
-        .from("membership_plans")
-        .select("*")
-        .eq("is_active", true);
+      setTiers(tiersRes.data || []);
+      setPlans(plansRes.data || []);
 
-      if (plansError) throw plansError;
-      setPlans(plansData || []);
-
-      // 3. Fetch User's Active Membership
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
+      const user = authRes.data.user;
       if (user) {
         const { data: membershipData, error: membershipError } = await supabase
           .from("user_memberships")
           .select("plan_id, plan:membership_plans(*), status")
           .eq("user_id", user.id)
-          .in("status", ["active", "cancelled"])
+          .eq("status", "active") // Only show 'active' as the current plan
           .gte("end_date", new Date().toISOString())
           .order("end_date", { ascending: false })
           .limit(1)
@@ -67,11 +83,13 @@ export default function MembershipScreen() {
 
         if (membershipData && membershipData.plan) {
           setCurrentPlan(membershipData.plan as unknown as MembershipPlan);
+        } else {
+          setCurrentPlan(null); // Explicitly clear if no active membership
         }
       }
     } catch (error) {
       console.error(error);
-      showAlert(t("common.error"), "Không thể tải dữ liệu gói tập", "error");
+      showAlert(t("common.error"), t("membership.load_failed"), "error");
     } finally {
       setLoading(false);
     }
@@ -83,10 +101,9 @@ export default function MembershipScreen() {
     tierLevel: number,
     targetPlanId: string
   ): "default" | "current" | "upgrade" | "downgrade" {
-    // 1. If user has NO active plan, treat Level 1 (Standard) as "Current"
     if (!currentPlan) {
       if (tierLevel === 1) return "current";
-      return "upgrade"; // Anything higher than Level 1 is an upgrade
+      return "upgrade";
     }
 
     if (currentPlan.id === targetPlanId) return "current";
@@ -96,7 +113,6 @@ export default function MembershipScreen() {
     if (!currentTier) return "default";
 
     if (tierLevel > currentTier.level) return "upgrade";
-    // If we are looking at Level 1, and current is higher, it's a downgrade
     if (tierLevel < currentTier.level) return "downgrade";
 
     return "default";
@@ -114,7 +130,7 @@ export default function MembershipScreen() {
       if (!user) {
         showAlert(
           t("common.error"),
-          "Vui lòng đăng nhập để mua gói tập.",
+          t("membership.login_required_buy"),
           "error",
           { onClose: () => router.push("/(auth)/sign-in") }
         );
@@ -143,6 +159,8 @@ export default function MembershipScreen() {
 
       if (initError) throw new Error(initError.message);
 
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       const { error: paymentError } = await presentPaymentSheet();
 
       if (paymentError) {
@@ -162,7 +180,7 @@ export default function MembershipScreen() {
   async function waitForMembershipActivation(userId: string, planId: string) {
     setLoading(true);
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 12;
 
     const interval = setInterval(async () => {
       attempts++;
@@ -173,7 +191,7 @@ export default function MembershipScreen() {
           .eq("user_id", userId)
           .eq("plan_id", planId)
           .eq("status", "active")
-          .gte("created_at", new Date(Date.now() - 60000).toISOString())
+          .gte("created_at", new Date(Date.now() - 300000).toISOString())
           .maybeSingle();
 
         if (data) {
@@ -181,7 +199,7 @@ export default function MembershipScreen() {
           setLoading(false);
           showAlert(
             t("common.success"),
-            "Đăng ký gói tập thành công!",
+            t("membership.activation_success"),
             "success"
           );
           fetchData();
@@ -190,26 +208,28 @@ export default function MembershipScreen() {
           setLoading(false);
           showAlert(
             t("common.success"),
-            "Thanh toán thành công! Gói tập sẽ được kích hoạt trong ít phút.",
+            t("membership.activation_pending"),
             "success"
           );
           fetchData();
         }
       } catch (e) {
-        clearInterval(interval);
-        setLoading(false);
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          setLoading(false);
+        }
       }
     }, 2000);
   }
 
   async function handleCancel() {
     showAlert(
-      "Xác nhận hủy",
-      "Bạn có chắc chắn muốn hủy gói tập hiện tại? Việc này sẽ dừng gia hạn (nếu có) và thay đổi trạng thái gói.",
+      t("common.confirm_buy"),
+      t("common.cancel_membership_confirm"),
       "warning",
       {
-        primaryButtonText: "Hủy gói",
-        secondaryButtonText: "Không",
+        primaryButtonText: t("common.cancel_membership"),
+        secondaryButtonText: t("common.keep_membership"),
         onPrimaryPress: async () => {
           setLoading(true);
           try {
@@ -228,8 +248,8 @@ export default function MembershipScreen() {
 
             if (!mem) {
               showAlert(
-                "Lỗi",
-                "Không tìm thấy gói tập đang hoạt động để hủy.",
+                t("common.error"),
+                t("membership.no_active_found"),
                 "error"
               );
               return;
@@ -260,120 +280,151 @@ export default function MembershipScreen() {
     );
   }
 
+  const PageSkeleton = () => (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      className="flex-1"
+      contentContainerStyle={{ paddingTop: 24, paddingBottom: 40 }}
+    >
+      {/* Header Skeleton */}
+      <View className="mb-4">
+        <Skeleton width={200} height={36} borderRadius={4} />
+        <View className="mt-2">
+          <Skeleton width={150} height={16} borderRadius={4} />
+        </View>
+      </View>
+
+      {/* Duration Selector Skeleton */}
+      <DurationSelectorSkeleton />
+
+      {/* Cards Skeleton */}
+      <MembershipCardSkeleton />
+      <MembershipCardSkeleton />
+    </ScrollView>
+  );
+
   return (
     <View className="flex-1 bg-background pt-24 px-4">
-      <View className="mb-4">
-        <Text className="text-3xl font-bold text-foreground">
-          {t("membership.title")}
-        </Text>
-        <Text className="text-muted_foreground mt-1">
-          {t("membership.subtitle")}
-        </Text>
-      </View>
+      {loading ? (
+        <PageSkeleton />
+      ) : (
+        <Animated.View style={{ flex: 1, opacity: contentOpacity }}>
+          {/* Actual Content */}
+          <View className="mb-4">
+            <Text className="text-3xl font-bold text-foreground">
+              {t("membership.title")}
+            </Text>
+            <Text className="text-muted_foreground mt-1">
+              {t("membership.subtitle")}
+            </Text>
+          </View>
 
-      {/* Duration Selector - Best Practice 2026 */}
-      <View className="mb-6">
-        <View className="flex-row bg-card p-1 rounded-3xl border border-border justify-between relative shadow-sm">
-          {durationOptions.map((duration) => (
-            <TouchableOpacity
-              key={duration}
-              className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
-                selectedDuration === duration
-                  ? "bg-primary shadow-sm"
-                  : "bg-transparent"
-              }`}
-              onPress={() => setSelectedDuration(duration as any)}
-            >
-              {duration === 6 && (
-                <View className="absolute -top-3 z-20 bg-accent px-2 py-0.5 rounded-full shadow-sm border border-white/20">
-                  <Text className="text-[10px] font-bold text-on_accent">
-                    {t("membership.popular")}
-                  </Text>
-                </View>
-              )}
-              {duration === 12 && (
-                <View className="absolute -top-3 z-20 bg-error px-2 py-0.5 rounded-full shadow-sm border border-white/20">
-                  <Text className="text-[10px] font-bold text-white">
-                    {t("membership.best_value")}
-                  </Text>
-                </View>
-              )}
-              <Text
-                className={`font-bold text-sm ${
-                  selectedDuration === duration
-                    ? "text-on_primary"
-                    : "text-muted_foreground"
-                }`}
-              >
-                {duration === 12
-                  ? t("membership.1_year")
-                  : t("membership.month_count", { count: duration })}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-        <Text className="text-center text-xs text-muted_foreground mt-3 italic opacity-80">
-          {t("membership.save_hint")}
-        </Text>
-      </View>
-
-      <FlatList
-        data={tiers}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item: tier }) => {
-          // LOGIC: Hide Standard Tier (Level 1) for packages > 1 Month (Free is forever/monthly)
-          if (selectedDuration > 1 && tier.level === 1) return null;
-
-          const relevantPlans = plans.filter((p) => p.tier_id === tier.id);
-          const selectedPlan = relevantPlans.find(
-            (p) => p.duration_months === selectedDuration
-          );
-
-          if (!selectedPlan) return null;
-
-          const isMyCurrentPlan =
-            currentPlan?.id === selectedPlan.id &&
-            tier.level ===
-              tiers.find((t) => t.id === currentPlan.tier_id)?.level;
-
-          return (
-            <View>
-              <MembershipCard
-                plan={
-                  {
-                    ...selectedPlan,
-                    name: tier.name,
-                    image_slug: tier.image_slug,
-                  } as any
-                }
-                tier={tier}
-                duration={selectedDuration}
-                onBuy={() => handleBuy(selectedPlan.id)}
-                isLoading={purchasingId === selectedPlan.id}
-                status={getPlanStatus(tier.level, selectedPlan.id)}
-              />
-              {isMyCurrentPlan && (
+          {/* Duration Selector */}
+          <View className="mb-6">
+            <View className="flex-row bg-card p-1 rounded-3xl border border-border justify-between relative shadow-sm">
+              {durationOptions.map((duration) => (
                 <TouchableOpacity
-                  className="bg-destructive/10 border border-destructive p-3 rounded-lg -mt-2 mb-4 mx-4 items-center"
-                  onPress={() => handleCancel()}
+                  key={duration}
+                  accessibilityRole="button"
+                  className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
+                    selectedDuration === duration
+                      ? "bg-primary shadow-sm"
+                      : "bg-transparent"
+                  }`}
+                  onPress={() => setSelectedDuration(duration as any)}
                 >
-                  <Text className="text-destructive font-bold">
-                    Hủy gói tập (Cancel)
+                  {duration === 6 && (
+                    <View className="absolute -top-3 z-20 bg-accent px-2 py-0.5 rounded-full shadow-sm border border-white/20">
+                      <Text className="text-[10px] font-bold text-on_accent">
+                        {t("membership.popular")}
+                      </Text>
+                    </View>
+                  )}
+                  {duration === 12 && (
+                    <View className="absolute -top-3 z-20 bg-error px-2 py-0.5 rounded-full shadow-sm border border-white/20">
+                      <Text className="text-[10px] font-bold text-white">
+                        {t("membership.best_value")}
+                      </Text>
+                    </View>
+                  )}
+                  <Text
+                    className={`font-bold text-sm ${
+                      selectedDuration === duration
+                        ? "text-on_primary"
+                        : "text-muted_foreground"
+                    }`}
+                  >
+                    {duration === 12
+                      ? t("membership.1_year")
+                      : t("membership.month_count", { count: duration })}
                   </Text>
                 </TouchableOpacity>
-              )}
+              ))}
             </View>
-          );
-        }}
-        refreshing={loading}
-        onRefresh={fetchData}
-        ListEmptyComponent={
-          <Text className="text-center text-muted_foreground mt-10">
-            {t("membership.empty_list")}
-          </Text>
-        }
-      />
+            <Text className="text-center text-xs text-muted_foreground mt-3 italic opacity-80">
+              {t("membership.save_hint")}
+            </Text>
+          </View>
+
+          <FlatList
+            data={tiers}
+            keyExtractor={(item) => item.id}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item: tier }) => {
+              if (selectedDuration > 1 && tier.level === 1) return null;
+
+              const relevantPlans = plans.filter((p) => p.tier_id === tier.id);
+              const selectedPlan = relevantPlans.find(
+                (p) => p.duration_months === selectedDuration
+              );
+
+              if (!selectedPlan) return null;
+
+              const isMyCurrentPlan =
+                currentPlan?.id === selectedPlan.id &&
+                tier.level ===
+                  tiers.find((t) => t.id === currentPlan.tier_id)?.level;
+
+              return (
+                <View>
+                  <MembershipCard
+                    plan={
+                      {
+                        ...selectedPlan,
+                        name: tier.name,
+                        image_slug: tier.image_slug,
+                      } as any
+                    }
+                    tier={tier}
+                    duration={selectedDuration}
+                    onBuy={() => handleBuy(selectedPlan.id)}
+                    isLoading={purchasingId === selectedPlan.id}
+                    status={getPlanStatus(tier.level, selectedPlan.id)}
+                  />
+                  {isMyCurrentPlan && (
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      className="bg-destructive/10 border border-destructive p-3 rounded-lg -mt-2 mb-4 mx-4 items-center"
+                      onPress={() => handleCancel()}
+                    >
+                      <Text className="text-destructive font-bold">
+                        {t("common.cancel_membership")}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              );
+            }}
+            refreshing={loading}
+            onRefresh={fetchData}
+            ListEmptyComponent={
+              <Text className="text-center text-muted_foreground mt-10">
+                {t("membership.empty_list")}
+              </Text>
+            }
+          />
+        </Animated.View>
+      )}
       <CustomAlertComponent />
     </View>
   );

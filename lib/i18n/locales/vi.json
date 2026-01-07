@@ -60,7 +60,12 @@
     "pick_image_error": "Không thể chọn ảnh.",
     "uploading": "Đang tải lên...",
     "default_user_name": "Người dùng Gymbro",
-    "optional": "Tùy chọn"
+    "optional": "Tùy chọn",
+    "confirm_buy": "Xác nhận đăng ký",
+    "cancel_membership": "Hủy gói tập",
+    "cancel_membership_confirm": "Bạn có chắc chắn muốn hủy gói tập hiện tại? Việc này sẽ dừng gia hạn (nếu có) và thay đổi trạng thái gói.",
+    "keep_membership": "Giữ lại gói tập",
+    "not_logged_in": "Vui lòng đăng nhập để tiếp tục."
   },
   "membership": {
     "payment_init_error": "Không thể khởi tạo thanh toán",
@@ -77,12 +82,20 @@
     "popular": "PHỔ BIẾN",
     "best_value": "TỐT NHẤT",
     "1_year": "1 Năm",
-    "month_count": "{{count}} Tháng",
+    "month_count_one": "{{count}} tháng",
+    "month_count_other": "{{count}} tháng",
     "save_hint": "* Tiết kiệm tới 30% khi đăng ký dài hạn",
     "free": "Miễn phí",
-    "month_unit": "tháng",
+    "month_unit_one": "tháng",
+    "month_unit_other": "tháng",
     "billed_duration": "Thanh toán {{price}} mỗi {{count}} tháng",
-    "per_month_approx": "≈ {{price}} / tháng"
+    "per_month_approx": "≈ {{price}} / tháng",
+    "activation_success": "Đăng ký gói tập thành công!",
+    "activation_pending": "Thanh toán thành công! Gói tập sẽ được kích hoạt trong ít phút.",
+    "load_failed": "Không thể tải dữ liệu gói tập",
+    "login_required_buy": "Vui lòng đăng nhập để mua gói tập.",
+    "no_active_found": "Không tìm thấy gói tập đang hoạt động để hủy.",
+    "cancelled_early": "Đã hủy (Hết hạn sớm)"
   },
   "home": {
     "welcome": "Chào mừng trở lại,",

@@ -22,23 +22,10 @@ import {
 } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import * as TaskManager from "expo-task-manager";
-import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Platform,
-  StyleSheet,
-  UIManager,
-  View,
-} from "react-native";
+import { useEffect } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 import "react-native-reanimated";
-
-// Enable LayoutAnimation for Android
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // Register task required by Stripe SDK (prevents warnings)
 TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
@@ -61,19 +48,27 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <StripeProvider
-      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string}
-    >
-      <AuthProvider>
-        <ThemeProvider>
-          <RootLayoutNav />
-        </ThemeProvider>
-      </AuthProvider>
-    </StripeProvider>
+    <SafeAreaProvider>
+      <StripeProvider
+        publishableKey={
+          process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
+        }
+        urlScheme="gymbros"
+      >
+        <AuthProvider>
+          <ThemeProvider>
+            <RootLayoutNav />
+          </ThemeProvider>
+        </AuthProvider>
+      </StripeProvider>
+    </SafeAreaProvider>
   );
 }
 
 function LoadingScreen({ backgroundColor }: { backgroundColor: string }) {
+  const { colorScheme } = useThemeContext();
+  const colors = Colors[colorScheme];
+
   return (
     <View
       style={[
@@ -86,7 +81,7 @@ function LoadingScreen({ backgroundColor }: { backgroundColor: string }) {
         },
       ]}
     >
-      <ActivityIndicator size="large" color={Colors.light.primary} />
+      <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }
@@ -110,19 +105,29 @@ function RootLayoutNav() {
     }
   }, [loaded]);
 
-  const colors = Colors[colorScheme === "dark" ? "dark" : "light"];
+  const colors = Colors[colorScheme];
   const showLoading = !loaded || themeLoading;
 
   return (
     <NavigationThemeProvider
       value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
     >
-      <View style={{ flex: 1 }} className={colorScheme}>
+      {/* 
+        CRITICAL: We apply the theme class to a View that wraps the entire navigation tree.
+        This enables CSS variable propagation (dark: variants) throughout the app.
+        We use a key to ensure a clean re-render when switching themes to prevent interop loops.
+      */}
+      <View
+        key={colorScheme}
+        style={{ flex: 1, backgroundColor: colors.background }}
+        className={colorScheme}
+      >
         <Stack
           screenOptions={{
             contentStyle: { backgroundColor: colors.background },
             headerStyle: { backgroundColor: colors.card },
             headerTintColor: colors.text,
+            animation: "fade",
           }}
         >
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -161,9 +166,9 @@ function AuthGuard() {
   const { session, isLoading } = useAuthContext();
   const segments = useSegments();
   const rootNavigationState = useRootNavigationState();
-  const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
+    // Wait for auth to load and root navigation to be ready
     if (isLoading || !rootNavigationState?.key) return;
 
     const inAuthGroup = segments[0] === "(auth)";
@@ -171,27 +176,37 @@ function AuthGuard() {
 
     const checkOnboarding = async () => {
       try {
-        if (session) {
-          const { data, error } = await supabase
-            .from("body_indices")
-            .select("id")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
+        if (!session) {
+          // No session -> must go to auth
+          if (!inAuthGroup) {
+            router.replace("/(auth)/sign-in");
+          }
+          return;
+        }
 
-          const hasBodyIndices = !!data;
+        // Session exists -> check onboarding status
+        const { data, error } = await supabase
+          .from("body_indices")
+          .select("id")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
 
-          if (!hasBodyIndices && !inOnboardingGroup) {
+        if (error) throw error;
+        const hasBodyIndices = !!data;
+
+        if (!hasBodyIndices) {
+          // No onboarding -> force welcome
+          if (!inOnboardingGroup) {
             router.replace("/(onboarding)/welcome");
-          } else if (hasBodyIndices && (inAuthGroup || inOnboardingGroup)) {
+          }
+        } else {
+          // Fully onboarded -> force tabs if trying to go back to auth/onboarding
+          if (inAuthGroup || inOnboardingGroup) {
             router.replace("/(tabs)");
           }
-        } else if (!session && !inAuthGroup) {
-          router.replace("/(auth)/sign-in");
         }
       } catch (e) {
-        console.error("Auth guard error:", e);
-      } finally {
-        setIsChecking(false);
+        console.error("[AuthGuard] Error:", e);
       }
     };
 
