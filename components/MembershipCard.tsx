@@ -96,9 +96,7 @@ export default function MembershipCard({
         {/* Tier Badge Overlay */}
         <View className="absolute bottom-6 left-2 bg-background/80 blur-md px-3 py-1 rounded-full border border-white/10">
           <Text className="text-foreground font-bold text-sm tracking-wider uppercase">
-            {tier
-              ? t(`home.tier.${tier.code}`, { defaultValue: tier.name })
-              : t(`plans.${plan.image_slug}`, { defaultValue: plan.name })}
+            {tier ? t(`home.tier.${tier.code}`) : t(`plans.${plan.image_slug}`)}
           </Text>
         </View>
 
@@ -116,7 +114,7 @@ export default function MembershipCard({
       <View className="px-2 mb-4">
         {isFreeTier ? (
           <Text className="text-4xl font-extrabold text-primary mb-1">
-            {t("membership.free", { defaultValue: "Miễn phí" })}
+            {t("membership.free")}
           </Text>
         ) : (
           <View>
@@ -152,9 +150,7 @@ export default function MembershipCard({
               />
               <Text className="text-foreground ml-3 text-sm font-medium">
                 {/* Provide i18n key or raw feature name */}
-                {t(`features.${feature}`, {
-                  defaultValue: feature.replace(/_/g, " "),
-                })}
+                {t(`features.${feature}`)}
               </Text>
             </View>
           ))}

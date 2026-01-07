@@ -27,10 +27,10 @@
     --color-foreground: 17 24 39; /* #111827 - Near black for high contrast */
 
     /* Use: Secondary text, descriptions, body content */
-    --color-foreground-secondary: 75 85 99; /* #4B5563 - Medium gray */
+    --color-foreground-secondary: 55 65 81; /* #374151 - Darker gray for better readability */
 
     /* Use: Tertiary text, captions, disabled states */
-    --color-foreground-muted: 156 163 175; /* #9CA3AF - Light gray */
+    --color-foreground-muted: 107 114 128; /* #6B7280 - Darker muted text for accessibility */
 
     /* ----- Brand Colors (Premium Orange Palette) ----- */
     /* Use: Primary buttons, links, key interactive elements */

@@ -34,8 +34,8 @@ import Animated, {
 interface SkeletonProps {
   /** Width of the skeleton (string for percentage, number for pixels) */
   width?: string | number;
-  /** Height of the skeleton (number for pixels) */
-  height?: number;
+  /** Height of the skeleton (string for percentage, number for pixels) */
+  height?: string | number;
   /** Border radius for rounded corners */
   borderRadius?: number;
   /** Optional custom test ID for testing */
@@ -70,7 +70,7 @@ export function Skeleton({
       cancelAnimation(translateX);
       translateX.value = -1; // Reset to initial position
     };
-  }, []);
+  }, [translateX]);
 
   // Animated style for shimmer effect
   const animatedStyle = useAnimatedStyle(() => ({
@@ -98,10 +98,9 @@ export function Skeleton({
       testID={testID}
       className={`bg-muted overflow-hidden relative ${radiusClass}`}
       style={{
-        width: typeof width === "number" ? width : undefined,
-        height,
+        width: width as any,
+        height: height as any,
         ...(borderRadius > 0 && borderRadius !== 9999 && { borderRadius }),
-        ...(typeof width === "string" && { alignSelf: "stretch" }),
       }}
     >
       <Animated.View
