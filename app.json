@@ -2,7 +2,7 @@
   "expo": {
     "name": "Gymbros",
     "slug": "gymbros",
-    "version": "0.9.1",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "gymbros",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gymbros",
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./credentials/GoogleService-Info.plist"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +26,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.gymbros",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./credentials/google-services.json"
     },
     "web": {
       "bundler": "metro",

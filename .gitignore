@@ -1,79 +1,53 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Credentials
+credentials/*
+!credentials/.gitkeep
+!credentials/README.md
+.env
+.env.*
+!.env.example
+secrets/
 
-# dependencies
+# Dependencies
 node_modules/
 yarn.lock
 package-lock.json
 
-# Expo
+# Expo build artifacts
 .expo/
 dist/
 web-build/
 expo-env.d.ts
+/ios
+/android
 
-# Native
+# Native build artifacts
 .kotlin/
 .gradle/
 *.orig.*
+
+# Signing keys
 *.jks
 *.p8
 *.p12
 *.key
+*.pem
 *.mobileprovision
 *.keystore
 
-# Metro
+# Metro & TypeScript
 .metro-health-check*
+*.tsbuildinfo
+.temp/
 
-# debug
+# Debug logs
 npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# MacOS
 .DS_Store
-*.pem
-
-# local env files
-# Disable temporarily
-.env*
-.env 
-secrets/
-
-# typescript
-*.tsbuildinfo
-node_modules/
-.temp/
-
-# Native folders (Do not ignore top level)
-/ios
-/android
-
-# iOS
-*.pbxproj
-*.xcworkspace
-*.podspec
-/ios/build/
-/ios/Pods/
-/ios/GoogleService-Info.plist
-/ios/.xcode.env.local
-
-# Android
-/android/build/
-/android/app/build/
-/android/.gradle/
-/android/local.properties
-/android/*.iml
-/android/.idea
-/android/.navigation
-/android/app/google-services.json
-/android/app/debug.keystore
-
-# vscode
 .vscode/
 
-# Docs
+# Proj docs
 /docs_need_to_work
 /design_references
-/scripts
-/docs

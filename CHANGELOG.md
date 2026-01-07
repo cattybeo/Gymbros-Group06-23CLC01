@@ -2,6 +2,38 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.0.0] - 2026-01-07
+
+### Thêm mới
+
+- **Thanh toán Hội viên (Membership Payments)**:
+  - Tích hợp **Stripe SDK** cho thanh toán thực tế (VND).
+  - Triển khai **Supabase Edge Functions** (Deno 2) để xử lý thanh toán và Webhook bảo mật.
+  - Hỗ trợ chu kỳ thanh toán linh hoạt: 1 tháng, 3 tháng, 6 tháng và 12 tháng.
+  - Tự động kích hoạt gói tập thông qua Stripe Webhook thành công.
+- **Quản lý Hội viên**:
+  - Tính năng hủy gói tập (`Cancel Membership`) ngay trong ứng dụng.
+  - Phân cấp Hội viên mới: Standard (Free), Silver, Gold, Platinum.
+  - Hệ thống dữ liệu Tiers và Plans đồng bộ hóa hoàn toàn với Database Redesign.
+
+### Thay đổi
+
+- **Kiến trúc ứng dụng**:
+  - Cập nhật lên **New Architecture (Fabric)** cho Android để tăng hiệu năng.
+  - Chuyển đổi toàn bộ logic Auth sang **Deno 2 Best Practices** trên Edge Functions.
+  - Tối ưu hóa **AuthGuard** và cơ chế điều hướng mượt mà hơn.
+- **Giao diện & Theme**:
+  - Hệ thống **Dark/Light Mode Sync** hoàn thiện: Khắc phục lỗi lệch pha màu sắc giữa JS và CSS.
+  - Cải tiến **CustomAlertModal**: Hỗ trợ bố cục nút thông minh hơn cho màn hình di động.
+  - Giao diện Membership mượt mà hơn với các hiệu ứng chuyển cảnh và Skeleton loading.
+
+### Sửa lỗi
+
+- **Layout**: Khắc phục lỗi đệ quy CSS (Infinite Loop) trong NativeWind v4.
+- **Android**: Gỡ bỏ cảnh báo `setLayoutAnimationEnabledExperimental` trên kiến trúc mới.
+- **Database**: Sửa lỗi truy vấn cột không tồn tại sau khi thiết kế lại Schema.
+- **Logic**: Sửa lỗi người dùng vẫn thấy gói tập đã hủy cho đến khi hết hạn.
+
 ## [v0.9.1] - 2026-01-07
 
 ### Sửa lỗi (Fixed)
