@@ -1,16 +1,13 @@
 // @ts-nocheck
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@12.4.0?target=deno";
+import { createClient } from "npm:@supabase/supabase-js@2.47.10";
+import Stripe from "npm:stripe@16.12.0";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
-  apiVersion: "2022-11-15",
+  apiVersion: "2025-12-15.clover",
   httpClient: Stripe.createFetchHttpClient(),
 });
 
-const cryptoProvider = Stripe.createSubtleCryptoProvider();
-
-serve(async (req) => {
+Deno.serve(async (req: Request) => {
   const signature = req.headers.get("Stripe-Signature");
   const body = await req.text();
   const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
@@ -21,9 +18,7 @@ serve(async (req) => {
     event = await stripe.webhooks.constructEventAsync(
       body,
       signature,
-      webhookSecret,
-      undefined,
-      cryptoProvider
+      webhookSecret
     );
   } catch (err) {
     console.error(`Webhook signature verification failed: ${err.message}`);
@@ -55,7 +50,6 @@ serve(async (req) => {
 
       if (planError || !planData) {
         console.error(`Webhook Error: Plan not found ${planId}`, planError);
-        // Returning 200 because we don't want Stripe to retry infinitely if the plan is genuinely gone
         return new Response("Plan not found", { status: 200 });
       }
 
@@ -97,7 +91,6 @@ serve(async (req) => {
           "Webhook Error: Failed to insert membership:",
           insertError
         );
-        // Return 500 to trigger retry for transient DB issues
         return new Response("Database Error", { status: 500 });
       }
 
