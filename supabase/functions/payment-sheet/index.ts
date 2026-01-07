@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@12.4.0?target=deno";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
@@ -25,22 +26,27 @@ serve(async (req) => {
       throw new Error("Missing planId or userId");
     }
 
-    // Hardcode details for MVP if DB access is hard from Edge without Service Role
-    // Ideal: Fetch price using Supabase Client here.
-    // For now: Just switch on planId to get price.
+    // Initialize Supabase Client to fetch actual price
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
 
-    // Map planId to amount (in cents)
-    // Silver: 500,000 VND -> ~20 USD (just using mocked USD for global stripe test) or VND if supported.
-    // Stripe Test supports VND? Yes.
+    const { data: plan, error: planError } = await supabase
+      .from("membership_plans")
+      .select("price, name")
+      .eq("id", planId)
+      .single();
 
-    let amount = 500000; // Default Silver
-    if (planId.includes("gold")) amount = 1200000;
-    if (planId.includes("platinum")) amount = 2000000;
+    if (planError || !plan) {
+      throw new Error(`Plan not found: ${planId}`);
+    }
 
-    // 1. Create or Retrieve Customer (Mock: always create new or finding by email not implemented yet)
-    // Ideally we store stripe_customer_id in profiles.
-
-    const customer = await stripe.customers.create();
+    // 1. Create or Retrieve Customer
+    // (Optimization: In a real app, mapping userId to stripe_customer_id is better)
+    const customer = await stripe.customers.create({
+      metadata: { userId },
+    });
 
     // 2. Ephemeral Key
     const ephemeralKey = await stripe.ephemeralKeys.create(
@@ -48,11 +54,16 @@ serve(async (req) => {
       { apiVersion: "2022-11-15" }
     );
 
-    // 3. Payment Intent
+    // 3. Payment Intent with Metadata (CRITICAL for Webhook)
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount,
+      amount: plan.price,
       currency: "vnd",
       customer: customer.id,
+      metadata: {
+        userId: userId,
+        planId: planId,
+      },
+      description: `Gymbros Membership: ${plan.name}`,
       automatic_payment_methods: {
         enabled: true,
       },

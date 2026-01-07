@@ -37,33 +37,35 @@ serve(async (req) => {
 
     if (userId && planId) {
       console.log(
-        `Processing subscription for User ${userId} - Plan ${planId}`
+        `Webhook: Processing subscription for User ${userId} - Plan ${planId}`
       );
 
-      // Initialize Supabase Client with Service Role Key to bypass RLS
+      // Initialize Supabase Client with Service Role Key
       const supabase = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
 
-      // Determine duration (Hardcoded logic similar to payment-sheet or fetch from DB)
-      // Ideally fetch from DB, but for MVP consistency let's fetch or logic map
       // Fetch plan details to get duration
-      const { data: planData } = await supabase
+      const { data: planData, error: planError } = await supabase
         .from("membership_plans")
         .select("duration_months")
         .eq("id", planId)
         .single();
 
-      const durationMonths = planData?.duration_months || 1;
+      if (planError || !planData) {
+        console.error(`Webhook Error: Plan not found ${planId}`, planError);
+        // Returning 200 because we don't want Stripe to retry infinitely if the plan is genuinely gone
+        return new Response("Plan not found", { status: 200 });
+      }
 
-      // FIX: Check for existing active membership to prevent date drift
+      const durationMonths = planData.duration_months || 1;
+
+      // Check for existing active membership to prevent date drift
       const { data: currentMembership } = await supabase
         .from("user_memberships")
         .select("end_date")
         .eq("user_id", userId)
-        // logic: if renewing same plan or upgrading, we usually add time.
-        // For simplicity, always add time if 'active' membership exists.
         .eq("status", "active")
         .order("end_date", { ascending: false })
         .limit(1)
@@ -80,19 +82,28 @@ serve(async (req) => {
       const endDate = new Date(startDate);
       endDate.setMonth(startDate.getMonth() + durationMonths);
 
-      const { error } = await supabase.from("user_memberships").insert({
-        user_id: userId,
-        plan_id: planId,
-        start_date: startDate.toISOString(),
-        end_date: endDate.toISOString(),
-        status: "active",
-      });
+      const { error: insertError } = await supabase
+        .from("user_memberships")
+        .insert({
+          user_id: userId,
+          plan_id: planId,
+          start_date: startDate.toISOString(),
+          end_date: endDate.toISOString(),
+          status: "active",
+        });
 
-      if (error) {
-        console.error("Error activating membership:", error);
+      if (insertError) {
+        console.error(
+          "Webhook Error: Failed to insert membership:",
+          insertError
+        );
+        // Return 500 to trigger retry for transient DB issues
         return new Response("Database Error", { status: 500 });
       }
-      console.log("Membership activated successfully!");
+
+      console.log(`Webhook Success: Membership activated for ${userId}`);
+    } else {
+      console.warn("Webhook Warning: Missing metadata (userId or planId)");
     }
   }
 
