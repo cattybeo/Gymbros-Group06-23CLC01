@@ -36,7 +36,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: plan, error: planError } = await supabase
       .from("membership_plans")
-      .select("price, name")
+      .select("price, membership_tiers(name)")
       .eq("id", planId)
       .single();
 
@@ -45,6 +45,7 @@ Deno.serve(async (req: Request) => {
       throw new Error(`Plan not found: ${planId}`);
     }
 
+    const planName = plan.membership_tiers?.name || "Gymbros Membership";
     console.log(`[PaymentSheet] Creating customer for userId=${userId}`);
     const customer = await stripe.customers.create({
       metadata: { userId },
@@ -69,7 +70,7 @@ Deno.serve(async (req: Request) => {
         userId: userId,
         planId: planId,
       },
-      description: `Gymbros Membership: ${plan.name}`,
+      description: `Gymbros Membership: ${planName}`,
       automatic_payment_methods: {
         enabled: true,
       },
