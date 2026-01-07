@@ -32,7 +32,9 @@ export default function HomeScreen() {
           // 1. Fetch Tier (must be active, started, and not expired)
           supabase
             .from("user_memberships")
-            .select("end_date, plan_id, membership_plans!inner(tier_id, membership_tiers!inner(name))")
+            .select(
+              "end_date, plan_id, membership_plans!inner(tier_id, membership_tiers!inner(name))"
+            )
             .eq("user_id", user.id)
             .eq("status", "active")
             .lte("start_date", today) // Must have started
@@ -51,7 +53,8 @@ export default function HomeScreen() {
         ]);
 
         if (tierResponse.data && tierResponse.data.membership_plans) {
-          const membershipPlans = tierResponse.data.membership_plans as unknown as {
+          const membershipPlans = tierResponse.data
+            .membership_plans as unknown as {
             membership_tiers: { name: string };
           };
           const tierName = membershipPlans.membership_tiers?.name;
@@ -198,10 +201,12 @@ export default function HomeScreen() {
             resizeMode="cover"
           />
           <View className="absolute inset-0 bg-black/40 flex-1 justify-center px-6">
-            <Text className="text-white font-bold text-xl w-2/3">
-              TRANSFORM YOUR BODY WITH POWER PUMP
+            <Text className="text-card-foreground font-bold text-xl w-2/3">
+              {t("home.banner_title")}
             </Text>
-            <Text className="text-primary font-bold mt-2">JOIN NOW &rarr;</Text>
+            <Text className="text-primary font-bold mt-2">
+              {t("home.join_now")} &rarr;
+            </Text>
           </View>
         </View>
       </View>
@@ -224,9 +229,7 @@ export default function HomeScreen() {
                   color={colors.tint}
                 />
               </View>
-              <Text className="text-foreground font-medium">
-                {item.name}
-              </Text>
+              <Text className="text-foreground font-medium">{item.name}</Text>
             </View>
           ))}
         </View>
@@ -240,10 +243,11 @@ export default function HomeScreen() {
         {recentActivity ? (
           <View className="bg-card rounded-xl p-4 border border-border flex-row items-center">
             <View
-              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${new Date(recentActivity.booking_date) > new Date()
-                ? "bg-info/20"
-                : "bg-success/20"
-                }`}
+              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
+                new Date(recentActivity.booking_date) > new Date()
+                  ? "bg-info/20"
+                  : "bg-success/20"
+              }`}
             >
               <FontAwesome
                 name={

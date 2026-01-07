@@ -210,7 +210,7 @@ export default function EditProfileScreen() {
           <FontAwesome name="arrow-left" size={20} color={colors.text} />
         </TouchableOpacity>
 
-        <Text className="text-3xl font-bold text-text mb-10">
+        <Text className="text-3xl font-bold text-foreground mb-10">
           {t("profile.edit_profile")}
         </Text>
 
@@ -229,7 +229,7 @@ export default function EditProfileScreen() {
                   resizeMode="cover"
                 />
               ) : (
-                <Text className="text-4xl font-bold text-text_secondary">
+                <Text className="text-4xl font-bold text-foreground-secondary">
                   {fullName
                     ? fullName.charAt(0).toUpperCase()
                     : user?.email?.charAt(0).toUpperCase()}
@@ -245,7 +245,7 @@ export default function EditProfileScreen() {
               <Ionicons name="camera" size={18} color="white" />
             </View>
           </TouchableOpacity>
-          <Text className="text-text_secondary text-sm mt-4">
+          <Text className="text-foreground-secondary text-sm mt-4">
             {uploading ? t("common.uploading") : t("profile.change_avatar")}
           </Text>
         </View>
@@ -253,17 +253,17 @@ export default function EditProfileScreen() {
         <View className="space-y-12 gap-4">
           {/* Section 1: Personal Details */}
           <View className="space-y-8 gap-3">
-            <Text className="text-text text-xl font-bold opacity-90 border-b border-border pb-3">
+            <Text className="text-foreground text-xl font-bold opacity-90 border-b border-border pb-3">
               {t("profile.personal_details")}
             </Text>
 
             {/* Name */}
             <View>
-              <Text className="text-text_secondary mb-3 font-medium">
+              <Text className="text-foreground-secondary mb-3 font-medium">
                 {t("auth.name_label")}
               </Text>
               <TextInput
-                className="bg-surface p-4 rounded-xl text-text border border-border focus:border-primary"
+                className="bg-surface p-4 rounded-xl text-foreground border border-border focus:border-primary"
                 value={fullName}
                 onChangeText={setFullName}
                 placeholder={t("auth.name_placeholder")}
@@ -273,20 +273,20 @@ export default function EditProfileScreen() {
 
             {/* Email */}
             <View>
-              <Text className="text-text_secondary mb-3 font-medium">
+              <Text className="text-foreground-secondary mb-3 font-medium">
                 {t("auth.email_label")}
               </Text>
               <View className="bg-surface p-4 rounded-xl border border-border opacity-50">
-                <Text className="text-text_secondary">{user?.email}</Text>
+                <Text className="text-foreground-secondary">{user?.email}</Text>
               </View>
-              <Text className="text-text_secondary text-xs mt-2 italic">
+              <Text className="text-foreground-secondary text-xs mt-2 italic">
                 {t("profile.email_change_notice")}
               </Text>
             </View>
 
             {/* Gender Selector */}
             <View>
-              <Text className="text-text_secondary mb-4 font-medium">
+              <Text className="text-foreground-secondary mb-4 font-medium">
                 {t("profile.gender_label")}
               </Text>
               <View className="flex-row gap-3">
@@ -304,7 +304,7 @@ export default function EditProfileScreen() {
                       className={`${
                         gender === g
                           ? "text-primary-foreground font-bold"
-                          : "text-text_secondary"
+                          : "text-foreground-secondary"
                       }`}
                     >
                       {t(`profile.genders.${g}`)}
@@ -316,7 +316,7 @@ export default function EditProfileScreen() {
 
             {/* Birthday */}
             <View>
-              <Text className="text-text_secondary mb-4 font-medium">
+              <Text className="text-foreground-secondary mb-4 font-medium">
                 {t("profile.birthday_label")}
               </Text>
 
@@ -328,7 +328,7 @@ export default function EditProfileScreen() {
                 className="bg-surface p-4 rounded-xl border border-border flex-row justify-between items-center"
               >
                 <Text
-                  className={`${birthday ? "text-text" : "text-text_secondary"}`}
+                  className={`${birthday ? "text-foreground" : "text-foreground-secondary"}`}
                 >
                   {birthday
                     ? dayjs(birthday).format("YYYY-MM-DD")
@@ -350,7 +350,7 @@ export default function EditProfileScreen() {
               >
                 <View className="flex-1 justify-center items-center bg-black/80 p-4">
                   <View className="bg-surface w-full max-w-sm rounded-3xl p-6 border border-border">
-                    <Text className="text-text text-xl font-bold mb-4 text-center">
+                    <Text className="text-foreground text-xl font-bold mb-4 text-center">
                       {t("profile.birthday_label")}
                     </Text>
 
@@ -412,7 +412,7 @@ export default function EditProfileScreen() {
                         onPress={() => setShowDatePicker(false)}
                         className="flex-1 py-3 rounded-xl bg-surface border border-border items-center"
                       >
-                        <Text className="text-text_secondary font-bold">
+                        <Text className="text-foreground-secondary font-bold">
                           {t("common.cancel")}
                         </Text>
                       </TouchableOpacity>
@@ -438,12 +438,12 @@ export default function EditProfileScreen() {
 
           {/* Section 2: Fitness Goals */}
           <View className="space-y-10 gap-3">
-            <Text className="text-text text-xl font-bold opacity-90 border-b border-border pb-3">
+            <Text className="text-foreground text-xl font-bold opacity-90 border-b border-border pb-3">
               {t("profile.fitness_profile")}
             </Text>
 
             <View>
-              <Text className="text-text_secondary mb-4 font-medium">
+              <Text className="text-foreground-secondary mb-4 font-medium">
                 {t("profile.goal_label")}
               </Text>
               <View className="flex-row flex-wrap gap-3">
@@ -461,7 +461,7 @@ export default function EditProfileScreen() {
                       className={`${
                         goal === g
                           ? "text-primary-foreground font-bold"
-                          : "text-text_secondary"
+                          : "text-foreground-secondary"
                       }`}
                     >
                       {t(`profile.goals.${g}`)}
@@ -473,7 +473,7 @@ export default function EditProfileScreen() {
 
             {/* AI Data: Activity Level */}
             <View>
-              <Text className="text-text_secondary mb-4 font-medium">
+              <Text className="text-foreground-secondary mb-4 font-medium">
                 {t("profile.activity_level_label")}
               </Text>
               <View className="flex-row flex-wrap gap-3">
@@ -491,7 +491,7 @@ export default function EditProfileScreen() {
                       className={`${
                         activityLevel === opt
                           ? "text-primary-foreground font-bold"
-                          : "text-text_secondary"
+                          : "text-foreground-secondary"
                       }`}
                     >
                       {t(`profile.activities.${opt}`)}
@@ -503,7 +503,7 @@ export default function EditProfileScreen() {
 
             {/* AI Data: Experience Level */}
             <View>
-              <Text className="text-text_secondary mb-4 font-medium">
+              <Text className="text-foreground-secondary mb-4 font-medium">
                 {t("profile.experience_level_label")}
               </Text>
               <View className="flex-row flex-wrap gap-3">
@@ -521,7 +521,7 @@ export default function EditProfileScreen() {
                       className={`${
                         experienceLevel === opt
                           ? "text-primary-foreground font-bold"
-                          : "text-text_secondary"
+                          : "text-foreground-secondary"
                       }`}
                     >
                       {t(`profile.experiences.${opt}`)}
@@ -533,7 +533,7 @@ export default function EditProfileScreen() {
 
             {/* AI Data: Weekly Availability */}
             <View>
-              <Text className="text-text_secondary mb-4 font-medium">
+              <Text className="text-foreground-secondary mb-4 font-medium">
                 {t("profile.weekly_availability_label")}
               </Text>
               <View className="flex-row flex-wrap gap-3">
@@ -551,7 +551,7 @@ export default function EditProfileScreen() {
                       className={`${
                         weeklyAvailability === opt
                           ? "text-primary-foreground font-bold"
-                          : "text-text_secondary"
+                          : "text-foreground-secondary"
                       }`}
                     >
                       {t(`profile.availabilities.${opt}`)}

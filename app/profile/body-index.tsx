@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { useThemeContext } from "@/lib/theme";
 import { BodyIndex } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect } from "expo-router";
@@ -18,6 +19,7 @@ export default function BodyIndexHistoryScreen() {
   const [data, setData] = useState<BodyIndex[]>([]);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
+  const { colorScheme } = useThemeContext();
 
   const fetchHistory = async () => {
     setLoading(true);
@@ -73,7 +75,9 @@ export default function BodyIndexHistoryScreen() {
           </View>
         </View>
         <View className="items-end bg-secondary px-3 py-1 rounded-lg">
-          <Text className="text-xs text-muted_foreground">BMI</Text>
+          <Text className="text-xs text-muted_foreground">
+            {t("profile.bmi")}
+          </Text>
           <Text className="text-primary font-bold">{bmi}</Text>
         </View>
       </View>
@@ -131,7 +135,11 @@ export default function BodyIndexHistoryScreen() {
           onPress={() => router.back()}
           className="w-10 h-10 items-center justify-center bg-surface rounded-full mr-4"
         >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons
+            name="arrow-back"
+            size={24}
+            color={colorScheme === "dark" ? "#fff" : "#000"}
+          />
         </TouchableOpacity>
         <Text className="text-foreground text-xl font-bold flex-1">
           {t("profile.body_index_history")}

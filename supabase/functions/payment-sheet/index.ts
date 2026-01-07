@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2.47.10";
 import Stripe from "npm:stripe@16.12.0";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
-  apiVersion: "2025-12-15.clover",
+  apiVersion: "2024-12-18.acacia",
   httpClient: Stripe.createFetchHttpClient(),
 });
 
@@ -62,8 +62,13 @@ Deno.serve(async (req: Request) => {
     console.log(
       `[PaymentSheet] Creating payment intent for amount=${plan.price}`
     );
+    const amount = Math.round(Number(plan.price));
+    if (amount <= 0) {
+      throw new Error(`Invalid plan price: ${plan.price}`);
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: plan.price,
+      amount: amount,
       currency: "vnd",
       customer: customer.id,
       metadata: {
