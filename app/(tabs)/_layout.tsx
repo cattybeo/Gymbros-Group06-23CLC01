@@ -40,6 +40,22 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="classes"
+        options={{
+          title: t("navigation.classes"),
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="calendar" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="journey"
+        options={{
+          title: t("navigation.journey"),
+          tabBarIcon: ({ color }) => <TabBarIcon name="trophy" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: t("navigation.profile"),
@@ -52,15 +68,6 @@ export default function TabLayout() {
           title: t("navigation.membership"),
           tabBarIcon: ({ color }) => (
             <TabBarIcon name="credit-card" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="classes"
-        options={{
-          title: t("navigation.classes"),
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="calendar" color={color} />
           ),
         }}
       />

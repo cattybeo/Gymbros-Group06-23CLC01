@@ -1,79 +1,84 @@
-import ClassCard from "@/components/ClassCard";
-import CrowdHeatmap, { TrafficData } from "@/components/CrowdHeatmap";
+import { ClassesSkeleton } from "@/components/ClassesSkeleton";
+import { TrafficData } from "@/components/CrowdHeatmap";
+import { LiveClassList } from "@/components/LiveClassList";
 import Colors from "@/constants/Colors";
-import { GYM_IMAGES } from "@/constants/Images";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { AISuggestion, getAISmartSuggestion } from "@/lib/ai";
+import i18n from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  FlatList,
-  Image,
-  ScrollView,
-  Text,
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 
 export default function ClassesScreen() {
   const [classes, setClasses] = useState<GymClass[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [trafficData, setTrafficData] = useState<TrafficData[] | undefined>(
+    undefined
+  );
+  const [loading, setLoading] = useState(true);
+  const [dataReady, setDataReady] = useState(false);
+  const [contentOpacity] = useState(new Animated.Value(0));
   const [bookingId, setBookingId] = useState<string | null>(null);
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
 
-  const [trafficData, setTrafficData] = useState<TrafficData[]>([]);
   const [myBookings, setMyBookings] = useState<Set<string>>(new Set());
-  const [classCounts, setClassCounts] = useState<Record<string, number>>({});
+
+  // AI Suggestion State
+  const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // Catalog State
-  const [selectedType, setSelectedType] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
-    setLoading(true);
-    try {
-      // Parallel Fetching: User, Traffic, Classes
-      const [userResponse, trafficResponse, classesResponse] =
-        await Promise.all([
-          supabase.auth.getUser(),
-          supabase.rpc("get_weekly_traffic"),
-          supabase
-            .from("classes")
-            .select("*")
-            // .gte("start_time", new Date().toISOString()) // Uncomment for Prod
-            .order("start_time", { ascending: true }),
-        ]);
-
-      const user = userResponse.data.user;
-
-      // 1. Set Traffic
-      if (!trafficResponse.error) {
-        setTrafficData(trafficResponse.data || []);
+  const fetchData = useCallback(
+    async (forceRefreshAI = false, silent = false) => {
+      const startTime = Date.now(); // 1. Start timer for UX Smoothing
+      if (!silent) {
+        setLoading(true);
+        setDataReady(false);
+        contentOpacity.setValue(0);
       }
+      try {
+        const [userResponse, classesResponse, trafficResponse] =
+          await Promise.all([
+            supabase.auth.getUser(),
+            supabase
+              .from("classes")
+              .select(
+                "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
+              )
+              .order("start_time", { ascending: true }),
+            supabase.rpc("get_weekly_traffic"),
+          ]);
 
-      // 2. Set Classes
-      if (classesResponse.error) throw classesResponse.error;
-      const classesData = classesResponse.data || [];
-      setClasses(classesData);
+        const user = userResponse.data.user;
 
-      const classIds = classesData.map((c) => c.id);
+        if (classesResponse.error) throw classesResponse.error;
+        const classesData = classesResponse.data || [];
+        setClasses(classesData);
 
-      // 3. Parallel Fetching: Bookings (Dependent on Class IDs)
-      if (classIds.length > 0) {
-        // FIXME: RLS prevents fetching global counts client-side. Using RPC bypass for now.
+        if (trafficResponse.data) {
+          setTrafficData(trafficResponse.data);
+        }
 
-        if (user) {
-          // Fetch My Bookings
+        const classIds = classesData.map((c) => c.id);
+        let userBookedIds: string[] = [];
+
+        if (classIds.length > 0 && user) {
           const { data: myBookingsData } = await supabase
             .from("bookings")
             .select("class_id")
@@ -81,256 +86,337 @@ export default function ClassesScreen() {
             .in("class_id", classIds)
             .in("status", ["confirmed", "checked_in"]);
 
-          setMyBookings(new Set(myBookingsData?.map((b) => b.class_id)));
+          userBookedIds = [
+            ...new Set(myBookingsData?.map((b) => b.class_id) || []),
+          ];
+          setMyBookings(new Set(userBookedIds));
         }
 
-        // Fetch Global Counts via RPC (Bypass RLS)
-        const { data: countsData } = await supabase.rpc("get_class_counts", {
-          class_ids: classIds,
-        });
-
-        const counts: Record<string, number> = {};
-        if (countsData) {
-          countsData.forEach((item: { class_id: string; count: number }) => {
-            counts[item.class_id] = item.count;
-          });
+        // AI Analysis Trigger - Enhanced with persistent caching
+        if (user) {
+          setAiLoading(true);
+          getAISmartSuggestion(
+            user.user_metadata,
+            {
+              availableClasses: classesData,
+              userBookings: userBookedIds,
+              currentTime: new Date().toISOString(),
+              language: i18n.language,
+            },
+            forceRefreshAI
+          )
+            .then((res) => setSuggestion(res))
+            .finally(() => setAiLoading(false));
         }
-        setClassCounts(counts);
-      }
-    } catch (error) {
-      console.error(error);
-      showAlert(t("common.error"), t("classes.fetch_error"), "error");
-    } finally {
-      setLoading(false);
-    }
-  }
 
-  async function handleBook(classId: string) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      showAlert(t("auth.login_button"), t("classes.login_required"), "error", {
-        onClose: () => router.push("/(auth)/sign-in"),
-      });
-      return;
-    }
-
-    setBookingId(classId);
-
-    try {
-      // 0. Check Capacity
-      const currentCount = classCounts[classId] || 0;
-      const targetClass = classes.find((c) => c.id === classId);
-      if (targetClass && currentCount >= targetClass.capacity) {
-        showAlert(t("common.error"), t("classes.class_full"), "error");
-        return;
-      }
-
-      // 1. Check Active Membership
-      const { data: memberships, error: memError } = await supabase
-        .from("user_memberships")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("status", "active")
-        .gte("end_date", new Date().toISOString())
-        .limit(1);
-
-      if (memError || !memberships || memberships.length === 0) {
-        showAlert(
-          t("classes.membership_required"),
-          t("classes.membership_required_msg"),
-          "error",
-          {
-            primaryButtonText: t("common.confirm"),
-            onPrimaryPress: () => router.push("/membership"), // Guide them to membership page
-          }
-        );
-        setBookingId(null);
-        return;
-      }
-
-      // 2. Check duplicate
-      const { data: existingBooking } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("class_id", classId)
-        .single();
-
-      if (existingBooking) {
-        showAlert(t("common.error"), t("classes.already_booked"), "error");
-        setBookingId(null);
-        return;
-      }
-
-      // 3. Create Booking
-      const { error: bookError } = await supabase.from("bookings").insert({
-        user_id: user.id,
-        class_id: classId,
-        booking_date: new Date().toISOString(),
-        status: "confirmed",
-        status_payment: "unpaid",
-      });
-
-      if (bookError) throw bookError;
-
-      showAlert(
-        t("classes.booking_success"),
-        t("classes.booking_success_msg"),
-        "success"
-      );
-      fetchData();
-    } catch (error: any) {
-      showAlert(t("classes.booking_error"), error.message, "error");
-    } finally {
-      setBookingId(null);
-    }
-  }
-
-  // --- Derived State for Catalog ---
-  const uniqueClassTypes = useMemo(() => {
-    const typesMap = new Map<string, { name: string; image_slug: string }>();
-    classes.forEach((c) => {
-      // Use name as key to ensure uniqueness
-      if (!typesMap.has(c.name)) {
-        typesMap.set(c.name, { name: c.name, image_slug: c.image_slug });
-      }
-    });
-    return Array.from(typesMap.values());
-  }, [classes]);
-
-  const filteredClasses = useMemo(() => {
-    if (selectedType === "All") return classes;
-    return classes.filter((c) => c.name === selectedType);
-  }, [classes, selectedType]);
-
-  const renderCatalog = () => (
-    <View className="mb-6">
-      <Text className="text-xl font-bold text-foreground mb-3 px-1">
-        {t("classes.explore")}
-      </Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View className="flex-row">
-          {/* 'All' Option */}
-          <TouchableOpacity
-            onPress={() => setSelectedType("All")}
-            className={`mr-3 items-center ${
-              selectedType === "All" ? "opacity-100" : "opacity-60"
-            }`}
-          >
-            <View
-              className={`w-16 h-16 rounded-full items-center justify-center mb-2 ${
-                selectedType === "All" ? "bg-primary" : "bg-card"
-              }`}
-            >
-              <Ionicons
-                name="grid-outline"
-                size={24}
-                color={
-                  selectedType === "All"
-                    ? colors.primary
-                    : colors.muted_foreground
-                }
-              />
-            </View>
-            <Text
-              className={`text-xs font-semibold ${
-                selectedType === "All"
-                  ? "text-primary"
-                  : "text-muted_foreground"
-              }`}
-            >
-              {t("classes.all")}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Dynamic Types */}
-          {uniqueClassTypes.map((type) => {
-            const isSelected = selectedType === type.name;
-            const imageSource =
-              GYM_IMAGES[type.image_slug] || GYM_IMAGES["default"];
-
-            return (
-              <TouchableOpacity
-                key={type.name}
-                onPress={() => setSelectedType(type.name)}
-                className={`mr-3 items-center ${isSelected ? "opacity-100" : "opacity-60"}`}
-              >
-                <Image
-                  source={imageSource}
-                  className={`w-16 h-16 rounded-full mb-2 border-2 ${isSelected ? "border-primary" : "border-transparent"}`}
-                  resizeMode="cover"
-                />
-                <Text
-                  className={`text-xs font-semibold max-w-[80px] text-center ${
-                    isSelected ? "text-primary" : "text-muted_foreground"
-                  }`}
-                  numberOfLines={1}
-                >
-                  {type.name}
-                </Text>
-              </TouchableOpacity>
+        // 2. UX: Ensure minimum loading time (800ms) to prevent Skeleton flickering
+        if (!silent) {
+          const elapsedTime = Date.now() - startTime;
+          const MIN_LOADING_TIME = 800;
+          if (elapsedTime < MIN_LOADING_TIME) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, MIN_LOADING_TIME - elapsedTime)
             );
-          })}
-        </View>
-      </ScrollView>
-    </View>
+          }
+          setDataReady(true);
+        }
+      } catch (error) {
+        if (!silent)
+          showAlert(t("common.error"), t("classes.fetch_error"), "error");
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [contentOpacity, t, showAlert]
   );
 
-  return (
-    <View className="flex-1 bg-background pt-12 px-4">
-      <View className="mb-2">
-        <Text className="text-3xl font-bold text-foreground">
-          {t("classes.title")}
-        </Text>
-        <Text className="text-muted_foreground mt-1">
-          {t("classes.subtitle")}
-        </Text>
-      </View>
+  useFocusEffect(
+    useCallback(() => {
+      // If we already have data, do a silent refresh to avoid skeleton flicker
+      fetchData(false, dataReady);
+    }, [fetchData, dataReady])
+  );
 
-      <FlatList
-        data={filteredClasses}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <>
-            {renderCatalog()}
-            <CrowdHeatmap data={trafficData} isLoading={loading} />
-            <Text className="text-lg font-bold text-foreground mb-2 mt-2 px-1">
-              {t("classes.upcoming_schedule")}
-            </Text>
-          </>
+  useEffect(() => {
+    const channel = supabase
+      .channel("bookings-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => {
+          fetchData(false, true); // Silent refresh
         }
-        renderItem={({ item }) => {
-          const bookedCount = classCounts[item.id] || 0;
-          const isBooked = myBookings.has(item.id);
-          const isFull = bookedCount >= item.capacity;
-          const spotsLeft = item.capacity - bookedCount;
+      )
+      .subscribe();
 
-          return (
-            <ClassCard
-              gymClass={item}
-              onBook={handleBook}
-              isBooking={bookingId === item.id}
-              isBooked={isBooked}
-              isFull={isFull}
-              spotsLeft={spotsLeft}
-            />
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData]);
+
+  // Premium Fade-in Transition
+  useEffect(() => {
+    if (dataReady) {
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [dataReady, contentOpacity]);
+
+  const handleBook = useCallback(
+    async (classId: string, currentCount: number) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        showAlert(
+          t("auth.login_button"),
+          t("classes.login_required"),
+          "error",
+          {
+            onClose: () => router.push("/(auth)/sign-in"),
+          }
+        );
+        return;
+      }
+
+      setBookingId(classId);
+
+      try {
+        const targetClass = classes.find((c) => c.id === classId);
+        if (targetClass && currentCount >= targetClass.capacity) {
+          showAlert(t("common.error"), t("classes.class_full"), "error");
+          return;
+        }
+
+        // Overlap Detection (Task 2.1)
+        if (targetClass) {
+          const { data: myExistingBookings } = await supabase
+            .from("bookings")
+            .select("*, classes(start_time, end_time)")
+            .eq("user_id", user.id)
+            .in("status", ["confirmed", "checked_in"]);
+
+          const hasOverlap = myExistingBookings?.some((b: any) => {
+            if (!b.classes) return false;
+            const bStart = new Date(b.classes.start_time).getTime();
+            const bEnd = new Date(b.classes.end_time).getTime();
+            const tStart = new Date(targetClass.start_time).getTime();
+            const tEnd = new Date(targetClass.end_time).getTime();
+            return bStart < tEnd && bEnd > tStart;
+          });
+
+          if (hasOverlap) {
+            showAlert(t("common.error"), t("classes.overlap_error"), "error");
+            setBookingId(null);
+            return;
+          }
+        }
+
+        // Membership Expiry Logic (Task 2.2)
+        const { data: memberships, error: memError } = await supabase
+          .from("user_memberships")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .gte("end_date", targetClass?.start_time || new Date().toISOString())
+          .limit(1);
+
+        if (memError || !memberships || memberships.length === 0) {
+          showAlert(
+            t("classes.membership_required"),
+            t("classes.membership_required_msg"),
+            "error",
+            {
+              primaryButtonText: t("common.confirm"),
+              onPrimaryPress: () => router.push("/membership"),
+            }
           );
-        }}
-        refreshing={loading}
-        onRefresh={fetchData}
-        ListEmptyComponent={
-          !loading ? (
-            <Text className="text-center text-muted_foreground mt-10">
-              {t("classes.empty_list")}
-            </Text>
-          ) : null
+          setBookingId(null);
+          return;
         }
-        contentContainerStyle={{ paddingBottom: 20 }}
-      />
-      <CustomAlertComponent />
-    </View>
+
+        // Optimistic Update (Task 3.2)
+        setMyBookings((prev) => new Set(prev).add(classId));
+
+        const { data: existingBooking } = await supabase
+          .from("bookings")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("class_id", classId)
+          .single();
+
+        if (existingBooking) {
+          showAlert(t("common.error"), t("classes.already_booked"), "error");
+          // Rollback
+          setMyBookings((prev) => {
+            const next = new Set(prev);
+            next.delete(classId);
+            return next;
+          });
+          setBookingId(null);
+          return;
+        }
+
+        const { error: bookError } = await supabase.from("bookings").insert({
+          user_id: user.id,
+          class_id: classId,
+          booking_date: new Date().toISOString(),
+          status: "confirmed",
+          status_payment: "unpaid",
+        });
+
+        if (bookError) throw bookError;
+
+        await fetchData();
+        showAlert(
+          t("classes.booking_success"),
+          t("classes.booking_success_msg"),
+          "success"
+        );
+        fetchData(false, true); // Silent refresh to sync global counts
+      } catch (error: any) {
+        // Final Rollback
+        setMyBookings((prev) => {
+          const next = new Set(prev);
+          next.delete(classId);
+          return next;
+        });
+        showAlert(t("classes.booking_error"), error.message, "error");
+      } finally {
+        setBookingId(null);
+      }
+    },
+    [classes, t, showAlert, fetchData]
+  );
+
+  const handleCancel = useCallback(
+    async (classId: string) => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      showAlert(
+        t("common.confirm"),
+        t("classes.cancel_confirm_msg"),
+        "warning",
+        {
+          primaryButtonText: t("common.no"),
+          secondaryButtonText: t("common.yes"),
+          onSecondaryPress: async () => {
+            setBookingId(classId);
+            // Optimistic Update (Task 3.2)
+            setMyBookings((prev) => {
+              const next = new Set(prev);
+              next.delete(classId);
+              return next;
+            });
+
+            try {
+              const { error } = await supabase
+                .from("bookings")
+                .update({ status: "cancelled" })
+                .eq("user_id", user.id)
+                .eq("class_id", classId);
+
+              if (error) throw error;
+
+              showAlert(
+                t("common.success"),
+                t("classes.cancel_success_msg"),
+                "success"
+              );
+              fetchData(false, true); // Silent refresh
+            } catch (error: any) {
+              // Rollback
+              setMyBookings((prev) => new Set(prev).add(classId));
+              showAlert(t("common.error"), error.message, "error");
+            } finally {
+              setBookingId(null);
+            }
+          },
+        }
+      );
+    },
+    [t, showAlert, fetchData]
+  );
+
+  const filteredClasses = useMemo(() => {
+    return classes.filter((c) => {
+      const matchesSearch = c.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    });
+  }, [classes, searchQuery]);
+
+  const onRefresh = useCallback(() => {
+    fetchData(true);
+  }, [fetchData]);
+
+  const onResetFilters = useCallback(() => {
+    setSearchQuery("");
+  }, []);
+
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1"
+    >
+      <View className="flex-1 bg-background pt-12 px-4">
+        {!dataReady ? (
+          <ClassesSkeleton />
+        ) : (
+          <Animated.View
+            style={{ flex: 1, opacity: contentOpacity, marginTop: 48 }}
+          >
+            <View className="flex-row items-center bg-card px-4 py-3 rounded-xl border border-border mb-4">
+              <Ionicons
+                name="search"
+                size={20}
+                color={colors.foreground_secondary}
+              />
+              <TextInput
+                placeholder={t("common.search")}
+                placeholderTextColor={colors.foreground_secondary}
+                className="flex-1 ml-2 text-foreground font-medium"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <Ionicons
+                    name="close-circle"
+                    size={18}
+                    color={colors.foreground_secondary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <LiveClassList
+              data={filteredClasses}
+              allClasses={classes}
+              handleBook={handleBook}
+              handleCancel={handleCancel}
+              bookingId={bookingId}
+              myBookings={myBookings}
+              trafficData={trafficData}
+              isLoading={loading}
+              onRefresh={onRefresh}
+              aiSuggestion={suggestion}
+              aiLoading={aiLoading}
+              onResetFilters={onResetFilters}
+            />
+          </Animated.View>
+        )}
+        <CustomAlertComponent />
+      </View>
+    </KeyboardAvoidingView>
   );
 }

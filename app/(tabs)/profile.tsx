@@ -67,6 +67,7 @@ export default function ProfileScreen() {
                 "end_date, plan:membership_plans(id, tier:membership_tiers(name, code))"
               )
               .eq("user_id", user.id)
+              .eq("status", "active") // Ensure we only fetch ACTIVE memberships
               .gte("end_date", new Date().toISOString())
               .order("end_date", { ascending: false })
               .limit(1)

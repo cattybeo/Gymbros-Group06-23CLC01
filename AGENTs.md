@@ -1,10 +1,41 @@
 # AGENTs.md - AI Coding Principles & Mobile Workflow (2026 Edition)
 
-> **Context Blindness Mitigation**: This document serves as the "Rule of Law" for AI Agents working on this Expo/React Native project. Follow it strictly to avoid code bloat and architectural drift.
+## Continuity Ledger (compaction-safe)
+
+Maintain a single Continuity Ledger for this workspace in `CONTINUITY.md`. The ledger is the canonical session briefing designed to survive context compaction; do not rely on earlier chat text unless it's reflected in the ledger.
+
+### How it works
+
+- At the start of every assistant turn: read `CONTINUITY.md`, update it to reflect the latest goal/constraints/decisions/state, then proceed with the work.
+- Update `CONTINUITY.md` again whenever any of these change: goal, constraints/assumptions, key decisions, progress state (Done/Now/Next), or important tool outcomes.
+- Keep it short and stable: facts only, no transcripts. Prefer bullets. Mark uncertainty as `UNCONFIRMED` (never guess).
+- If you notice missing recall or a compaction/summary event: refresh/rebuild the ledger from visible context, mark gaps `UNCONFIRMED`, ask up to 1-3 targeted questions, then continue.
+
+### `functions.update_plan` vs the Ledger
+
+- `functions.update_plan` is for short-term execution scaffolding while you work (a small 3-7 step plan with pending/in_progress/completed).
+- `CONTINUITY.md` is for long-running continuity across compaction (the "what/why/current state"), not a step-by-step task list.
+- Keep them consistent: when the plan or state changes, update the ledger at the intent/progress level (not every micro-step).
+
+### In replies
+
+- Begin with a brief "Ledger Snapshot" (Goal + Now/Next + Open Questions). Print the full ledger only when it materially changes or when the user asks.
+
+### `CONTINUITY.md` format (keep headings)
+
+- Goal (incl. success criteria):
+- Constraints/Assumptions:
+- Key decisions:
+- State:
+  - Done:
+  - Now:
+  - Next:
+- Open questions (UNCONFIRMED if needed):
+- Working set (files/IDs/commands):
 
 ## 1. Project Snapshot (Auto-Detected)
 
-_Derived from `package.json` at commit `2026-01-05`_:
+_Derived from `package.json` at commit `2026-01-07`_:
 
 - **Framework**: Expo SDK ~54 (React Native 0.81.5)
 - **Language**: TypeScript (`.ts`, `.tsx`) in Strict Mode
@@ -46,9 +77,9 @@ _Derived from `package.json` at commit `2026-01-05`_:
 
 ### 3.1. Secrets & Environment Variables
 
-- **Rule**: NEVER store sensitive keys (Service Account, Private Keys) in `EXPO_PUBLIC_*`.
+- **Rule**: NEVER store sensitive keys (Service Account, Private Keys, `GEMINI_API_KEY`) in `EXPO_PUBLIC_*`.
 - **Reason**: These variables are embedded into the client bundle and are readable by users.
-- **Action**: Use Supabase Edge Functions for sensitive operations.
+- **Action**: Use Supabase Edge Functions for sensitive operations. Use `npx supabase secrets set` for server-side keys.
 
 ### 3.2. Dependency Management
 
@@ -62,30 +93,57 @@ _Derived from `package.json` at commit `2026-01-05`_:
 - **EAS Update**: Changes to JS/TS/Assets can be pushed via OTA.
 - **Native Changes**: Changes to native config (`app.json`, `podfile`) require a **New Binary Build**.
 
-## 4. Mobile Performance & UX Rules
+## 4. AI & LLM Architecture (2025-2026 Standards)
 
-### 4.1. Lists & Virtualization
+### 4.1. The Unified SDK Rule
+
+- **Rule**: Use `@google/genai` as the unified standard library.
+- **Legacy Alert**: Do NOT use `@google/generative-ai` or legacy Vertex AI wrappers.
+- **Pattern**: Always initialize with `const ai = new GoogleGenAI({ apiKey })`.
+
+### 4.2. Model Selection (Gemini 2.5 & 3)
+
+- **Gemini 2.5 Flash**: Optimized for speed + reasoning. Use for most features (Vibe Analysis, Class Sorting).
+- **Gemini 3 Flash (Preview)**: Frontier-class performance. Use for complex agentic tasks or heavy visual/spatial reasoning.
+- **Thinking Config**:
+  - For Gemini 2.5: Use `thinkingBudget: -1` for dynamic reasoning.
+  - For Gemini 3: Prefer `thinkingLevel: "low" | "medium" | "high"` over budget for predictable latency.
+
+### 4.3. Structured Output & Reliability
+
+- **Rule**: Never parse AI responses with regex.
+- **Constraint**: Always use `responseMimeType: "application/json"` combined with a native `responseSchema` (generated from Zod).
+- **Safety**: Apply `thinkingBudget: 0` only when speed is the absolute priority over accuracy.
+
+### 4.4. Supabase Edge Functions (Deno Runtime)
+
+- **CORS**: Always handle `OPTIONS` preflight and set `Access-Control-Allow-Origin`.
+- **Runtime**: Prefer `npm:` specifiers (e.g., `npm:@google/genai`) for library imports in Deno.
+
+## 5. Mobile Performance & UX Rules
+
+### 5.1. Lists & Virtualization
 
 - **Rule**: Use `<FlatList>` or `<FlashList>` for any list > 20 items.
 - **Anti-Pattern**: Using `.map()` inside a `<ScrollView>` for dynamic data.
 - **Why**: Performance degradation and high memory usage (OOM crashes).
 
-### 4.2. Keyboard Handling
+### 5.2. Keyboard Handling
 
 - **Rule**: Always wrap input forms in `<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>`.
 - **Validation**: Test input visibility when the keyboard is open.
 
-### 4.3. Accessibility (A11y)
+### 5.3. Accessibility (A11y)
 
 - **Rule**: Interactive elements (`TouchableOpacity`) must have `accessibilityLabel` and `accessibilityRole`.
 - **Check**: "Can a user navigate this screen using VoiceOver/TalkBack?"
 
-### 4.4. Push Notifications
+### 5.4. Push Notifications
 
 - **Constraint**: Real push notifications DO NOT work on Simulators/Emulators.
 - **Requirement**: Test push tokens on a physical device.
 
-## 5. Anti-Code-Bloat Workflow
+## 6. Anti-Code-Bloat Workflow
 
 **Step 1: Ingest Context**
 
@@ -101,16 +159,39 @@ _Derived from `package.json` at commit `2026-01-05`_:
 - Run `yarn analysis:knip` to find dead code.
 - Run `yarn analysis:graph` to check for circular deps.
 
-## 6. CI/PR Checklist
+### 7. CI/PR & Commit Workflow (2026 Standardization)
 
-1. [ ] **Health Pass**: `npx expo-doctor` returns no issues.
-2. [ ] **Lint & Types**: `yarn lint:unused` and `yarn tsc` pass.
-3. [ ] **No Circular Deps**: `artifacts/depgraph.json` shows clean graph.
-4. [ ] **No Unused Code**: `artifacts/knip-report.json` is clean-ish.
-5. [ ] **Performance**: Lists use FlatList; Keyboard handling implemented.
-6. [ ] **Secrets Safe**: No private keys in client code.
+Before submitting any code or making a commit, follow this **Recursive Integrity Process**:
 
-## 7. 17 Rules of Agentic Coding
+**Step 1: Check-and-Adjust (Self-Reflection)**
+
+- [ ] Run `yarn lint:unused` and `yarn tsc`.
+- [ ] Verify UI against mobile reality (Padding, Accessibility, Keyboard).
+- [ ] **Reflection**: "Did I just add a new library for one function?" -> Inline it instead.
+- [ ] **Reflection**: "Does this AI feature have a fallback?" -> Ensure UI doesn't crash if AI fails.
+
+**Step 2: Semantic Versioning (SemVer)**
+
+- Update `version` in `package.json`:
+  - `PATCH`: Bug fixes, small UI tweaks.
+  - `MINOR`: New features (e.g., AI Caching).
+  - `MAJOR`: Breaking changes.
+- Sync the version string in `app/profile/settings.tsx` footer.
+
+**Step 3: Documentation Sync**
+
+- Update `CHANGELOG.md` with:
+  - `Added`: New features.
+  - `Changed`: Functional or UI refinements.
+  - `Security`: Fixes to keys or Edge Functions.
+- Update `docs/` or `artifacts/llm-context-pack.md` if significant architecture changed.
+
+**Step 4: Atomic Commit**
+
+- Use clear, prefix-based messages: `feat:`, `fix:`, `docs:`, `refactor:`, `perf:`.
+- Example: `feat: implement persistent AI caching and context stability`.
+
+## 8. 17 Rules of Agentic Coding
 
 Based on Eric Raymond's Unix Philosophy, these principles guide sustainable software development. Adapted from [The Art of Unix Programming](https://cdn.nakamototinstitute.org/docs/taoup.pdf).
 
@@ -219,6 +300,9 @@ Based on Eric Raymond's Unix Philosophy, these principles guide sustainable soft
 
 ## Sources & Citations
 
+- [Gemini 2.5 & 3 Release Notes](https://ai.google.dev/gemini-api/docs/changelog) - Dec 2025 Updates.
+- [Google Gen AI SDK Migration](https://ai.google.dev/gemini-api/docs/migrate) - Path to unified v1 2025 standard.
+- [Thinking Configuration Guide](https://ai.google.dev/gemini-api/docs/thinking) - Setting budget and level.
 - [Expo Versions](https://docs.expo.dev/versions/latest/) - Validated SDK 54 mapping.
 - [Expo Doctor](https://docs.expo.dev/develop/tools/) - Project health checks.
 - [FlatList Optimization](https://reactnative.dev/docs/optimizing-flatlist-configuration) - React Native Docs.
