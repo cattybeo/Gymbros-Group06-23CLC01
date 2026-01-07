@@ -1,8 +1,16 @@
 import { GYM_IMAGES } from "@/constants/Images";
 import { GymClass } from "@/lib/types";
-import React, { memo } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import React, { memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 interface ClassCardProps {
   gymClass: GymClass;
@@ -11,6 +19,7 @@ interface ClassCardProps {
   isBooked?: boolean;
   isFull?: boolean;
   spotsLeft?: number;
+  isAIRecommended?: boolean;
 }
 
 const ClassCard = memo(function ClassCard({
@@ -20,10 +29,41 @@ const ClassCard = memo(function ClassCard({
   isBooked,
   isFull,
   spotsLeft,
+  isAIRecommended,
 }: ClassCardProps) {
   const { t, i18n } = useTranslation();
   const startTime = new Date(gymClass.start_time);
   const endTime = new Date(gymClass.end_time);
+
+  // Pulse effect for AI Recommended border
+  const borderPulse = useSharedValue(0.5);
+
+  useEffect(() => {
+    if (isAIRecommended) {
+      borderPulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1500 }),
+          withTiming(0.5, { duration: 1500 })
+        ),
+        -1,
+        true
+      );
+    } else {
+      borderPulse.value = 0.5;
+    }
+  }, [isAIRecommended]);
+
+  const animatedBorderStyle = useAnimatedStyle(() => ({
+    borderColor: isAIRecommended ? "#EAB308" : "transparent", // accent color
+    borderWidth: 2,
+    opacity: borderPulse.value,
+    borderRadius: 16,
+    position: "absolute",
+    top: -2,
+    left: -2,
+    right: -2,
+    bottom: -2,
+  }));
 
   // Map i18n language to locale format
   const locale = i18n.language === "vi" ? "vi-VN" : "en-US";
@@ -56,7 +96,20 @@ const ClassCard = memo(function ClassCard({
   }
 
   return (
-    <View className="bg-card p-4 rounded-2xl shadow-sm mb-4 border border-border overflow-hidden">
+    <View
+      className={`bg-card p-4 rounded-2xl shadow-sm mb-4 border overflow-hidden ${isAIRecommended ? "border-accent shadow-lg" : "border-border"}`}
+    >
+      {isAIRecommended && (
+        <>
+          <Animated.View style={animatedBorderStyle} />
+          <View className="absolute top-2 right-2 z-10 bg-accent px-2 py-0.5 rounded-full flex-row items-center">
+            <Ionicons name="sparkles" size={10} color="white" />
+            <Text className="text-[10px] font-bold text-white ml-1">
+              {t("classes.ai_recommended")}
+            </Text>
+          </View>
+        </>
+      )}
       <View className="flex-row mb-4">
         <Image
           source={imageSource}
