@@ -46,8 +46,8 @@ node_modules/
 .temp/
 
 # Native folders (Do not ignore top level)
-# /ios
-# /android
+/ios
+/android
 
 # iOS
 *.pbxproj
