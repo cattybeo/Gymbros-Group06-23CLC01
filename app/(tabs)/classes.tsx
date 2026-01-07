@@ -1,4 +1,3 @@
-import { ClassCatalog } from "@/components/ClassCatalog";
 import { ClassesSkeleton } from "@/components/ClassesSkeleton";
 import { LiveClassList } from "@/components/LiveClassList";
 import Colors from "@/constants/Colors";
@@ -39,7 +38,6 @@ export default function ClassesScreen() {
   const [aiLoading, setAiLoading] = useState(false);
 
   // Catalog State
-  const [selectedType, setSelectedType] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -57,7 +55,7 @@ export default function ClassesScreen() {
     }
   }, [dataReady, contentOpacity]);
 
-  async function fetchData() {
+  async function fetchData(forceRefreshAI = false) {
     setLoading(true);
     setDataReady(false);
     contentOpacity.setValue(0);
@@ -91,15 +89,19 @@ export default function ClassesScreen() {
         setMyBookings(new Set(userBookedIds));
       }
 
-      // AI Analysis Trigger - Enhanced context
+      // AI Analysis Trigger - Enhanced with persistent caching
       if (user) {
         setAiLoading(true);
-        getAISmartSuggestion(user.user_metadata, {
-          availableClasses: classesData,
-          userBookings: userBookedIds,
-          currentTime: new Date().toISOString(),
-          language: i18n.language,
-        })
+        getAISmartSuggestion(
+          user.user_metadata,
+          {
+            availableClasses: classesData,
+            userBookings: userBookedIds,
+            currentTime: new Date().toISOString(),
+            language: i18n.language,
+          },
+          forceRefreshAI
+        )
           .then((res) => setSuggestion(res))
           .finally(() => setAiLoading(false));
       }
@@ -200,25 +202,14 @@ export default function ClassesScreen() {
     [classes, t, showAlert]
   );
 
-  const uniqueClassTypes = useMemo(() => {
-    const typesMap = new Map<string, { name: string; image_slug: string }>();
-    classes.forEach((c) => {
-      if (!typesMap.has(c.name)) {
-        typesMap.set(c.name, { name: c.name, image_slug: c.image_slug });
-      }
-    });
-    return Array.from(typesMap.values());
-  }, [classes]);
-
   const filteredClasses = useMemo(() => {
     return classes.filter((c) => {
-      const matchesType = selectedType === "All" || c.name === selectedType;
       const matchesSearch = c.name
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
-      return matchesType && matchesSearch;
+      return matchesSearch;
     });
-  }, [classes, selectedType, searchQuery]);
+  }, [classes, searchQuery]);
 
   return (
     <KeyboardAvoidingView
@@ -262,21 +253,12 @@ export default function ClassesScreen() {
               handleBook={handleBook}
               bookingId={bookingId}
               myBookings={myBookings}
-              renderCatalog={() => (
-                <ClassCatalog
-                  selectedType={selectedType}
-                  setSelectedType={setSelectedType}
-                  uniqueClassTypes={uniqueClassTypes}
-                  colors={colors}
-                />
-              )}
               isLoading={loading}
-              onRefresh={fetchData}
+              onRefresh={() => fetchData(true)}
               aiSuggestion={suggestion}
               aiLoading={aiLoading}
               onResetFilters={() => {
                 setSearchQuery("");
-                setSelectedType("All");
               }}
             />
           </Animated.View>

@@ -128,14 +128,33 @@ _Derived from `package.json` at commit `2026-01-07`_:
 - Run `yarn analysis:knip` to find dead code.
 - Run `yarn analysis:graph` to check for circular deps.
 
-## 7. CI/PR Checklist
+### 7. CI/PR & Commit Workflow (2026 Standardization)
 
-1. [ ] **Health Pass**: `npx expo-doctor` returns no issues.
-2. [ ] **Lint & Types**: `yarn lint:unused` and `yarn tsc` pass.
-3. [ ] **No Circular Deps**: `artifacts/depgraph.json` shows clean graph.
-4. [ ] **No Unused Code**: `artifacts/knip-report.json` is clean-ish.
-5. [ ] **Performance**: Lists use FlatList; Keyboard handling implemented.
-6. [ ] **Secrets Safe**: No private keys in client code.
+Before submitting any code or making a commit, follow this **Recursive Integrity Process**:
+
+**Step 1: Check-and-Adjust (Self-Reflection)**
+- [ ] Run `yarn lint:unused` and `yarn tsc`.
+- [ ] Verify UI against mobile reality (Padding, Accessibility, Keyboard).
+- [ ] **Reflection**: "Did I just add a new library for one function?" -> Inline it instead.
+- [ ] **Reflection**: "Does this AI feature have a fallback?" -> Ensure UI doesn't crash if AI fails.
+
+**Step 2: Semantic Versioning (SemVer)**
+- Update `version` in `package.json`: 
+  - `PATCH`: Bug fixes, small UI tweaks.
+  - `MINOR`: New features (e.g., AI Caching).
+  - `MAJOR`: Breaking changes.
+- Sync the version string in `app/profile/settings.tsx` footer.
+
+**Step 3: Documentation Sync**
+- Update `CHANGELOG.md` with:
+  - `Added`: New features.
+  - `Changed`: Functional or UI refinements.
+  - `Security`: Fixes to keys or Edge Functions.
+- Update `docs/` or `artifacts/llm-context-pack.md` if significant architecture changed.
+
+**Step 4: Atomic Commit**
+- Use clear, prefix-based messages: `feat:`, `fix:`, `docs:`, `refactor:`, `perf:`.
+- Example: `feat: implement persistent AI caching and context stability`.
 
 ## 8. 17 Rules of Agentic Coding
 
