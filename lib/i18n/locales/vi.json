@@ -65,7 +65,9 @@
     "cancel_membership": "Hủy gói tập",
     "cancel_membership_confirm": "Bạn có chắc chắn muốn hủy gói tập hiện tại? Việc này sẽ dừng gia hạn (nếu có) và thay đổi trạng thái gói.",
     "keep_membership": "Giữ lại gói tập",
-    "not_logged_in": "Vui lòng đăng nhập để tiếp tục."
+    "not_logged_in": "Vui lòng đăng nhập để tiếp tục.",
+    "search": "Tìm kiếm",
+    "reset_filters": "Đặt lại bộ lọc"
   },
   "membership": {
     "payment_init_error": "Không thể khởi tạo thanh toán",
@@ -227,7 +229,12 @@
     "explore": "Khám phá lớp học",
     "all": "Tất cả",
     "upcoming_schedule": "Lịch tập sắp tới",
-    "default_class_name": "Lớp Nhóm"
+    "default_class_name": "Lớp Nhóm",
+    "ai_advisor": "AI Tư Vấn",
+    "view_recommendation": "Xem gợi ý",
+    "ai_loading": "AI đang phân tích...",
+    "ai_recommended": "Gợi ý bởi AI",
+    "no_classes_title": "Không tìm thấy lớp học"
   },
   "heatmap": {
     "title": "Biểu Đồ Đông Đúc",

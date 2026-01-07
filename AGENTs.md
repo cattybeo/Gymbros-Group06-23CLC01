@@ -46,9 +46,9 @@ _Derived from `package.json` at commit `2026-01-07`_:
 
 ### 3.1. Secrets & Environment Variables
 
-- **Rule**: NEVER store sensitive keys (Service Account, Private Keys) in `EXPO_PUBLIC_*`.
+- **Rule**: NEVER store sensitive keys (Service Account, Private Keys, `GEMINI_API_KEY`) in `EXPO_PUBLIC_*`.
 - **Reason**: These variables are embedded into the client bundle and are readable by users.
-- **Action**: Use Supabase Edge Functions for sensitive operations.
+- **Action**: Use Supabase Edge Functions for sensitive operations. Use `npx supabase secrets set` for server-side keys.
 
 ### 3.2. Dependency Management
 
@@ -62,30 +62,57 @@ _Derived from `package.json` at commit `2026-01-07`_:
 - **EAS Update**: Changes to JS/TS/Assets can be pushed via OTA.
 - **Native Changes**: Changes to native config (`app.json`, `podfile`) require a **New Binary Build**.
 
-## 4. Mobile Performance & UX Rules
+## 4. AI & LLM Architecture (2025-2026 Standards)
 
-### 4.1. Lists & Virtualization
+### 4.1. The Unified SDK Rule
+
+- **Rule**: Use `@google/genai` as the unified standard library.
+- **Legacy Alert**: Do NOT use `@google/generative-ai` or legacy Vertex AI wrappers.
+- **Pattern**: Always initialize with `const ai = new GoogleGenAI({ apiKey })`.
+
+### 4.2. Model Selection (Gemini 2.5 & 3)
+
+- **Gemini 2.5 Flash**: Optimized for speed + reasoning. Use for most features (Vibe Analysis, Class Sorting).
+- **Gemini 3 Flash (Preview)**: Frontier-class performance. Use for complex agentic tasks or heavy visual/spatial reasoning.
+- **Thinking Config**:
+  - For Gemini 2.5: Use `thinkingBudget: -1` for dynamic reasoning.
+  - For Gemini 3: Prefer `thinkingLevel: "low" | "medium" | "high"` over budget for predictable latency.
+
+### 4.3. Structured Output & Reliability
+
+- **Rule**: Never parse AI responses with regex.
+- **Constraint**: Always use `responseMimeType: "application/json"` combined with a native `responseSchema` (generated from Zod).
+- **Safety**: Apply `thinkingBudget: 0` only when speed is the absolute priority over accuracy.
+
+### 4.4. Supabase Edge Functions (Deno Runtime)
+
+- **CORS**: Always handle `OPTIONS` preflight and set `Access-Control-Allow-Origin`.
+- **Runtime**: Prefer `npm:` specifiers (e.g., `npm:@google/genai`) for library imports in Deno.
+
+## 5. Mobile Performance & UX Rules
+
+### 5.1. Lists & Virtualization
 
 - **Rule**: Use `<FlatList>` or `<FlashList>` for any list > 20 items.
 - **Anti-Pattern**: Using `.map()` inside a `<ScrollView>` for dynamic data.
 - **Why**: Performance degradation and high memory usage (OOM crashes).
 
-### 4.2. Keyboard Handling
+### 5.2. Keyboard Handling
 
 - **Rule**: Always wrap input forms in `<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>`.
 - **Validation**: Test input visibility when the keyboard is open.
 
-### 4.3. Accessibility (A11y)
+### 5.3. Accessibility (A11y)
 
 - **Rule**: Interactive elements (`TouchableOpacity`) must have `accessibilityLabel` and `accessibilityRole`.
 - **Check**: "Can a user navigate this screen using VoiceOver/TalkBack?"
 
-### 4.4. Push Notifications
+### 5.4. Push Notifications
 
 - **Constraint**: Real push notifications DO NOT work on Simulators/Emulators.
 - **Requirement**: Test push tokens on a physical device.
 
-## 5. Anti-Code-Bloat Workflow
+## 6. Anti-Code-Bloat Workflow
 
 **Step 1: Ingest Context**
 
@@ -101,7 +128,7 @@ _Derived from `package.json` at commit `2026-01-07`_:
 - Run `yarn analysis:knip` to find dead code.
 - Run `yarn analysis:graph` to check for circular deps.
 
-## 6. CI/PR Checklist
+## 7. CI/PR Checklist
 
 1. [ ] **Health Pass**: `npx expo-doctor` returns no issues.
 2. [ ] **Lint & Types**: `yarn lint:unused` and `yarn tsc` pass.
@@ -110,7 +137,7 @@ _Derived from `package.json` at commit `2026-01-07`_:
 5. [ ] **Performance**: Lists use FlatList; Keyboard handling implemented.
 6. [ ] **Secrets Safe**: No private keys in client code.
 
-## 7. 17 Rules of Agentic Coding
+## 8. 17 Rules of Agentic Coding
 
 Based on Eric Raymond's Unix Philosophy, these principles guide sustainable software development. Adapted from [The Art of Unix Programming](https://cdn.nakamototinstitute.org/docs/taoup.pdf).
 
@@ -219,6 +246,9 @@ Based on Eric Raymond's Unix Philosophy, these principles guide sustainable soft
 
 ## Sources & Citations
 
+- [Gemini 2.5 & 3 Release Notes](https://ai.google.dev/gemini-api/docs/changelog) - Dec 2025 Updates.
+- [Google Gen AI SDK Migration](https://ai.google.dev/gemini-api/docs/migrate) - Path to unified v1 2025 standard.
+- [Thinking Configuration Guide](https://ai.google.dev/gemini-api/docs/thinking) - Setting budget and level.
 - [Expo Versions](https://docs.expo.dev/versions/latest/) - Validated SDK 54 mapping.
 - [Expo Doctor](https://docs.expo.dev/develop/tools/) - Project health checks.
 - [FlatList Optimization](https://reactnative.dev/docs/optimizing-flatlist-configuration) - React Native Docs.
