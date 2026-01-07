@@ -2,6 +2,24 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.0.1] - 2026-01-07
+
+### Thêm mới (Added)
+
+- **Kiến trúc mã nguồn theo chuẩn 2026 Mobile**:
+  - Tách màn hình `ClassesScreen` thành các component nhỏ hơn: `ClassCatalog`, `ClassesSkeleton`, `LiveClassList`.
+  - Cải thiện trình bảo trì mã nguồn (Maintainability) và giảm quy mô file chính.
+
+### Thay đổi (Changed)
+
+- **Tối ưu hóa CrowdHeatmap (Premium & Live Status)**:
+  - **Dữ liệu thực tế**: Nâng cấp lên 1500 bookings với thuật toán phân bổ theo giờ cao điểm (Peak Hours).
+  - **Isolated Polling**: Di chuyển logic tự động làm mới (30s interval) vào trực tiếp component Heatmap.
+  - **Pulse Animation**: Thêm hiệu ứng nhịp thở cho ô biểu đồ của giờ hiện tại.
+  - **Granular Colors**: Cập nhật dải màu 6 mức độ chi tiết hơn cho biểu đồ đông đúc.
+- **Khắc phục lỗi Re-rendering**: Loại bỏ hiện tượng toàn bộ màn hình Lớp học bị render lại khi dữ liệu Live cập nhật, chỉ cập nhật duy nhất những phần thay đổi dữ liệu.
+- **Sửa lỗi Lint**: Khắc phục các lỗi về kiểu dữ liệu (JSX Namespace) và sắp xếp lại các import.
+
 ## [v0.9.2] - 2026-01-07
 
 ### Thêm mới (Added)
