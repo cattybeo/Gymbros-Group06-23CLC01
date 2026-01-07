@@ -4,8 +4,11 @@
   "version": "0.9.1",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios",
+    "android": "yarn ensure-credentials && expo run:android",
+    "ios": "yarn ensure-credentials && expo run:ios",
+    "prebuild": "expo prebuild",
+    "postprebuild": "yarn ensure-credentials",
+    "ensure-credentials": "mkdir -p ios/Gymbros android/app 2>/dev/null; cp credentials/GoogleService-Info.plist ios/Gymbros/ 2>/dev/null || true; cp credentials/google-services.json android/app/ 2>/dev/null || true",
     "web": "expo start --web",
     "analysis:knip": "knip --reporter json > artifacts/knip-report.json || exit 0",
     "analysis:graph": "depcruise app components lib hooks --include-only \"^app|^components|^lib|^hooks\" --config .dependency-cruiser.js --output-type json > artifacts/depgraph.json",
