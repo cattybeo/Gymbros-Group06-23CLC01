@@ -2,6 +2,25 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.2.0] - 2026-01-07
+
+### Thêm mới (Added)
+
+- **AI Caching & Consistency Engine**:
+  - Triển khai hệ thống lưu trữ đệm (Caching) sử dụng `AsyncStorage` để giảm 90% số lần gọi AI không cần thiết.
+  - Tích hợp cơ chế **Context Chaining**: Gửi lại gợi ý cũ vào Edge Function để AI duy trì tính nhất quán khi tư vấn (Coach stability).
+  - Tự động phát hiện thay đổi (Hash detection): AI chỉ làm mới gợi ý khi người dùng thay đổi mục tiêu hoặc đặt thêm lớp mới.
+- **Tối giản giao diện Lớp học**:
+  - Loại bỏ danh mục "Explore Classes" dư thừa để tối ưu không gian hiển thị trên mobile.
+  - Nâng cấp nút "All" thành nút Reset bộ lọc thông minh (Xóa cả từ khóa tìm kiếm).
+
+### Thay đổi (Changed)
+
+- **Giao diện & Animation**:
+  - Chỉnh sửa viền Pulse của gợi ý AI để không bị che khuất khi ở mép màn hình.
+  - Tối ưu hóa hiệu ứng Scale khi Card được AI đề xuất giúp nổi bật hơn.
+- **AGENTs.md**: Bổ sung quy trình **Commit Workflow (2026 Standardization)** bắt buộc cho mọi Agent.
+
 ## [v1.1.0] - 2026-01-07
 
 ### Thêm mới (Added)

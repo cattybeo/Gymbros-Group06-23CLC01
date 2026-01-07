@@ -59,10 +59,10 @@ const ClassCard = memo(function ClassCard({
     opacity: borderPulse.value,
     borderRadius: 16,
     position: "absolute",
-    top: -2,
-    left: -2,
-    right: -2,
-    bottom: -2,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   }));
 
   // Map i18n language to locale format
@@ -97,7 +97,7 @@ const ClassCard = memo(function ClassCard({
 
   return (
     <View
-      className={`bg-card p-4 rounded-2xl shadow-sm mb-4 border overflow-hidden ${isAIRecommended ? "border-accent shadow-lg" : "border-border"}`}
+      className={`bg-card p-4 rounded-2xl shadow-sm mb-4 border ${isAIRecommended ? "border-accent shadow-lg" : "border-border"}`}
     >
       {isAIRecommended && (
         <>
