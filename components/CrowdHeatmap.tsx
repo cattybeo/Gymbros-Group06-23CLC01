@@ -1,9 +1,17 @@
 import Colors from "@/constants/Colors";
+import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Animated,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Skeleton } from "./ui/Skeleton";
 
 export interface TrafficData {
   day_of_week: number; // 0 = Sun, 1 = Mon...
@@ -12,30 +20,105 @@ export interface TrafficData {
 }
 
 interface CrowdHeatmapProps {
-  data: TrafficData[];
   isLoading?: boolean;
 }
 
 const HOURS = Array.from({ length: 17 }, (_, i) => i + 6); // 6 AM to 22 PM (10 PM)
 const DAYS = [1, 2, 3, 4, 5, 6, 0]; // Mon to Sun order
 
-export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
+export default function CrowdHeatmap({
+  isLoading: parentLoading,
+  initialData,
+}: CrowdHeatmapProps & { initialData?: TrafficData[] }) {
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
+  const pulseAnim = useRef(new Animated.Value(0.6)).current;
 
-  // Helper to get color based on score
+  // If initialData is provided, we don't need to show loading state
+  const [data, setData] = useState<TrafficData[]>(initialData || []);
+  const [internalLoading, setInternalLoading] = useState(
+    initialData === undefined
+  );
+
+  const fetchTraffic = async () => {
+    try {
+      const { data: trafficData, error } =
+        await supabase.rpc("get_weekly_traffic");
+      if (!error && trafficData) {
+        setData(trafficData);
+      }
+    } finally {
+      setInternalLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Only fetch immediately if we don't have initial data
+    if (initialData === undefined) {
+      fetchTraffic();
+    }
+
+    // Subscribe to Realtime Bookings for Instant Demo Updates
+    const channel = supabase
+      .channel("heatmap_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => {
+          fetchTraffic();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Update local state if initialData changes (e.g. pull-to-refresh from parent)
+  useEffect(() => {
+    if (initialData) {
+      setData(initialData);
+      setInternalLoading(false);
+    }
+  }, [initialData]);
+
+  const isLoading = parentLoading || internalLoading;
+
+  // Pulse effect for the current hour cell (High-end UI feel)
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.6,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [pulseAnim]);
+
+  // Helper to get color based on score (2025-2026 Modern Spectrum)
   const getColor = (score: number) => {
     if (score === 0) return "bg-surface_highlight"; // Empty
-    if (score < 0.3) return "bg-success"; // Low
-    if (score < 0.7) return "bg-warning"; // Med
-    return "bg-error"; // High
+    if (score < 0.2) return "bg-success/60"; // Very Low
+    if (score < 0.45) return "bg-success"; // Low
+    if (score < 0.65) return "bg-warning"; // Moderate
+    if (score < 0.85) return "bg-error/80"; // Busy
+    return "bg-error"; // Peak
   };
 
   const getIntensityLabel = (score: number) => {
-    if (score < 0.3) return t("heatmap.low", { defaultValue: "Vắng" });
-    if (score < 0.7) return t("heatmap.med", { defaultValue: "Vừa" });
-    return t("heatmap.high", { defaultValue: "Đông" });
+    if (score < 0.3) return t("heatmap.low");
+    if (score < 0.7) return t("heatmap.med");
+    return t("heatmap.high");
   };
 
   // Convert flat data to map for O(1) lookup
@@ -46,6 +129,9 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
     });
     return map;
   }, [data]);
+
+  const currentHour = new Date().getHours();
+  const currentDay = new Date().getDay();
 
   const [selectedCell, setSelectedCell] = useState<{
     day: number;
@@ -64,18 +150,70 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
       ? "border-2 border-primary"
       : "border border-transparent";
 
+    const isCurrentTime = day === currentDay && hour === currentHour;
+
     return (
       <TouchableOpacity
         key={key}
-        className={`w-8 h-8 m-0.5 rounded-md ${colorClass} ${borderClass}`}
         onPress={() => setSelectedCell({ day, hour, score })}
         activeOpacity={0.7}
-      />
+      >
+        <Animated.View
+          className={`w-8 h-8 m-0.5 rounded-md ${colorClass} ${borderClass}`}
+          style={
+            isCurrentTime
+              ? { opacity: pulseAnim, transform: [{ scale: pulseAnim }] }
+              : {}
+          }
+        />
+      </TouchableOpacity>
     );
   };
 
-  const currentHour = new Date().getHours();
-  const currentDay = new Date().getDay();
+  if (isLoading) {
+    return (
+      <View className="mb-6">
+        <View className="mb-2 px-1">
+          <Skeleton width={150} height={24} borderRadius={4} />
+        </View>
+        <View className="bg-surface rounded-xl p-3 border border-border">
+          <View className="mb-4 border-b border-border pb-2">
+            <Skeleton width="100%" height={20} borderRadius={4} />
+          </View>
+          <View className="flex-row">
+            <View className="mt-8 mr-2">
+              {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <View key={i} className="h-8 m-0.5 justify-center">
+                  <Skeleton width={32} height={12} borderRadius={4} />
+                </View>
+              ))}
+            </View>
+            <View className="flex-1">
+              <View className="flex-row mb-1">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <View key={i} className="w-8 m-0.5 items-center">
+                    <Skeleton width={20} height={10} borderRadius={2} />
+                  </View>
+                ))}
+              </View>
+              {[1, 2, 3, 4].map((i) => (
+                <View key={i} className="flex-row">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((j) => (
+                    <View
+                      key={j}
+                      className="w-8 h-8 m-0.5 rounded-md bg-surface_highlight"
+                    >
+                      <Skeleton width="100%" height="100%" borderRadius={6} />
+                    </View>
+                  ))}
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className="mb-6">
@@ -83,7 +221,7 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
         <Text className="text-foreground text-lg font-bold flex-row items-center">
           <Ionicons name="bar-chart" size={20} color={colors.tint} />
           {"  "}
-          {t("heatmap.title", { defaultValue: "Gym Traffic" })}
+          {t("heatmap.title")}
         </Text>
         {/* Simple Legend */}
         <View className="flex-row gap-2">
@@ -112,7 +250,7 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
         {/* Top Header: Current Status Prediction */}
         <View className="mb-4 flex-row items-center justify-between border-b border-border pb-2">
           <Text className="text-foreground-secondary font-medium">
-            {t("heatmap.now", { defaultValue: "Live Status:" })}
+            {t("heatmap.now")}
           </Text>
           <Text className="text-primary font-bold">
             {/* Mock live status based on heatmap data for current hour */}
@@ -128,11 +266,7 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
             {DAYS.map((day) => (
               <View key={day} className="h-8 m-0.5 justify-center">
                 <Text className="text-foreground-secondary text-xs font-bold text-right w-8">
-                  {t(`heatmap.days.${day}`, {
-                    defaultValue: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"][
-                      day
-                    ],
-                  })}
+                  {t(`heatmap.days.${day}`)}
                 </Text>
               </View>
             ))}
@@ -166,16 +300,12 @@ export default function CrowdHeatmap({ data, isLoading }: CrowdHeatmapProps) {
         {selectedCell && (
           <View className="mt-3 bg-surface_highlight p-2 rounded-lg items-center border border-border">
             <Text className="text-foreground-secondary text-xs text-center">
-              {t(`heatmap.days.${selectedCell.day}`, {
-                defaultValue: "Day " + selectedCell.day,
-              })}{" "}
-              @ {selectedCell.hour}:00 -
+              {t(`heatmap.days.${selectedCell.day}`)} @ {selectedCell.hour}:00 -
               <Text
                 className={`font-bold ${selectedCell.score > 0.7 ? "text-error" : "text-success"}`}
               >
                 {" "}
-                {Math.round(selectedCell.score * 100)}%{" "}
-                {t("heatmap.capacity", { defaultValue: "Capacity" })}
+                {Math.round(selectedCell.score * 100)}% {t("heatmap.capacity")}
               </Text>
             </Text>
           </View>

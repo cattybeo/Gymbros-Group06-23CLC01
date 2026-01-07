@@ -16,6 +16,7 @@
     "no_account": "Don't have an account?",
     "register_now": "Register now",
     "or_continue": "Or continue with",
+    "login_failed": "Login failed",
     "sign_up_title": "Create Account",
     "sign_up_subtitle": "Start your journey today",
     "register_button": "Register",
@@ -54,8 +55,11 @@
     "missing_info": "Please fill in all fields.",
     "success": "Success",
     "save": "Save Changes",
+    "yes": "Yes",
+    "no": "No",
     "cancel": "Cancel",
     "confirm": "Confirm",
+    "processing": "Processing...",
     "add": "Add",
     "feature_coming_soon": "Feature coming soon!",
     "pick_image_error": "Could not pick image.",
@@ -66,7 +70,9 @@
     "cancel_membership": "Cancel Membership",
     "cancel_membership_confirm": "Are you sure you want to cancel your current membership? This will stop any future renewals (if any) and change your membership status.",
     "keep_membership": "Keep Membership",
-    "not_logged_in": "Please log in to continue."
+    "not_logged_in": "Please log in to continue.",
+    "search": "Search",
+    "reset_filters": "Reset Filters"
   },
   "membership": {
     "payment_init_error": "Could not initialize payment",
@@ -115,7 +121,9 @@
     },
     "no_activity": "No recent activity",
     "upcoming_class": "Upcoming Class",
-    "completed_class": "Completed"
+    "completed_class": "Completed",
+    "banner_title": "TRANSFORM YOUR BODY WITH POWER PUMP",
+    "join_now": "JOIN NOW"
   },
   "profile": {
     "workouts": "Workouts",
@@ -137,6 +145,7 @@
     "change_password": "Change Password",
     "change_password_success": "Password changed successfully!",
     "body_index": "Body Index",
+    "bmi": "BMI Index",
     "goal_label": "Primary Goal",
     "gender_label": "Gender",
     "birthday_label": "Date of Birth (YYYY-MM-DD)",
@@ -200,6 +209,7 @@
     "home": "Home",
     "profile": "Profile",
     "membership": "Membership",
+    "journey": "Journey",
     "classes": "Classes"
   },
   "classes": {
@@ -212,7 +222,13 @@
     "slots": "slots",
     "book_now": "Book Now",
     "booked": "Booked",
+    "cancel_booking": "Cancel Booking",
     "full": "Full",
+    "expired": "Expired",
+    "ongoing": "Ongoing",
+    "years_exp": "Years exp",
+    "starting_soon": "Starting Soon",
+    "lead_by": "Lead by",
     "booking_success": "Success",
     "booking_success_msg": "Booking successful!",
     "booking_error": "Booking Error",
@@ -220,6 +236,9 @@
     "membership_required": "Membership Required",
     "membership_required_msg": "You need an active membership to book classes.",
     "already_booked": "You have already booked this class.",
+    "overlap_error": "You already have a class scheduled for this time window.",
+    "cancel_confirm_msg": "Are you sure you want to cancel this booking?",
+    "cancel_success_msg": "Booking cancelled successfully",
     "empty_list": "No upcoming classes found.",
     "processing": "Processing...",
     "spots_left": "{{count}} left",
@@ -228,7 +247,29 @@
     "explore": "Explore Classes",
     "all": "All",
     "upcoming_schedule": "Upcoming Schedule",
-    "default_class_name": "Group Class"
+    "default_class_name": "Group Class",
+    "ai_advisor": "AI Advisor",
+    "view_recommendation": "View Recommendation",
+    "ai_loading": "AI is analyzing...",
+    "ai_recommended": "AI Recommended",
+    "no_classes_title": "No classes found",
+    "about_title": "About this class",
+    "no_description": "No description available for this class.",
+    "default_location": "Gymbros Fitness Center",
+    "default_studio": "Floor 2, Studio A",
+    "unknown_trainer": "Unknown Trainer"
+  },
+  "journey": {
+    "subtitle": "Your personalized training schedule",
+    "total_bookings": "Total Bookings",
+    "completed": "Sessions Done",
+    "tab_upcoming": "Upcoming",
+    "tab_history": "History",
+    "no_upcoming_title": "No upcoming classes",
+    "no_upcoming_desc": "Go to Classes and find your next workout!",
+    "no_history_title": "No history found",
+    "no_history_desc": "Your past classes will appear here.",
+    "find_classes": "Find Classes"
   },
   "heatmap": {
     "title": "Crowd Meter",
