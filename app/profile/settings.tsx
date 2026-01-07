@@ -142,7 +142,7 @@ export default function SettingsScreen() {
           </View>
 
           <Text className="text-muted_foreground text-xs mt-4 text-center">
-            {t("profile.version")} 0.9.1 (Beta)
+            {t("profile.version")} 1.0.0 (Gold)
           </Text>
         </View>
       </View>
