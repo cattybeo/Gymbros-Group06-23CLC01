@@ -19,10 +19,10 @@ export default {
     text: "#111827",
     // Alias for text (maintained for backward compatibility)
     foreground: "#111827",
-    // Secondary text, descriptions, body content
+    // Secondary text, descriptions, body content - Darkened for contrast (Gray 700)
     foreground_secondary: "#374151",
-    // Tertiary text, captions, disabled states
-    foreground_muted: "#4B5563",
+    // Tertiary text, captions, disabled states - Darkened for contrast (Gray 500)
+    foreground_muted: "#6B7280",
 
     // ----- Brand Colors (Premium Orange Palette) -----
     // Primary buttons, links, key interactive elements

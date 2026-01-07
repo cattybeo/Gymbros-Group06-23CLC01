@@ -236,9 +236,9 @@ export default function MembershipScreen() {
       t("common.cancel_membership_confirm"),
       "warning",
       {
-        primaryButtonText: t("common.cancel_membership"),
-        secondaryButtonText: t("common.keep_membership"),
-        onPrimaryPress: async () => {
+        primaryButtonText: t("common.keep_membership"),
+        secondaryButtonText: t("common.cancel_membership"),
+        onSecondaryPress: async () => {
           setLoading(true);
           try {
             const {
@@ -334,10 +334,11 @@ export default function MembershipScreen() {
                 <TouchableOpacity
                   key={duration}
                   accessibilityRole="button"
-                  className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${selectedDuration === duration
-                    ? "bg-primary shadow-sm"
-                    : "bg-transparent"
-                    }`}
+                  className={`flex-1 py-3 items-center rounded-2xl relative z-10 ${
+                    selectedDuration === duration
+                      ? "bg-primary shadow-sm"
+                      : "bg-transparent"
+                  }`}
                   onPress={() => setSelectedDuration(duration as any)}
                 >
                   {duration === 6 && (
@@ -355,10 +356,11 @@ export default function MembershipScreen() {
                     </View>
                   )}
                   <Text
-                    className={`font-bold text-sm ${selectedDuration === duration
-                      ? "text-on_primary"
-                      : "text-muted_foreground"
-                      }`}
+                    className={`font-bold text-sm ${
+                      selectedDuration === duration
+                        ? "text-on_primary"
+                        : "text-muted_foreground"
+                    }`}
                   >
                     {duration === 12
                       ? t("membership.1_year")
@@ -389,7 +391,7 @@ export default function MembershipScreen() {
               const isMyCurrentPlan =
                 currentPlan?.id === selectedPlan.id &&
                 tier.level ===
-                tiers.find((t) => t.id === currentPlan.tier_id)?.level;
+                  tiers.find((t) => t.id === currentPlan.tier_id)?.level;
 
               return (
                 <View>

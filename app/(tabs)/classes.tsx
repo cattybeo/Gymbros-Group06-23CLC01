@@ -1,4 +1,5 @@
 import { ClassesSkeleton } from "@/components/ClassesSkeleton";
+import { TrafficData } from "@/components/CrowdHeatmap";
 import { LiveClassList } from "@/components/LiveClassList";
 import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
@@ -8,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,6 +23,9 @@ import {
 
 export default function ClassesScreen() {
   const [classes, setClasses] = useState<GymClass[]>([]);
+  const [trafficData, setTrafficData] = useState<TrafficData[] | undefined>(
+    undefined
+  );
   const [loading, setLoading] = useState(true);
   const [dataReady, setDataReady] = useState(false);
   const [contentOpacity] = useState(new Animated.Value(0));
@@ -42,27 +46,34 @@ export default function ClassesScreen() {
 
   const fetchData = useCallback(
     async (forceRefreshAI = false, silent = false) => {
+      const startTime = Date.now(); // 1. Start timer for UX Smoothing
       if (!silent) {
         setLoading(true);
         setDataReady(false);
         contentOpacity.setValue(0);
       }
       try {
-        const [userResponse, classesResponse] = await Promise.all([
-          supabase.auth.getUser(),
-          supabase
-            .from("classes")
-            .select(
-              "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
-            )
-            .order("start_time", { ascending: true }),
-        ]);
+        const [userResponse, classesResponse, trafficResponse] =
+          await Promise.all([
+            supabase.auth.getUser(),
+            supabase
+              .from("classes")
+              .select(
+                "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
+              )
+              .order("start_time", { ascending: true }),
+            supabase.rpc("get_weekly_traffic"),
+          ]);
 
         const user = userResponse.data.user;
 
         if (classesResponse.error) throw classesResponse.error;
         const classesData = classesResponse.data || [];
         setClasses(classesData);
+
+        if (trafficResponse.data) {
+          setTrafficData(trafficResponse.data);
+        }
 
         const classIds = classesData.map((c) => c.id);
         let userBookedIds: string[] = [];
@@ -98,9 +109,18 @@ export default function ClassesScreen() {
             .finally(() => setAiLoading(false));
         }
 
-        if (!silent) setDataReady(true);
+        // 2. UX: Ensure minimum loading time (800ms) to prevent Skeleton flickering
+        if (!silent) {
+          const elapsedTime = Date.now() - startTime;
+          const MIN_LOADING_TIME = 800;
+          if (elapsedTime < MIN_LOADING_TIME) {
+            await new Promise((resolve) =>
+              setTimeout(resolve, MIN_LOADING_TIME - elapsedTime)
+            );
+          }
+          setDataReady(true);
+        }
       } catch (error) {
-        console.error(error);
         if (!silent)
           showAlert(t("common.error"), t("classes.fetch_error"), "error");
       } finally {
@@ -110,9 +130,12 @@ export default function ClassesScreen() {
     [contentOpacity, t, showAlert]
   );
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useFocusEffect(
+    useCallback(() => {
+      // If we already have data, do a silent refresh to avoid skeleton flicker
+      fetchData(false, dataReady);
+    }, [fetchData, dataReady])
+  );
 
   useEffect(() => {
     const channel = supabase
@@ -283,8 +306,9 @@ export default function ClassesScreen() {
         t("classes.cancel_confirm_msg"),
         "warning",
         {
-          primaryButtonText: t("common.yes"),
-          onPrimaryPress: async () => {
+          primaryButtonText: t("common.no"),
+          secondaryButtonText: t("common.yes"),
+          onSecondaryPress: async () => {
             setBookingId(classId);
             // Optimistic Update (Task 3.2)
             setMyBookings((prev) => {
@@ -316,7 +340,6 @@ export default function ClassesScreen() {
               setBookingId(null);
             }
           },
-          secondaryButtonText: t("common.no"),
         }
       );
     },
@@ -383,6 +406,7 @@ export default function ClassesScreen() {
               handleCancel={handleCancel}
               bookingId={bookingId}
               myBookings={myBookings}
+              trafficData={trafficData}
               isLoading={loading}
               onRefresh={onRefresh}
               aiSuggestion={suggestion}

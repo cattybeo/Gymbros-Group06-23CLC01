@@ -5,11 +5,10 @@ import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { Booking, GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  ActivityIndicator,
   FlatList,
   RefreshControl,
   Text,
@@ -19,8 +18,49 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ClassCard from "@/components/ClassCard";
+import { ClassCardSkeleton } from "@/components/ui/ClassCardSkeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 type BookingWithClass = Booking & { classes: GymClass };
+
+const JourneySkeleton = () => {
+  return (
+    <View className="flex-1 bg-background px-4 pt-8">
+      {/* Title Skeleton */}
+      <View className="mb-6">
+        <View style={{ marginBottom: 8 }}>
+          <Skeleton width={150} height={36} borderRadius={8} />
+        </View>
+        <Skeleton width={220} height={20} borderRadius={4} />
+      </View>
+
+      {/* Stats Logic Skeleton - Box */}
+      <View className="bg-card rounded-2xl p-4 mb-6 border border-border h-24 flex-row justify-around items-center">
+        <View className="items-center gap-2">
+          <Skeleton width={30} height={30} borderRadius={4} />
+          <Skeleton width={80} height={12} borderRadius={4} />
+        </View>
+        <View className="w-[1px] bg-border h-8" />
+        <View className="items-center gap-2">
+          <Skeleton width={30} height={30} borderRadius={4} />
+          <Skeleton width={80} height={12} borderRadius={4} />
+        </View>
+      </View>
+
+      {/* Tabs Skeleton */}
+      <View className="flex-row bg-muted rounded-xl p-1 mb-6 h-12">
+        <View className="flex-1 m-1 bg-card rounded-lg" />
+      </View>
+
+      {/* Cards */}
+      <View>
+        <ClassCardSkeleton />
+        <ClassCardSkeleton />
+        <ClassCardSkeleton />
+      </View>
+    </View>
+  );
+};
 
 export default function JourneyScreen() {
   const { t } = useTranslation();
@@ -48,9 +88,9 @@ export default function JourneyScreen() {
         .order("booking_date", { ascending: false });
 
       if (error) throw error;
-      setBookings((data as any[]) || []);
+      setBookings((data as BookingWithClass[]) || []);
     } catch (error) {
-      console.error("Error fetching bookings:", error);
+      // Rule 11: Silence in failure (unless critical)
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -66,8 +106,9 @@ export default function JourneyScreen() {
         t("classes.cancel_confirm_msg"),
         "warning",
         {
-          primaryButtonText: t("common.yes"),
-          onPrimaryPress: async () => {
+          primaryButtonText: t("common.no"),
+          secondaryButtonText: t("common.yes"),
+          onSecondaryPress: async () => {
             setCancellingId(classId);
             try {
               const { error } = await supabase
@@ -84,22 +125,25 @@ export default function JourneyScreen() {
                 "success"
               );
               fetchBookings();
-            } catch (error: any) {
-              showAlert(t("common.error"), error.message, "error");
+            } catch (error) {
+              const errorMessage =
+                error instanceof Error ? error.message : "Unknown error";
+              showAlert(t("common.error"), errorMessage, "error");
             } finally {
               setCancellingId(null);
             }
           },
-          secondaryButtonText: t("common.no"),
         }
       );
     },
     [user, t, showAlert, fetchBookings]
   );
 
-  useEffect(() => {
-    fetchBookings();
-  }, [fetchBookings]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchBookings();
+    }, [fetchBookings])
+  );
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -175,11 +219,9 @@ export default function JourneyScreen() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.background }}>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={colors.tint} />
-        </View>
-      </View>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+        <JourneySkeleton />
+      </SafeAreaView>
     );
   }
 
@@ -234,7 +276,10 @@ export default function JourneyScreen() {
                   onPress={() => router.push("/(tabs)/classes")}
                   className="mt-8 bg-primary px-10 py-4 rounded-full shadow-lg shadow-primary/30"
                 >
-                  <Text className="text-on_primary font-bold text-lg">
+                  <Text
+                    className="text-on_primary font-bold text-lg"
+                    numberOfLines={1}
+                  >
                     {t("journey.find_classes")}
                   </Text>
                 </TouchableOpacity>
