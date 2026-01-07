@@ -2,6 +2,29 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.1.0] - 2026-01-07
+
+### Thêm mới (Added)
+
+- **Hệ thống AI Personal Trainer (Edge Computing)**:
+  - Triển khai **Supabase Edge Function** (`gymbros-ai`) sử dụng SDK `@google/genai` mới nhất (giai đoạn 2025-2026).
+  - Tích hợp mô hình **Gemini 2.5-Flash** với cấu hình **Dynamic Thinking** để tư duy gợi ý lộ trình tập luyện cá nhân hóa.
+  - **Bảo mật tối đa**: Chuyển toàn bộ logic AI và API Key từ Client sang Server side.
+  - Hỗ trợ phản hồi đa ngôn ngữ (Tiếng Việt và Tiếng Anh) dựa trên cài đặt của người dùng.
+- **Tính năng AI Interactive trên Lớp học**:
+  - Tự động gợi ý chính xác 3 lớp học phù hợp với mục tiêu (Tăng cơ/Giảm mỡ) và lịch trình của người dùng.
+  - Hiệu ứng **Pulse Border Animation** và Badge **AI Recommended** cho các lớp học được gợi ý.
+  - Tính năng **Click-to-Scroll**: Tự động cuộn đến lớp học khi nhấn vào gợi ý của AI.
+  - Trạng thái tải dữ liệu Shimmer (Skeleton) chuyên nghiệp cho AI Suggestion Card.
+
+### Thay đổi (Changed)
+
+- **Giao diện Lớp học (UX Refinement)**:
+  - Cập nhật **Sticky Search Bar**: Thanh tìm kiếm luôn cố định ở đầu danh sách giúp thao tác lọc nhanh hơn.
+  - Cải thiện **Empty State**: Thêm hình ảnh minh họa và nút đặt lại bộ lọc khi không tìm thấy kết quả.
+  - Tối ưu hóa hiệu năng danh sách khi cuộn và nhảy đến vị trí lớp học.
+- **AGENTs.md**: Cập nhật tiêu chuẩn lập trình AI (Rule of Law 2026) cho toàn bộ đội ngũ agent.
+
 ## [v1.0.1] - 2026-01-07
 
 ### Thêm mới (Added)
