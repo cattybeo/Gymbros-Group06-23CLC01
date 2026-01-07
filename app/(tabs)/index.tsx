@@ -27,14 +27,16 @@ export default function HomeScreen() {
     if (!user) return;
     const fetchData = async () => {
       try {
+        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format for date comparison
         const [tierResponse, activityResponse] = await Promise.all([
-          // 1. Fetch Tier
+          // 1. Fetch Tier (must be active, started, and not expired)
           supabase
             .from("user_memberships")
-            .select("end_date, plan:membership_plans(membership_tiers(name))")
+            .select("end_date, plan_id, membership_plans!inner(tier_id, membership_tiers!inner(name))")
             .eq("user_id", user.id)
             .eq("status", "active")
-            .gte("end_date", new Date().toISOString())
+            .lte("start_date", today) // Must have started
+            .gte("end_date", today) // Must not have expired
             .order("end_date", { ascending: false })
             .limit(1)
             .maybeSingle(),
@@ -48,10 +50,21 @@ export default function HomeScreen() {
             .maybeSingle(),
         ]);
 
-        if (tierResponse.data && tierResponse.data.plan) {
-          const planData = tierResponse.data.plan as any;
-          const tierName = planData.membership_tiers?.name || "STANDARD";
-          setMemberTier(tierName.toUpperCase());
+        if (tierResponse.data && tierResponse.data.membership_plans) {
+          const membershipPlans = tierResponse.data.membership_plans as unknown as {
+            membership_tiers: { name: string };
+          };
+          const tierName = membershipPlans.membership_tiers?.name;
+          console.log("🔍 [Home] Membership data:", {
+            tierName: tierName,
+            upperCase: tierName?.toUpperCase(),
+            endDate: tierResponse.data.end_date,
+          });
+          if (tierName) {
+            setMemberTier(tierName.toUpperCase());
+          }
+        } else {
+          console.log("⚠️ [Home] No active membership found", tierResponse);
         }
 
         if (activityResponse.data) {
@@ -69,7 +82,7 @@ export default function HomeScreen() {
   const getTierStyle = (tier: string) => {
     if (tier.includes("SILVER")) {
       return {
-        text: "text-muted_foreground",
+        text: "text-foreground",
         icon: colors.silver,
         bg: "bg-muted",
         label: t("home.tier.silver"),
@@ -77,7 +90,7 @@ export default function HomeScreen() {
     }
     if (tier.includes("GOLD")) {
       return {
-        text: "text-warning",
+        text: "text-foreground",
         icon: colors.gold,
         bg: "bg-warning/20",
         label: t("home.tier.gold"),
@@ -85,14 +98,14 @@ export default function HomeScreen() {
     }
     if (tier.includes("PLATINUM")) {
       return {
-        text: "text-info",
+        text: "text-foreground",
         icon: colors.platinum,
         bg: "bg-info/20",
         label: t("home.tier.platinum"),
       };
     }
     return {
-      text: "text-primary",
+      text: "text-foreground",
       icon: colors.tint,
       bg: "bg-primary",
       label: t("home.tier.standard"),
@@ -185,7 +198,7 @@ export default function HomeScreen() {
             resizeMode="cover"
           />
           <View className="absolute inset-0 bg-black/40 flex-1 justify-center px-6">
-            <Text className="text-card-foreground font-bold text-xl w-2/3">
+            <Text className="text-white font-bold text-xl w-2/3">
               TRANSFORM YOUR BODY WITH POWER PUMP
             </Text>
             <Text className="text-primary font-bold mt-2">JOIN NOW &rarr;</Text>
@@ -211,7 +224,7 @@ export default function HomeScreen() {
                   color={colors.tint}
                 />
               </View>
-              <Text className="text-muted_foreground font-medium">
+              <Text className="text-foreground font-medium">
                 {item.name}
               </Text>
             </View>
@@ -227,11 +240,10 @@ export default function HomeScreen() {
         {recentActivity ? (
           <View className="bg-card rounded-xl p-4 border border-border flex-row items-center">
             <View
-              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${
-                new Date(recentActivity.booking_date) > new Date()
-                  ? "bg-info/20"
-                  : "bg-success/20"
-              }`}
+              className={`w-10 h-10 rounded-full items-center justify-center mr-4 ${new Date(recentActivity.booking_date) > new Date()
+                ? "bg-info/20"
+                : "bg-success/20"
+                }`}
             >
               <FontAwesome
                 name={
