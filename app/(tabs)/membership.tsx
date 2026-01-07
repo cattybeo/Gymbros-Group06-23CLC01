@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
 import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Animated,
@@ -31,22 +31,7 @@ export default function MembershipScreen() {
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
 
-  // Premium Fade-in Transition
-  useEffect(() => {
-    if (!loading) {
-      Animated.timing(contentOpacity, {
-        toValue: 1,
-        duration: 500, // Smoother timing for premium feel
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [loading, contentOpacity]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     contentOpacity.setValue(0);
     try {
@@ -95,7 +80,22 @@ export default function MembershipScreen() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [contentOpacity, t, showAlert]);
+
+  // Premium Fade-in Transition
+  useEffect(() => {
+    if (!loading) {
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 500, // Smoother timing for premium feel
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [loading, contentOpacity]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
@@ -127,8 +127,9 @@ export default function MembershipScreen() {
 
     try {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
+      const user = session?.user;
 
       if (!user) {
         showAlert(
@@ -155,6 +156,8 @@ export default function MembershipScreen() {
         customerId: customer,
         customerEphemeralKeySecret: ephemeralKey,
         paymentIntentClientSecret: paymentIntent,
+        allowsDelayedPaymentMethods: false,
+        returnURL: "gymbros://stripe-redirect",
         defaultBillingDetails: {
           name: "Gymbro Member",
         },
@@ -162,7 +165,7 @@ export default function MembershipScreen() {
 
       if (initError) throw new Error(initError.message);
 
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const { error: paymentError } = await presentPaymentSheet();
 
@@ -218,7 +221,7 @@ export default function MembershipScreen() {
             "success"
           );
         }
-      } catch (e) {
+      } catch {
         if (attempts >= maxAttempts) {
           clearInterval(interval);
           setLoading(false);

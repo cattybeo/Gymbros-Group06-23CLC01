@@ -70,7 +70,7 @@ export function Skeleton({
       cancelAnimation(translateX);
       translateX.value = -1; // Reset to initial position
     };
-  }, []);
+  }, [translateX]);
 
   // Animated style for shimmer effect
   const animatedStyle = useAnimatedStyle(() => ({

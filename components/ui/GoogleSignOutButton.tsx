@@ -1,8 +1,10 @@
 import { signOutFromGoogle } from "@/lib/GoogleAuth";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Text, TouchableOpacity } from "react-native";
 
 export default function GoogleSignOutButton() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   async function handleSignOut() {
@@ -26,7 +28,9 @@ export default function GoogleSignOutButton() {
       {loading ? (
         <ActivityIndicator />
       ) : (
-        <Text className="text-destructive-foreground font-bold">Đăng xuất</Text>
+        <Text className="text-destructive-foreground font-bold">
+          {t("profile.logout")}
+        </Text>
       )}
     </TouchableOpacity>
   );

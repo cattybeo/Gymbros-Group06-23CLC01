@@ -86,9 +86,9 @@ export default function CrowdHeatmap({
   };
 
   const getIntensityLabel = (score: number) => {
-    if (score < 0.3) return t("heatmap.low", { defaultValue: "Vắng" });
-    if (score < 0.7) return t("heatmap.med", { defaultValue: "Vừa" });
-    return t("heatmap.high", { defaultValue: "Đông" });
+    if (score < 0.3) return t("heatmap.low");
+    if (score < 0.7) return t("heatmap.med");
+    return t("heatmap.high");
   };
 
   // Convert flat data to map for O(1) lookup
@@ -191,7 +191,7 @@ export default function CrowdHeatmap({
         <Text className="text-foreground text-lg font-bold flex-row items-center">
           <Ionicons name="bar-chart" size={20} color={colors.tint} />
           {"  "}
-          {t("heatmap.title", { defaultValue: "Gym Traffic" })}
+          {t("heatmap.title")}
         </Text>
         {/* Simple Legend */}
         <View className="flex-row gap-2">
@@ -220,7 +220,7 @@ export default function CrowdHeatmap({
         {/* Top Header: Current Status Prediction */}
         <View className="mb-4 flex-row items-center justify-between border-b border-border pb-2">
           <Text className="text-foreground-secondary font-medium">
-            {t("heatmap.now", { defaultValue: "Live Status:" })}
+            {t("heatmap.now")}
           </Text>
           <Text className="text-primary font-bold">
             {/* Mock live status based on heatmap data for current hour */}
@@ -236,11 +236,7 @@ export default function CrowdHeatmap({
             {DAYS.map((day) => (
               <View key={day} className="h-8 m-0.5 justify-center">
                 <Text className="text-foreground-secondary text-xs font-bold text-right w-8">
-                  {t(`heatmap.days.${day}`, {
-                    defaultValue: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"][
-                      day
-                    ],
-                  })}
+                  {t(`heatmap.days.${day}`)}
                 </Text>
               </View>
             ))}
@@ -274,16 +270,12 @@ export default function CrowdHeatmap({
         {selectedCell && (
           <View className="mt-3 bg-surface_highlight p-2 rounded-lg items-center border border-border">
             <Text className="text-foreground-secondary text-xs text-center">
-              {t(`heatmap.days.${selectedCell.day}`, {
-                defaultValue: "Day " + selectedCell.day,
-              })}{" "}
-              @ {selectedCell.hour}:00 -
+              {t(`heatmap.days.${selectedCell.day}`)} @ {selectedCell.hour}:00 -
               <Text
                 className={`font-bold ${selectedCell.score > 0.7 ? "text-error" : "text-success"}`}
               >
                 {" "}
-                {Math.round(selectedCell.score * 100)}%{" "}
-                {t("heatmap.capacity", { defaultValue: "Capacity" })}
+                {Math.round(selectedCell.score * 100)}% {t("heatmap.capacity")}
               </Text>
             </Text>
           </View>

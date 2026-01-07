@@ -9,11 +9,26 @@ import { GymClass } from "@/lib/types";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { FlatList, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 
 interface LiveClassListProps {
   data: GymClass[];
   handleBook: (id: string, count: number) => void;
+  handleCancel?: (id: string) => void;
   bookingId: string | null;
   myBookings: Set<string>;
   isLoading: boolean;
@@ -27,6 +42,7 @@ interface LiveClassListProps {
 export const LiveClassList = ({
   data,
   handleBook,
+  handleCancel,
   bookingId,
   myBookings,
   isLoading,
@@ -42,6 +58,11 @@ export const LiveClassList = ({
   const [classCounts, setClassCounts] = useState<Record<string, number>>({});
   const listRef = useRef<FlatList>(null);
   const [pendingScrollId, setPendingScrollId] = useState<string | null>(null);
+
+  // Scroll to Top FAB State
+  const scrollY = useSharedValue(0);
+  const fabOpacity = useSharedValue(0);
+  const fabScale = useSharedValue(0);
 
   const fetchCounts = useCallback(async () => {
     if (data.length === 0) return;
@@ -96,93 +117,141 @@ export const LiveClassList = ({
     }
   };
 
-  const renderItem = ({ item }: { item: GymClass }) => {
-    const bookedCount = classCounts[item.id] || 0;
-    const isBooked = myBookings.has(item.id);
-    const isFull = bookedCount >= item.capacity;
-    const spotsLeft = item.capacity - bookedCount;
-    const IsAiRecommended = aiSuggestion?.recommended_class_ids.includes(
-      item.id
-    );
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offset = event.nativeEvent.contentOffset.y;
+    scrollY.value = offset;
 
-    return (
-      <View style={IsAiRecommended ? { transform: [{ scale: 1.02 }] } : null}>
-        <ClassCard
-          gymClass={item}
-          onBook={(id) => handleBook(id, bookedCount)}
-          isBooking={bookingId === item.id}
-          isBooked={isBooked}
-          isFull={isFull}
-          spotsLeft={spotsLeft}
-          isAIRecommended={IsAiRecommended}
-        />
-      </View>
-    );
+    if (offset > 400) {
+      fabOpacity.value = withTiming(1);
+      fabScale.value = withSpring(1);
+    } else {
+      fabOpacity.value = withTiming(0);
+      fabScale.value = withSpring(0);
+    }
   };
 
-  return (
-    <FlatList
-      ref={listRef}
-      data={data}
-      keyExtractor={(item) => item.id}
-      initialNumToRender={5}
-      maxToRenderPerBatch={5}
-      windowSize={5}
-      removeClippedSubviews={true}
-      ListHeaderComponent={
-        <>
-          <View className="mb-4">
-            <Text className="text-3xl font-bold text-foreground">
-              {t("classes.title")}
-            </Text>
-          </View>
+  const fabStyle = useAnimatedStyle(() => ({
+    opacity: fabOpacity.value,
+    transform: [{ scale: fabScale.value }],
+  }));
 
-          {(aiSuggestion || aiLoading) && (
-            <AISuggestionCard
-              suggestion={aiSuggestion!}
-              isLoading={aiLoading}
-              allClasses={allClasses}
-              onPressClass={scrollToClass}
-            />
-          )}
-          <CrowdHeatmap isLoading={isLoading} />
-          <Text className="text-lg font-bold text-foreground mb-2 mt-4 px-1">
-            {t("classes.upcoming_schedule")}
-          </Text>
-        </>
-      }
-      renderItem={renderItem}
-      refreshing={isLoading}
-      onRefresh={onRefresh}
-      ListEmptyComponent={
-        <View className="items-center justify-center py-20 px-10">
-          <View className="bg-muted w-16 h-16 rounded-full items-center justify-center mb-4">
-            <Ionicons
-              name="search"
-              size={32}
-              color={colors.foreground_secondary}
-            />
-          </View>
-          <Text className="text-xl font-bold text-foreground text-center">
-            {t("classes.no_classes_title", {
-              defaultValue: "No classes found",
-            })}
-          </Text>
-          <Text className="text-muted_foreground text-center mt-2">
-            {t("classes.empty_list")}
-          </Text>
-          <TouchableOpacity
-            onPress={onResetFilters}
-            className="mt-6 bg-secondary px-6 py-2 rounded-full"
-          >
-            <Text className="text-on-secondary font-bold">
-              {t("common.reset_filters", { defaultValue: "Reset Filters" })}
-            </Text>
-          </TouchableOpacity>
+  const renderItem = useCallback(
+    ({ item }: { item: GymClass }) => {
+      const bookedCount = classCounts[item.id] || 0;
+      const isBooked = myBookings.has(item.id);
+      const isFull = bookedCount >= item.capacity;
+      const spotsLeft = item.capacity - bookedCount;
+      const IsAiRecommended = aiSuggestion?.recommended_class_ids.includes(
+        item.id
+      );
+
+      return (
+        <View style={IsAiRecommended ? { transform: [{ scale: 1.02 }] } : null}>
+          <ClassCard
+            gymClass={item}
+            onBook={(id) => handleBook(id, bookedCount)}
+            onCancel={handleCancel}
+            isBooking={bookingId === item.id}
+            isBooked={isBooked}
+            isFull={isFull}
+            spotsLeft={spotsLeft}
+            isAIRecommended={IsAiRecommended}
+          />
         </View>
-      }
-      contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 4 }}
-      className="overflow-visible"
-    />
+      );
+    },
+    [classCounts, myBookings, aiSuggestion, bookingId, handleBook, handleCancel]
+  );
+
+  return (
+    <View style={{ flex: 1 }}>
+      <FlatList
+        ref={listRef}
+        data={data}
+        keyExtractor={(item) => item.id}
+        initialNumToRender={6}
+        maxToRenderPerBatch={10}
+        windowSize={10}
+        updateCellsBatchingPeriod={50}
+        removeClippedSubviews={Platform.OS === "android"}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        ListHeaderComponent={
+          <>
+            <View className="mb-4">
+              <Text className="text-3xl font-bold text-foreground">
+                {t("classes.title")}
+              </Text>
+            </View>
+
+            {(aiSuggestion || aiLoading) && (
+              <AISuggestionCard
+                suggestion={aiSuggestion!}
+                isLoading={aiLoading}
+                allClasses={allClasses}
+                onPressClass={scrollToClass}
+              />
+            )}
+            <CrowdHeatmap isLoading={isLoading} />
+            <Text className="text-lg font-bold text-foreground mb-2 mt-4 px-1">
+              {t("classes.upcoming_schedule")}
+            </Text>
+          </>
+        }
+        renderItem={renderItem}
+        refreshing={isLoading}
+        onRefresh={onRefresh}
+        ListEmptyComponent={
+          <View className="items-center justify-center py-20 px-10">
+            <View className="bg-muted w-16 h-16 rounded-full items-center justify-center mb-4">
+              <Ionicons
+                name="search"
+                size={32}
+                color={colors.foreground_secondary}
+              />
+            </View>
+            <Text className="text-xl font-bold text-foreground text-center">
+              {t("classes.no_classes_title")}
+            </Text>
+            <Text className="text-muted_foreground text-center mt-2">
+              {t("classes.empty_list")}
+            </Text>
+            <TouchableOpacity
+              onPress={onResetFilters}
+              className="mt-6 bg-secondary px-6 py-2 rounded-full"
+            >
+              <Text className="text-on-secondary font-bold">
+                {t("common.reset_filters")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        }
+        contentContainerStyle={{ paddingBottom: 20, paddingHorizontal: 4 }}
+        className="overflow-visible"
+      />
+
+      {/* Floating Scroll to Top Button */}
+      <Animated.View
+        style={[
+          fabStyle,
+          {
+            position: "absolute",
+            bottom: 20,
+            right: 20,
+            zIndex: 99,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          onPress={() =>
+            listRef.current?.scrollToOffset({ offset: 0, animated: true })
+          }
+          className="w-12 h-12 bg-primary rounded-full items-center justify-center shadow-lg border border-white/20"
+          activeOpacity={0.8}
+        >
+          <Ionicons name="arrow-up" size={24} color="white" />
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 };
