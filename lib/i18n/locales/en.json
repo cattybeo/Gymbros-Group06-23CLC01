@@ -248,7 +248,12 @@
     "view_recommendation": "View Recommendation",
     "ai_loading": "AI is analyzing...",
     "ai_recommended": "AI Recommended",
-    "no_classes_title": "No classes found"
+    "no_classes_title": "No classes found",
+    "about_title": "About this class",
+    "no_description": "No description available for this class.",
+    "default_location": "Gymbros Fitness Center",
+    "default_studio": "Floor 2, Studio A",
+    "unknown_trainer": "Unknown Trainer"
   },
   "journey": {
     "subtitle": "Your personalized training schedule",

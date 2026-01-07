@@ -2,6 +2,21 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.4.3] - 2026-01-08
+
+### Thay đổi (Changed)
+
+- **Real-time Crowd Meter**:
+  - Chuyển đổi cơ chế cập nhật từ Polling (30s) sang **Supabase Realtime** (Instant).
+  - Biểu đồ nhiệt và sĩ số lớp học (Example: 15/20) cập nhật ngay lập tức khi có người đặt chỗ.
+  - Cập nhật thuật toán sinh dữ liệu giả lập (Mock Data) để biểu đồ nhiệt có màu sắc thực tế hơn (Xanh/Vàng/Đỏ).
+
+### Sửa lỗi (Fixed)
+
+- **Membership Logic Consistency**:
+  - Sửa lỗi hiển thị trạng thái hội viên không đồng nhất giữa màn hình `Membership` và `Profile`.
+  - Profile Screen giờ đây sẽ tự động hiển thị **Standard** nếu gói hội viên (Gold/Silver) bị hủy hoặc hết hạn (Trước đây vẫn hiện Gold).
+
 ## [v1.3.2] - 2026-01-07
 
 ### Thay đổi (Changed)

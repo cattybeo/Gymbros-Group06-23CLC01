@@ -52,7 +52,9 @@ export default function ClassesScreen() {
           supabase.auth.getUser(),
           supabase
             .from("classes")
-            .select("*")
+            .select(
+              "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
+            )
             .order("start_time", { ascending: true }),
         ]);
 
@@ -73,14 +75,10 @@ export default function ClassesScreen() {
             .in("class_id", classIds)
             .in("status", ["confirmed", "checked_in"]);
 
-          userBookedIds = myBookingsData?.map((b) => b.class_id) || [];
-          setMyBookings((prev) => {
-            const next = new Set(userBookedIds);
-            // Only update if changed to avoid unnecessary re-renders
-            if (prev.size !== next.size) return next;
-            for (const id of next) if (!prev.has(id)) return next;
-            return prev;
-          });
+          userBookedIds = [
+            ...new Set(myBookingsData?.map((b) => b.class_id) || []),
+          ];
+          setMyBookings(new Set(userBookedIds));
         }
 
         // AI Analysis Trigger - Enhanced with persistent caching
@@ -298,7 +296,7 @@ export default function ClassesScreen() {
             try {
               const { error } = await supabase
                 .from("bookings")
-                .delete()
+                .update({ status: "cancelled" })
                 .eq("user_id", user.id)
                 .eq("class_id", classId);
 
