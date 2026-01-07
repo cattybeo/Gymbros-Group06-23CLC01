@@ -2,6 +2,34 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v0.9.2] - 2026-01-07
+
+### Thêm mới (Added)
+
+- **Mở rộng danh mục Lớp học (25 môn)**:
+  - Thêm 22 khoá học mới dựa trên xu hướng fitness 2026 (Pilates Máy, Đạp Xe VR, Trị Liệu Âm Thanh, Boxing Thể Hình...).
+  - Tạo 21+ logo cao cấp được thiết kế bởi AI (DALL-E 3) cho tất cả các môn học.
+- **Hệ thống Shimmer Skeleton Loading chuyên sâu**:
+  - `ClassCardSkeleton`: Placeholder chính xác 1:1 cho thẻ lớp học.
+  - `CatalogSkeleton`: Placeholder cho thanh lọc danh mục.
+  - Tích hợp trạng thái loading cho `CrowdHeatmap` (Biểu đồ đông đúc).
+  - Hiệu ứng Fade-in (500ms) mượt mà khi dữ liệu sẵn sàng trên cả màn hình Membership và Classes.
+
+### Thay đổi (Changed)
+
+- **Tối ưu hiệu năng danh sách (FlatList)**:
+  - Memoization cho `ClassCard` để giảm re-render không cần thiết.
+  - Tinh chỉnh `windowSize`, `initialNumToRender` và `removeClippedSubviews` cho 60fps scrolling với 25+ item.
+- **Tái cấu trúc Assets**:
+  - Thống nhất toàn bộ 25 ảnh lớp học vào thư mục `assets/images/classes/`.
+  - Cập nhật mapping tập trung trong `constants/Images.ts`.
+- **Nâng cấp Skeleton Component**: Hỗ trợ thuộc tính height dạng phần trăm (`100%`) và fix lỗi kiểu dữ liệu TypeScript.
+
+### Sửa lỗi (Fixed)
+
+- **Zero Layout Shift**: Đảm bảo kích thước Placeholder khớp hoàn toàn với nội dung thật, loại bỏ tình trạng UI bị "nhảy" khi tải xong.
+- **Bản dịch Tiếng Việt**: Dịch thuật 100% tên và mô tả 25 khoá học sang Tiếng Việt chuyên nghiệp.
+
 ## [v1.0.0] - 2026-01-07
 
 ### Thêm mới

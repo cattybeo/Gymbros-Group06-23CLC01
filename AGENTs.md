@@ -4,7 +4,7 @@
 
 ## 1. Project Snapshot (Auto-Detected)
 
-_Derived from `package.json` at commit `2026-01-05`_:
+_Derived from `package.json` at commit `2026-01-07`_:
 
 - **Framework**: Expo SDK ~54 (React Native 0.81.5)
 - **Language**: TypeScript (`.ts`, `.tsx`) in Strict Mode
