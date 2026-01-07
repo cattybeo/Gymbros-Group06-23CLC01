@@ -71,7 +71,7 @@ export default function MembershipScreen() {
           .from("user_memberships")
           .select("plan_id, plan:membership_plans(*), status")
           .eq("user_id", user.id)
-          .in("status", ["active", "cancelled"])
+          .eq("status", "active") // Only show 'active' as the current plan
           .gte("end_date", new Date().toISOString())
           .order("end_date", { ascending: false })
           .limit(1)
@@ -83,6 +83,8 @@ export default function MembershipScreen() {
 
         if (membershipData && membershipData.plan) {
           setCurrentPlan(membershipData.plan as unknown as MembershipPlan);
+        } else {
+          setCurrentPlan(null); // Explicitly clear if no active membership
         }
       }
     } catch (error) {
