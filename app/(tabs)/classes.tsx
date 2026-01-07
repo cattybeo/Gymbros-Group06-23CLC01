@@ -3,13 +3,23 @@ import { ClassesSkeleton } from "@/components/ClassesSkeleton";
 import { LiveClassList } from "@/components/LiveClassList";
 import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { AISuggestion, getAISmartSuggestion } from "@/lib/ai";
+import i18n from "@/lib/i18n";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Animated, View } from "react-native";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ClassesScreen() {
   const [classes, setClasses] = useState<GymClass[]>([]);
@@ -24,8 +34,13 @@ export default function ClassesScreen() {
 
   const [myBookings, setMyBookings] = useState<Set<string>>(new Set());
 
+  // AI Suggestion State
+  const [suggestion, setSuggestion] = useState<AISuggestion | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
   // Catalog State
   const [selectedType, setSelectedType] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -62,19 +77,33 @@ export default function ClassesScreen() {
       setClasses(classesData);
 
       const classIds = classesData.map((c) => c.id);
+      let userBookedIds: string[] = [];
 
-      if (classIds.length > 0) {
-        if (user) {
-          const { data: myBookingsData } = await supabase
-            .from("bookings")
-            .select("class_id")
-            .eq("user_id", user.id)
-            .in("class_id", classIds)
-            .in("status", ["confirmed", "checked_in"]);
+      if (classIds.length > 0 && user) {
+        const { data: myBookingsData } = await supabase
+          .from("bookings")
+          .select("class_id")
+          .eq("user_id", user.id)
+          .in("class_id", classIds)
+          .in("status", ["confirmed", "checked_in"]);
 
-          setMyBookings(new Set(myBookingsData?.map((b) => b.class_id)));
-        }
+        userBookedIds = myBookingsData?.map((b) => b.class_id) || [];
+        setMyBookings(new Set(userBookedIds));
       }
+
+      // AI Analysis Trigger - Enhanced context
+      if (user) {
+        setAiLoading(true);
+        getAISmartSuggestion(user.user_metadata, {
+          availableClasses: classesData,
+          userBookings: userBookedIds,
+          currentTime: new Date().toISOString(),
+          language: i18n.language,
+        })
+          .then((res) => setSuggestion(res))
+          .finally(() => setAiLoading(false));
+      }
+
       setDataReady(true);
     } catch (error) {
       console.error(error);
@@ -182,37 +211,78 @@ export default function ClassesScreen() {
   }, [classes]);
 
   const filteredClasses = useMemo(() => {
-    if (selectedType === "All") return classes;
-    return classes.filter((c) => c.name === selectedType);
-  }, [classes, selectedType]);
+    return classes.filter((c) => {
+      const matchesType = selectedType === "All" || c.name === selectedType;
+      const matchesSearch = c.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      return matchesType && matchesSearch;
+    });
+  }, [classes, selectedType, searchQuery]);
 
   return (
-    <View className="flex-1 bg-background pt-12 px-4">
-      {!dataReady ? (
-        <ClassesSkeleton />
-      ) : (
-        <Animated.View
-          style={{ flex: 1, opacity: contentOpacity, marginTop: 48 }}
-        >
-          <LiveClassList
-            data={filteredClasses}
-            handleBook={handleBook}
-            bookingId={bookingId}
-            myBookings={myBookings}
-            renderCatalog={() => (
-              <ClassCatalog
-                selectedType={selectedType}
-                setSelectedType={setSelectedType}
-                uniqueClassTypes={uniqueClassTypes}
-                colors={colors}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1"
+    >
+      <View className="flex-1 bg-background pt-12 px-4">
+        {!dataReady ? (
+          <ClassesSkeleton />
+        ) : (
+          <Animated.View
+            style={{ flex: 1, opacity: contentOpacity, marginTop: 48 }}
+          >
+            <View className="flex-row items-center bg-card border border-border rounded-token-lg px-3 py-2 mb-4">
+              <Ionicons
+                name="search"
+                size={20}
+                color={colors.foreground_secondary}
               />
-            )}
-            isLoading={loading}
-            onRefresh={fetchData}
-          />
-        </Animated.View>
-      )}
-      <CustomAlertComponent />
-    </View>
+              <TextInput
+                placeholder={t("common.search")}
+                placeholderTextColor={colors.foreground_secondary}
+                className="flex-1 ml-2 text-foreground font-medium"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+              {searchQuery.length > 0 && (
+                <TouchableOpacity onPress={() => setSearchQuery("")}>
+                  <Ionicons
+                    name="close-circle"
+                    size={18}
+                    color={colors.foreground_secondary}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <LiveClassList
+              data={filteredClasses}
+              allClasses={classes}
+              handleBook={handleBook}
+              bookingId={bookingId}
+              myBookings={myBookings}
+              renderCatalog={() => (
+                <ClassCatalog
+                  selectedType={selectedType}
+                  setSelectedType={setSelectedType}
+                  uniqueClassTypes={uniqueClassTypes}
+                  colors={colors}
+                />
+              )}
+              isLoading={loading}
+              onRefresh={fetchData}
+              aiSuggestion={suggestion}
+              aiLoading={aiLoading}
+              onResetFilters={() => {
+                setSearchQuery("");
+                setSelectedType("All");
+              }}
+            />
+          </Animated.View>
+        )}
+        <CustomAlertComponent />
+      </View>
+    </KeyboardAvoidingView>
   );
 }
