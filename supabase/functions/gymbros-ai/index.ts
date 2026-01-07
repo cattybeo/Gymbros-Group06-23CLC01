@@ -125,20 +125,19 @@ Deno.serve(async (req: Request) => {
       4. DO NOT include classes not in the list.
     `;
 
-    console.log("[gymbros-ai] Calling Gemini 2.5 Flash...");
+    console.log("[gymbros-ai] Calling Gemini 2.5 Flash Lite...");
 
     // Gemini 2.5 Series (2025-2026 Production Model)
     let result;
     try {
       result = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.5-flash-lite",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
           thinkingConfig: {
-            // For 2.5-flash, a positive budget is often safer than -1 in some preview regions
-            thinkingBudget: 2048,
+            thinkingBudget: -1,
           },
         },
       });

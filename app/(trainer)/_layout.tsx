@@ -2,7 +2,6 @@ import Colors from "@/constants/Colors";
 import { useThemeContext } from "@/lib/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import { useTranslation } from "react-i18next";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TabBarIcon(props: {
@@ -12,62 +11,56 @@ function TabBarIcon(props: {
   return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
-export default function TabLayout() {
+export default function TrainerLayout() {
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
   const insets = useSafeAreaInsets();
-  const { t } = useTranslation();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.tint,
-        tabBarInactiveTintColor: colors.text_secondary,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.tabIconDefault,
         tabBarStyle: {
           backgroundColor: colors.card,
           borderTopColor: colors.border,
           paddingBottom: insets.bottom + 5,
           height: 60 + insets.bottom,
         },
-        headerShown: false, // Hide default header (each screen uses custom header)
+        headerShown: false,
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="dashboard"
         options={{
-          title: t("navigation.home"),
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="classes"
-        options={{
-          title: t("navigation.classes"),
+          title: "Dashboard",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="calendar" color={color} />
+            <TabBarIcon name="dashboard" color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="journey"
+        name="schedule"
         options={{
-          title: t("navigation.journey"),
-          tabBarIcon: ({ color }) => <TabBarIcon name="trophy" color={color} />,
+          title: "Của tôi", // My Schedule
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="calendar-o" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="students"
+        options={{
+          title: "Học viên",
+          tabBarIcon: ({ color }) => <TabBarIcon name="group" color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: t("navigation.profile"),
-          tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="membership"
-        options={{
-          title: t("navigation.membership"),
+          title: "Hồ sơ",
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="credit-card" color={color} />
+            <TabBarIcon name="user-md" color={color} />
           ),
         }}
       />
