@@ -1,21 +1,17 @@
 import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { signInWithGoogle } from "@/lib/GoogleAuth";
 import { useThemeContext } from "@/lib/theme";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { ActivityIndicator, Image, Text, TouchableOpacity } from "react-native";
 
 export default function GoogleSignInButton() {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
 
   async function handlePress() {
     setLoading(true);
@@ -25,7 +21,7 @@ export default function GoogleSignInButton() {
     setLoading(false);
 
     if (!result.success && !result.cancelled && result.error) {
-      Alert.alert(t("auth.login_failed"), result.error);
+      showAlert(t("auth.login_failed"), result.error, "error");
     }
     // AuthContext will auto-redirect on success
   }
@@ -42,17 +38,20 @@ export default function GoogleSignInButton() {
   }
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      className="w-full bg-card border border-border p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
-      disabled={loading}
-    >
-      <Image
-        source={require("@/assets/oauth-providers/google.png")}
-        className="w-6 h-6 mr-3"
-        resizeMode="contain"
-      />
-      <Text className="text-foreground font-bold text-base">Google</Text>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        onPress={handlePress}
+        className="w-full bg-card border border-border p-4 rounded-xl flex-row items-center justify-center shadow-sm mb-3"
+        disabled={loading}
+      >
+        <Image
+          source={require("@/assets/oauth-providers/google.png")}
+          className="w-6 h-6 mr-3"
+          resizeMode="contain"
+        />
+        <Text className="text-foreground font-bold text-base">Google</Text>
+      </TouchableOpacity>
+      <CustomAlertComponent />
+    </>
   );
 }

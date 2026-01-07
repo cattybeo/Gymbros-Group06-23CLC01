@@ -1,11 +1,12 @@
 import { Session, User } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "./supabase";
+import { Profile } from "./types";
 
 type AuthContextType = {
   session: Session | null;
   user: User | null;
-  profile: any | null; // Detailed profile including role
+  profile: Profile | null;
   isLoading: boolean;
   isAdmin: boolean;
   isTrainer: boolean;

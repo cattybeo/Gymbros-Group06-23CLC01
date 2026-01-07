@@ -1,4 +1,5 @@
 import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { getTrainerAIInsights } from "@/lib/ai";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
@@ -7,6 +8,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import dayjs from "dayjs";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -22,6 +24,8 @@ export default function TrainerDashboard() {
   const { user, profile } = useAuthContext();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
+  const { t } = useTranslation();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
 
   const [nextClass, setNextClass] = useState<any>(null);
   const [stats, setStats] = useState({ studentCount: 0, hoursToday: 0 });
@@ -92,6 +96,7 @@ export default function TrainerDashboard() {
         `
         )
         .eq("trainer_id", user.id)
+        .neq("status", "finished")
         .gte("end_time", now)
         .order("start_time", { ascending: true })
         .limit(1)
@@ -135,13 +140,13 @@ export default function TrainerDashboard() {
       if (!aiInsights) {
         fetchAIInsights();
       }
-    } catch (error) {
-      console.error("Dashboard fetch error:", error);
+    } catch (error: any) {
+      showAlert(t("common.error"), error.message || "Fetch failed", "error");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user, profile, aiInsights, fetchAIInsights]);
+  }, [user, profile, aiInsights, fetchAIInsights, t, showAlert]);
 
   useFocusEffect(
     useCallback(() => {
@@ -160,6 +165,7 @@ export default function TrainerDashboard() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+      <CustomAlertComponent />
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
@@ -168,10 +174,14 @@ export default function TrainerDashboard() {
       >
         <View style={styles.header}>
           <Text style={[styles.greeting, { color: colors.text }]}>
-            Xin chào, Coach {profile?.full_name?.split(" ").pop() || "Trainer"}!
+            {t("trainer.dashboard.greeting", {
+              name:
+                profile?.full_name?.split(" ").pop() ||
+                t("common.role_trainer"),
+            })}
           </Text>
           <Text style={[styles.subtext, { color: colors.foreground_muted }]}>
-            {dayjs().format("dddd, D MMMM YYYY")}
+            {dayjs().format(t("trainer.schedule.date_format_full"))}
           </Text>
         </View>
 
@@ -189,7 +199,7 @@ export default function TrainerDashboard() {
             <Text
               style={[styles.statLabel, { color: colors.foreground_muted }]}
             >
-              Học viên hôm nay
+              {t("trainer.dashboard.students_today")}
             </Text>
           </View>
           <View
@@ -199,19 +209,20 @@ export default function TrainerDashboard() {
             ]}
           >
             <Text style={[styles.statValue, { color: colors.primary }]}>
-              {stats.hoursToday}h
+              {stats.hoursToday}
+              {t("common.unit_hour")}
             </Text>
             <Text
               style={[styles.statLabel, { color: colors.foreground_muted }]}
             >
-              Giờ dạy
+              {t("trainer.dashboard.teaching_hours")}
             </Text>
           </View>
         </View>
 
         {/* Next Class Card */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Lớp tiếp theo
+          {t("trainer.dashboard.next_class")}
         </Text>
         {loading ? (
           <ActivityIndicator color={colors.primary} size="large" />
@@ -234,7 +245,9 @@ export default function TrainerDashboard() {
                 ]}
               >
                 <Text style={{ color: colors.on_primary, fontWeight: "bold" }}>
-                  {dayjs(nextClass.start_time).format("HH:mm")}
+                  {dayjs(nextClass.start_time).format(
+                    t("trainer.schedule.time_format")
+                  )}
                 </Text>
               </View>
             </View>
@@ -247,7 +260,7 @@ export default function TrainerDashboard() {
                 style={{ width: 20 }}
               />
               <Text style={{ color: colors.foreground_secondary }}>
-                Phòng tập chính
+                {t("trainer.dashboard.main_gym")}
               </Text>
             </View>
 
@@ -259,8 +272,10 @@ export default function TrainerDashboard() {
                 style={{ width: 20 }}
               />
               <Text style={{ color: colors.foreground_secondary }}>
-                {nextClass.bookings?.[0]?.count || 0} / {nextClass.capacity} Học
-                viên
+                {t("trainer.dashboard.student_count", {
+                  count: nextClass.bookings?.[0]?.count || 0,
+                  capacity: nextClass.capacity,
+                })}
               </Text>
             </View>
 
@@ -268,7 +283,7 @@ export default function TrainerDashboard() {
               style={[styles.actionButton, { backgroundColor: colors.primary }]}
             >
               <Text style={{ color: colors.on_primary, fontWeight: "600" }}>
-                Điểm danh & Quản lý
+                {t("trainer.dashboard.action_attendance")}
               </Text>
             </View>
           </TouchableOpacity>
@@ -277,7 +292,7 @@ export default function TrainerDashboard() {
             style={[styles.emptyState, { backgroundColor: colors.secondary }]}
           >
             <Text style={{ color: colors.foreground_secondary }}>
-              Không có lớp nào sắp tới hôm nay.
+              {t("trainer.dashboard.no_upcoming_classes")}
             </Text>
           </View>
         )}
@@ -291,7 +306,7 @@ export default function TrainerDashboard() {
                 { marginTop: 0, color: colors.text },
               ]}
             >
-              Coach AI Assistant ✨
+              {t("trainer.ai_coach.title")}
             </Text>
             {fetchingAI && (
               <ActivityIndicator size="small" color={colors.primary} />
@@ -323,7 +338,7 @@ export default function TrainerDashboard() {
               {aiInsights.retention_alerts?.length > 0 && (
                 <View style={styles.alertContainer}>
                   <Text style={[styles.alertTitle, { color: colors.error }]}>
-                    ⚠️ Cảnh báo nghỉ học
+                    {t("trainer.ai_coach.retention_alert")}
                   </Text>
                   {aiInsights.retention_alerts.map((alert: any, i: number) => (
                     <View key={i} style={styles.alertItem}>
@@ -340,7 +355,7 @@ export default function TrainerDashboard() {
                   <Text
                     style={[styles.broadcastTitle, { color: colors.primary }]}
                   >
-                    Dự thảo tin nhắn gửi lớp
+                    {t("trainer.ai_coach.smart_broadcast_draft")}
                   </Text>
                   <TouchableOpacity
                     style={[
@@ -355,10 +370,10 @@ export default function TrainerDashboard() {
                       style={[styles.broadcastType, { color: colors.primary }]}
                     >
                       {aiInsights.smart_broadcasts[0].type === "motivational"
-                        ? "🔥 Động lực"
+                        ? t("trainer.ai_coach.broadcast_type_motivational")
                         : aiInsights.smart_broadcasts[0].type === "urgent"
-                          ? "🚨 Khẩn cấp"
-                          : "📢 Thông báo"}
+                          ? t("trainer.ai_coach.broadcast_type_urgent")
+                          : t("trainer.ai_coach.broadcast_type_friendly")}
                     </Text>
                     <Text
                       style={[
@@ -368,7 +383,9 @@ export default function TrainerDashboard() {
                     >
                       {aiInsights.smart_broadcasts[0].message}
                     </Text>
-                    <Text style={styles.copyHint}>Chạm để sao chép</Text>
+                    <Text style={styles.copyHint}>
+                      {t("trainer.ai_coach.copy_hint")}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -380,7 +397,7 @@ export default function TrainerDashboard() {
                 onPress={fetchAIInsights}
               >
                 <Text style={{ color: colors.foreground_muted }}>
-                  Chưa có phân tích lớp học. Nhấn để cập nhật.
+                  {t("trainer.ai_coach.empty_state")}
                 </Text>
               </TouchableOpacity>
             )

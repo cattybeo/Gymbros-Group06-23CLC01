@@ -2,6 +2,40 @@
 
 Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu lại trong tệp này.
 
+## [v1.8.0] - 2026-01-08
+
+### Thêm mới (Added)
+
+- **Trainer QR Check-out**: Triển khai tính năng quét mã QR để xác nhận hoàn thành buổi tập (Check-out). PT quét mã từ Dashboard của học viên để đánh dấu `completed`.
+- **Custom Alert Integration**: Thay thế hoàn toàn `Alert.alert` của hệ thống bằng `CustomAlertModal` trên toàn bộ phân hệ Trainer và các thành phần chung như nút đăng nhập Google.
+
+### Thay đổi (Changed)
+
+- **Unified Profiles Data Flow**: Loại bỏ cơ chế tự động chèn thông tin vào `user_metadata` của Supabase Auth. Toàn bộ thông tin cá nhân hiện được quản lý tập trung và duy nhất tại bảng `public.profiles`.
+- **Attendance Logic Correction**: Phân định rõ vai trò: Nhân viên (Staff) thực hiện Check-in (`arrived`), PT thực hiện Check-out (`completed`) và lưu dấu `checkout_at`.
+- **i18n Standardization**: Cập nhật bộ thuật ngữ "Hoàn thành" (Completed) thay cho "Hiện diện" (Attended) để phù hợp với quy trình chứng nhận buổi tập của PT.
+
+### Sửa lỗi (Fixed)
+
+- Khắc phục lỗi đồng bộ hóa dữ liệu Avatar khi cập nhật hồ sơ, đảm bảo thay đổi phản chiếu ngay lập tức trên UI.
+
+## [v1.7.0] - 2026-01-11
+
+### Thêm mới (Added)
+
+- **Trainer Profile Management**: Cho phép PT chỉnh sửa tiểu sử (Bio), chuyên môn (Specialties) và họ tên trong ứng dụng.
+- **Class Lifecycle Management**: Thêm trạng thái `status` cho lớp học (`scheduled`, `finished`). PT có thể nhấn "Hoàn thành buổi tập" để đóng lớp và kích hoạt AI phân tích.
+- **Optimized Data Fetching**: Triển khai Supabase RPC `get_trainer_students` giúp tải danh sách học viên nhanh hơn và tiết kiệm băng thông.
+
+### Thay đổi (Changed)
+
+- **UX/UI Trainer Expansion**: Toàn bộ các màn hình Trainer (Lịch dạy, Học viên, Hồ sơ) đã được kết nối dữ liệu thật và bản địa hóa hoàn toàn.
+- **Keyboard Handling**: Áp dụng `KeyboardAvoidingView` cho tất cả các form nhập liệu trong phân hệ Trainer để tránh bị che khuất bởi bàn phím.
+
+### Sửa lỗi (Fixed)
+
+- Khắc phục lỗi hiển thị dữ liệu mẫu (mock data) trên Dashboard khi đã có dữ liệu thật.
+
 ## [v1.6.0] - 2026-01-10
 
 ### Thêm mới (Added)

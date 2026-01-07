@@ -1,15 +1,19 @@
+import Button from "@/components/ui/Button";
 import Colors from "@/constants/Colors";
+import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import dayjs from "dayjs";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Alert,
   FlatList,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -20,13 +24,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function ClassSessionScreen() {
   const { id } = useLocalSearchParams();
   const { colorScheme } = useThemeContext();
+  const { t } = useTranslation();
   const colors = Colors[colorScheme];
   const { user } = useAuthContext();
+  const [permission, requestPermission] = useCameraPermissions();
+  const { showAlert, CustomAlertComponent } = useCustomAlert();
 
   const [classData, setClassData] = useState<any>(null);
   const [students, setStudents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+  const [isProcessingQR, setIsProcessingQR] = useState(false);
 
   const fetchSessionDetails = useCallback(async () => {
     try {
@@ -57,11 +66,11 @@ export default function ClassSessionScreen() {
       if (bError) throw bError;
       setStudents(bData || []);
     } catch (err: any) {
-      Alert.alert("Error", err.message);
+      showAlert(t("common.error"), t("trainer.session.error_load"), "error");
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t, showAlert]);
 
   useEffect(() => {
     if (id) fetchSessionDetails();
@@ -72,50 +81,140 @@ export default function ClassSessionScreen() {
       if (processingId) return;
       setProcessingId(bookingId);
 
-      // Logic: Toggle between 'confirmed' (Registered) and 'attended' (Present)
-      const isAttending = currentStatus !== "attended";
-      const newStatus = isAttending ? "attended" : "confirmed";
-
       try {
-        const updatePayload: any = { status: newStatus };
+        // Trainer "Check-out" marks as completed.
+        // We can toggle between 'completed' and 'arrived' (the status set by Staff)
+        const newStatus =
+          currentStatus === "completed" ? "arrived" : "completed";
 
         const { error } = await supabase
           .from("bookings")
-          .update(updatePayload)
+          .update({
+            status: newStatus,
+            checkout_at:
+              newStatus === "completed" ? new Date().toISOString() : null,
+          })
           .eq("id", bookingId);
 
         if (error) throw error;
 
-        // RECORD IN ACCESS_LOGS FOR AI COACH
-        if (newStatus === "attended") {
-          const student = students.find((s) => s.id === bookingId);
-          if (student?.user_id) {
-            await supabase.from("access_logs").insert({
-              user_id: student.user_id,
-              class_id: id,
-              staff_id: user?.id,
-              gate_location: "Class Session",
-            });
-          }
-        } else {
-          // If un-marking, we might want to delete the log,
-          // but for simplicity we'll just leave it or handle it later.
-        }
-
-        // Optimistic Update
+        // Update local state
         setStudents((prev) =>
           prev.map((s) =>
             s.id === bookingId ? { ...s, status: newStatus } : s
           )
         );
       } catch (err: any) {
-        Alert.alert("Update Failed", err.message);
+        showAlert(
+          t("common.error"),
+          t("trainer.session.update_failed"),
+          "error"
+        );
       } finally {
         setProcessingId(null);
       }
     },
-    [id, students, user, processingId]
+    [processingId, t, showAlert]
   );
+
+  const handleBarCodeScanned = async ({ data }: { data: string }) => {
+    if (isProcessingQR) return;
+    setIsProcessingQR(true);
+
+    try {
+      // data is student's user_id from their dashboard QR
+      const studentBooking = students.find((s) => s.user_id === data);
+      if (studentBooking) {
+        if (studentBooking.status !== "completed") {
+          await toggleAttendance(studentBooking.id, studentBooking.status);
+          showAlert(
+            t("common.success"),
+            t("trainer.session.scan_success", {
+              name: studentBooking.profiles?.full_name || studentBooking.id,
+            }),
+            "success"
+          );
+          setIsScanning(false);
+        } else {
+          showAlert(
+            t("common.info"),
+            t("trainer.session.already_attended"),
+            "info"
+          );
+          setIsScanning(false);
+        }
+      } else {
+        showAlert(
+          t("common.error"),
+          t("trainer.session.student_not_in_list"),
+          "error"
+        );
+        setIsScanning(false);
+      }
+    } catch (err) {
+      // Error handled in toggleAttendance
+    } finally {
+      setIsProcessingQR(false);
+    }
+  };
+
+  const startScan = async () => {
+    if (!permission) {
+      const { status } = await requestPermission();
+      if (status !== "granted") {
+        showAlert(
+          t("common.error"),
+          t("trainer.session.camera_permission_required"),
+          "error"
+        );
+        return;
+      }
+    } else if (!permission.granted) {
+      const { status } = await requestPermission();
+      if (status !== "granted") {
+        showAlert(
+          t("common.error"),
+          t("trainer.session.camera_permission_required"),
+          "error"
+        );
+        return;
+      }
+    }
+    setIsScanning(true);
+  };
+
+  const handleFinishSession = () => {
+    showAlert(
+      t("trainer.session.finish_confirm_title"),
+      t("trainer.session.finish_confirm_msg"),
+      "warning",
+      {
+        secondaryButtonText: t("common.cancel"),
+        onPrimaryPress: async () => {
+          try {
+            // 1. Mark class as finished in DB
+            const { error } = await supabase
+              .from("classes")
+              .update({ status: "finished" })
+              .eq("id", id);
+
+            if (error) throw error;
+
+            showAlert(
+              t("common.success"),
+              t("trainer.session.finish_success"),
+              "success",
+              {
+                onClose: () => router.back(),
+              }
+            );
+          } catch (err: any) {
+            showAlert(t("common.error"), err.message, "error");
+          }
+        },
+      }
+    );
+  };
 
   if (loading) {
     return (
@@ -146,7 +245,9 @@ export default function ClassSessionScreen() {
           },
         ]}
       >
-        <Text style={{ color: colors.text }}>Session not found</Text>
+        <Text style={{ color: colors.text }}>
+          {t("trainer.session.not_found")}
+        </Text>
       </View>
     );
   }
@@ -164,7 +265,7 @@ export default function ClassSessionScreen() {
           <FontAwesome name="arrow-left" size={24} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text }]}>
-          Quản lý lớp học
+          {t("trainer.session.manage_title")}
         </Text>
         <View style={{ width: 40 }} />
       </View>
@@ -180,19 +281,35 @@ export default function ClassSessionScreen() {
             color={colors.foreground_muted}
           />
           <Text style={{ color: colors.foreground_secondary, marginLeft: 8 }}>
-            {dayjs(classData.start_time).format("HH:mm")} -{" "}
-            {dayjs(classData.end_time).format("HH:mm")}
+            {dayjs(classData.start_time).format(
+              t("trainer.schedule.time_format")
+            )}{" "}
+            -{" "}
+            {dayjs(classData.end_time).format(
+              t("trainer.schedule.time_format")
+            )}
           </Text>
         </View>
         <Text style={{ color: colors.foreground_muted, marginTop: 4 }}>
-          {dayjs(classData.start_time).format("dddd, D MMMM YYYY")}
+          {dayjs(classData.start_time).format(
+            t("trainer.schedule.date_format_full")
+          )}
         </Text>
       </View>
 
       <View style={styles.listHeader}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Danh sách học viên ({students.length})
+          {t("trainer.session.student_list", { count: students.length })}
         </Text>
+        <TouchableOpacity
+          onPress={startScan}
+          style={[styles.scanButton, { backgroundColor: colors.primary }]}
+        >
+          <FontAwesome name="qrcode" size={18} color="white" />
+          <Text style={styles.scanButtonText}>
+            {t("trainer.session.scan_qr")}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -200,37 +317,79 @@ export default function ClassSessionScreen() {
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingBottom: 40 }}
         renderItem={({ item }) => {
-          const isPresent = item.status === "attended";
+          const isPresent = item.status === "completed";
+          const isArrived = item.status === "arrived";
           return (
             <View
               style={[
                 styles.studentCard,
-                { backgroundColor: colors.card, borderColor: colors.border },
+                {
+                  backgroundColor: colors.card,
+                  borderColor: isArrived ? colors.primary : colors.border,
+                },
               ]}
             >
               <View style={styles.studentInfo}>
                 <View
                   style={[
                     styles.avatarPlaceholder,
-                    { backgroundColor: colors.primary_light },
+                    {
+                      backgroundColor: isPresent
+                        ? colors.success + "15"
+                        : colors.primary_light,
+                    },
                   ]}
                 >
-                  <Text style={{ color: colors.primary, fontWeight: "bold" }}>
-                    {item.profiles?.full_name?.charAt(0) || "S"}
+                  <Text
+                    style={{
+                      color: isPresent ? colors.success : colors.primary,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {item.profiles?.full_name?.charAt(0) ||
+                      t("common.unknown_name").charAt(0)}
                   </Text>
                 </View>
                 <View>
                   <Text style={[styles.studentName, { color: colors.text }]}>
-                    {item.profiles?.full_name || "Unknown User"}
+                    {item.profiles?.full_name || t("common.unknown_name")}
                   </Text>
-                  <Text
-                    style={[
-                      styles.studentEmail,
-                      { color: colors.foreground_muted },
-                    ]}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
                   >
-                    {item.profiles?.email}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.studentEmail,
+                        { color: colors.foreground_muted },
+                      ]}
+                    >
+                      {item.profiles?.email}
+                    </Text>
+                    {isArrived && (
+                      <View
+                        style={{
+                          backgroundColor: colors.info + "20",
+                          paddingHorizontal: 6,
+                          paddingVertical: 2,
+                          borderRadius: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 10,
+                            fontWeight: "700",
+                            color: colors.info,
+                          }}
+                        >
+                          {t("trainer.schedule.status_upcoming").toUpperCase()}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
 
@@ -246,7 +405,9 @@ export default function ClassSessionScreen() {
                       }
                     : {
                         backgroundColor: "transparent",
-                        borderColor: colors.foreground_muted,
+                        borderColor: isArrived
+                          ? colors.primary
+                          : colors.foreground_muted,
                       },
                 ]}
               >
@@ -274,10 +435,57 @@ export default function ClassSessionScreen() {
               marginTop: 40,
             }}
           >
-            Chưa có học viên nào đăng ký.
+            {t("trainer.session.no_students")}
           </Text>
         }
       />
+
+      <View style={{ paddingTop: 10 }}>
+        <Button
+          title={t("trainer.session.finish_class")}
+          onPress={handleFinishSession}
+        />
+      </View>
+
+      <CustomAlertComponent />
+
+      {/* QR Scanner Modal */}
+      <Modal
+        visible={isScanning}
+        animationType="slide"
+        onRequestClose={() => setIsScanning(false)}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#000" }}>
+          <View style={styles.scannerHeader}>
+            <TouchableOpacity
+              onPress={() => setIsScanning(false)}
+              style={styles.closeScanner}
+            >
+              <FontAwesome name="times" size={24} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.scannerTitle}>
+              {t("trainer.session.scan_qr_title")}
+            </Text>
+            <View style={{ width: 40 }} />
+          </View>
+
+          <CameraView
+            style={StyleSheet.absoluteFillObject}
+            facing="back"
+            onBarcodeScanned={handleBarCodeScanned}
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr"],
+            }}
+          />
+
+          <View style={styles.scannerOverlay}>
+            <View style={styles.scanFrame} />
+            <Text style={styles.scanHint}>
+              {t("trainer.session.scan_hint")}
+            </Text>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -302,8 +510,26 @@ const styles = StyleSheet.create({
   className: { fontSize: 24, fontWeight: "bold", marginBottom: 8 },
   timeRow: { flexDirection: "row", alignItems: "center" },
 
-  listHeader: { marginBottom: 16 },
+  listHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
   sectionTitle: { fontSize: 18, fontWeight: "600" },
+  scanButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
+  },
+  scanButtonText: {
+    color: "white",
+    fontWeight: "600",
+    fontSize: 14,
+  },
 
   studentCard: {
     flexDirection: "row",
@@ -332,5 +558,45 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
+  },
+  scannerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 16,
+    zIndex: 10,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  closeScanner: {
+    padding: 8,
+  },
+  scannerTitle: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  scannerOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  scanFrame: {
+    width: 250,
+    height: 250,
+    borderWidth: 2,
+    borderColor: "white",
+    backgroundColor: "transparent",
+    borderRadius: 16,
+  },
+  scanHint: {
+    color: "white",
+    marginTop: 24,
+    fontSize: 16,
+    textAlign: "center",
+    paddingHorizontal: 40,
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
