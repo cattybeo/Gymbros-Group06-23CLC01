@@ -166,7 +166,7 @@ export default function MembershipScreen() {
   async function waitForMembershipActivation(userId: string, planId: string) {
     setLoading(true);
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 12; // Increase to ~24 seconds total
 
     const interval = setInterval(async () => {
       attempts++;
@@ -177,7 +177,8 @@ export default function MembershipScreen() {
           .eq("user_id", userId)
           .eq("plan_id", planId)
           .eq("status", "active")
-          .gte("created_at", new Date(Date.now() - 60000).toISOString())
+          // Relaxed filter: check for any record created in the last 5 minutes
+          .gte("created_at", new Date(Date.now() - 300000).toISOString())
           .maybeSingle();
 
         if (data) {
@@ -200,8 +201,11 @@ export default function MembershipScreen() {
           fetchData();
         }
       } catch (e) {
-        clearInterval(interval);
-        setLoading(false);
+        // Continue polling unless explicit error check fails hard
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          setLoading(false);
+        }
       }
     }, 2000);
   }
