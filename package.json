@@ -1,7 +1,7 @@
 {
   "name": "gymbros",
   "main": "expo-router/entry",
-  "version": "1.3.2",
+  "version": "1.4.3",
   "scripts": {
     "start": "expo start",
     "android": "yarn setup:android && expo run:android",

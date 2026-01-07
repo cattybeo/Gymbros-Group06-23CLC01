@@ -185,6 +185,10 @@ function RootLayoutNav() {
             name="profile/settings"
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name="class/[id]"
+            options={{ headerShown: false, animation: "slide_from_right" }}
+          />
         </Stack>
         {rootNavigationState?.key && <AuthGuard />}
         {showLoading && <LoadingScreen backgroundColor={colors.background} />}

@@ -81,8 +81,22 @@ export const LiveClassList = ({
 
   useEffect(() => {
     fetchCounts();
-    const interval = setInterval(fetchCounts, 30000);
-    return () => clearInterval(interval);
+
+    // Subscribe to Realtime Bookings for Instant Demo Updates
+    const channel = supabase
+      .channel("class_counts_realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings" },
+        () => {
+          fetchCounts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchCounts]);
 
   // Handle pending scroll after filters reset

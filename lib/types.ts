@@ -26,15 +26,44 @@ export interface UserMembership {
   plan?: MembershipPlan; // For Joined Queries (changed from membership_plans to plan for clarity/mapping)
 }
 
+export interface Location {
+  id: string;
+  name: string;
+  address: string | null;
+  description: string | null;
+  image_slug: string | null;
+}
+
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  email?: string | null;
+  role: "Admin" | "Staff" | "PT" | "Member";
+  phone?: string | null;
+  bio?: string | null;
+  goal?: string | null;
+  gender?: string | null;
+  birthday?: string | null;
+  activity_level?: string | null;
+  experience_level?: string | null;
+  weekly_availability?: string | null;
+  specialties?: string[] | null;
+  metadata?: any;
+}
+
 export interface GymClass {
   id: string;
   name: string;
   description: string | null;
   trainer_id: string | null;
+  location_id: string | null;
   start_time: string;
   end_time: string;
   capacity: number;
   image_slug: string;
+  trainer?: Profile; // Joined from public.profiles
+  location?: Location; // Joined from public.locations
 }
 
 export interface Booking {
