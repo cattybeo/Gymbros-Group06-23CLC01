@@ -30,6 +30,8 @@ interface SkeletonCardProps {
   borderRadius?: number;
   /** Number of shimmer bars to display */
   lines?: number;
+  /** Optional custom padding */
+  padding?: number | string;
   /** Optional custom test ID for testing */
   testID?: string;
 }
@@ -39,6 +41,7 @@ export function SkeletonCard({
   height = 80,
   borderRadius = 12,
   lines = 1,
+  padding = 12,
   testID,
 }: SkeletonCardProps) {
   // Calculate line height based on total height and number of lines
@@ -48,19 +51,21 @@ export function SkeletonCard({
   const lineHeight = (height - totalSpacing) / lines;
 
   // Calculate NativeWind classes for border radius
-  const radiusClass = borderRadius === 0
-    ? "rounded-none"
-    : borderRadius === 9999
-    ? "rounded-full"
-    : ""; // Use inline style for custom values
+  const radiusClass =
+    borderRadius === 0
+      ? "rounded-none"
+      : borderRadius === 9999
+        ? "rounded-full"
+        : ""; // Use inline style for custom values
 
   return (
     <View
       testID={testID}
-      className={`bg-card border border-border p-3 justify-center gap-2 ${radiusClass}`}
+      className={`bg-card border border-border justify-center gap-2 ${radiusClass}`}
       style={{
         width: typeof width === "number" ? width : undefined,
         height,
+        padding: typeof padding === "number" ? padding : undefined,
         ...(borderRadius > 0 && borderRadius !== 9999 && { borderRadius }),
         ...(typeof width === "string" && { alignSelf: "stretch" }),
       }}
