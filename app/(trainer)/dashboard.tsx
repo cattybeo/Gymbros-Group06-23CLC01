@@ -38,10 +38,10 @@ export default function TrainerDashboard() {
     if (!user || !profile) return;
     setFetchingAI(true);
     try {
-      // Fetch recent finished classes
+      // Fetch recent finished classes (based on end_time, not status)
       const { data: pastClasses } = await supabase
         .from("classes")
-        .select("id, name, start_time, end_time")
+        .select("id, name, start_time, end_time, capacity")
         .eq("trainer_id", user.id)
         .lte("end_time", new Date().toISOString())
         .order("end_time", { ascending: false })
@@ -50,23 +50,25 @@ export default function TrainerDashboard() {
       if (pastClasses && pastClasses.length > 0) {
         const classIds = pastClasses.map((c) => c.id);
 
-        // Fetch attendance for these classes
-        const { data: attendance } = await supabase
-          .from("access_logs")
-          .select("user_id, class_id, entered_at")
-          .in("class_id", classIds);
+        // Fetch attendance from BOOKINGS table (completed check-outs)
+        const { data: completedBookings } = await supabase
+          .from("bookings")
+          .select("user_id, class_id, checkout_at, status")
+          .in("class_id", classIds)
+          .eq("status", "completed");
 
         const insights = await getTrainerAIInsights(profile, {
           classSessions: pastClasses.map((c) => ({
             name: c.name,
+            capacity: c.capacity,
             attendanceCount:
-              attendance?.filter((a) => a.class_id === c.id).length || 0,
+              completedBookings?.filter((b) => b.class_id === c.id).length || 0,
           })),
           studentAttendance:
-            attendance?.map((a: any) => ({
-              studentId: a.user_id,
+            completedBookings?.map((b: any) => ({
+              studentId: b.user_id,
               attended: true,
-              date: a.entered_at,
+              date: b.checkout_at,
             })) || [],
         });
 
