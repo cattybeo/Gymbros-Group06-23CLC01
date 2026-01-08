@@ -1,6 +1,7 @@
 import Colors from "@/constants/Colors";
 import { GYM_IMAGES } from "@/constants/Images";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { GymClass } from "@/lib/types";
@@ -21,6 +22,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ClassDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { user, profile } = useAuthContext();
   const { t, i18n } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
@@ -36,10 +38,6 @@ export default function ClassDetailScreen() {
     if (!id) return;
     setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       const [classRes, countRes, bookingRes] = await Promise.all([
         supabase
           .from("classes")
@@ -84,9 +82,6 @@ export default function ClassDetailScreen() {
     if (!id || !gymClass) return;
     setIsProcessing(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
       if (!user) {
         showAlert(t("common.error"), t("classes.login_required"), "error");
         return;
