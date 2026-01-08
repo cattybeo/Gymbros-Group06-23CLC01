@@ -3,6 +3,7 @@ import { DurationSelectorSkeleton } from "@/components/ui/DurationSelectorSkelet
 import { MembershipCardSkeleton } from "@/components/ui/MembershipCardSkeleton";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { MembershipPlan, MembershipTier } from "@/lib/types";
 import { useStripe } from "@stripe/stripe-react-native";
@@ -19,6 +20,7 @@ import {
 } from "react-native";
 
 export default function MembershipScreen() {
+  const { user } = useAuthContext();
   const [tiers, setTiers] = useState<MembershipTier[]>([]);
   const [plans, setPlans] = useState<MembershipPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,13 +37,12 @@ export default function MembershipScreen() {
     setLoading(true);
     contentOpacity.setValue(0);
     try {
-      const [tiersRes, plansRes, authRes] = await Promise.all([
+      const [tiersRes, plansRes] = await Promise.all([
         supabase
           .from("membership_tiers")
           .select("*")
           .order("level", { ascending: true }),
         supabase.from("membership_plans").select("*").eq("is_active", true),
-        supabase.auth.getUser(),
       ]);
 
       if (tiersRes.error) throw tiersRes.error;
@@ -50,7 +51,6 @@ export default function MembershipScreen() {
       setTiers(tiersRes.data || []);
       setPlans(plansRes.data || []);
 
-      const user = authRes.data.user;
       if (user) {
         const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD for date comparison
         const { data: membershipData, error: membershipError } = await supabase
@@ -80,7 +80,7 @@ export default function MembershipScreen() {
     } finally {
       setLoading(false);
     }
-  }, [contentOpacity, t, showAlert]);
+  }, [contentOpacity, t, showAlert, user]);
 
   // Premium Fade-in Transition
   useEffect(() => {
@@ -241,10 +241,6 @@ export default function MembershipScreen() {
         onSecondaryPress: async () => {
           setLoading(true);
           try {
-            const {
-              data: { user },
-            } = await supabase.auth.getUser();
-
             if (!user) return;
 
             const { data: mem } = await supabase

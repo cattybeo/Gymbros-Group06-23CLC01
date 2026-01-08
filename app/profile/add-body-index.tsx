@@ -49,7 +49,8 @@ export default function AddBodyIndexScreen() {
       const userAge =
         age ||
         (profile?.birthday
-          ? new Date().getFullYear() - new Date(profile.birthday).getFullYear()
+          ? new Date().getFullYear() -
+            new Date(profile.birthday as string).getFullYear()
           : 25);
 
       const { error } = await supabase.from("body_indices").insert({

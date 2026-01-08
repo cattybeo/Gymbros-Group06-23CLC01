@@ -166,7 +166,12 @@
       "sign_out": "Sign Out",
       "save_success": "Profile updated successfully!",
       "no_specialties": "No specialties listed",
-      "no_bio": "No biography provided."
+      "no_bio": "No biography provided.",
+      "experience": "Years of Experience",
+      "messenger": "Messenger Link",
+      "zalo": "Zalo Number/ID",
+      "facebook": "Facebook Profile Link",
+      "social_links_title": "Social Media Links"
     },
     "schedule": {
       "title": "My Schedule",

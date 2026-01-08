@@ -23,6 +23,7 @@ import {
 } from "react-native";
 
 export default function ClassesScreen() {
+  const { user, profile } = useAuthContext();
   const [classes, setClasses] = useState<GymClass[]>([]);
   const [trafficData, setTrafficData] = useState<TrafficData[] | undefined>(
     undefined
@@ -35,7 +36,6 @@ export default function ClassesScreen() {
   const { showAlert, CustomAlertComponent } = useCustomAlert();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
-  const { profile } = useAuthContext();
 
   const [myBookings, setMyBookings] = useState<Set<string>>(new Set());
 
@@ -55,19 +55,15 @@ export default function ClassesScreen() {
         contentOpacity.setValue(0);
       }
       try {
-        const [userResponse, classesResponse, trafficResponse] =
-          await Promise.all([
-            supabase.auth.getUser(),
-            supabase
-              .from("classes")
-              .select(
-                "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
-              )
-              .order("start_time", { ascending: true }),
-            supabase.rpc("get_weekly_traffic"),
-          ]);
-
-        const user = userResponse.data.user;
+        const [classesResponse, trafficResponse] = await Promise.all([
+          supabase
+            .from("classes")
+            .select(
+              "*, trainer:trainer_id(id, full_name, avatar_url, bio), location:locations(*)"
+            )
+            .order("start_time", { ascending: true }),
+          supabase.rpc("get_weekly_traffic"),
+        ]);
 
         if (classesResponse.error) throw classesResponse.error;
         const classesData = classesResponse.data || [];
@@ -169,10 +165,6 @@ export default function ClassesScreen() {
 
   const handleBook = useCallback(
     async (classId: string, currentCount: number) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         showAlert(
           t("auth.login_button"),
@@ -297,10 +289,6 @@ export default function ClassesScreen() {
 
   const handleCancel = useCallback(
     async (classId: string) => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) return;
 
       showAlert(
