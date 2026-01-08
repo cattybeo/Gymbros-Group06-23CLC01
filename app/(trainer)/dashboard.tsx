@@ -51,11 +51,15 @@ export default function TrainerDashboard() {
         const classIds = pastClasses.map((c) => c.id);
 
         // Fetch attendance from BOOKINGS table (completed check-outs)
+        // EXCLUDE HEATMAP BOT from AI analysis
         const { data: completedBookings } = await supabase
           .from("bookings")
-          .select("user_id, class_id, checkout_at, status")
+          .select(
+            "user_id, class_id, checkout_at, status, profiles:user_id(email)"
+          )
           .in("class_id", classIds)
-          .eq("status", "completed");
+          .eq("status", "completed")
+          .neq("profiles.email", "heatmap_bot@gymbros.io");
 
         const insights = await getTrainerAIInsights(profile, {
           classSessions: pastClasses.map((c) => ({
