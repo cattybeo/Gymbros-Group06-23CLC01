@@ -60,8 +60,6 @@ export default function TrainerLayout() {
         }}
       />
       {/* Internal routes hidden from tab bar */}
-      <Tabs.Screen name="students" options={{ href: null }} />
-      <Tabs.Screen name="profile/index" options={{ href: null }} />
       <Tabs.Screen name="profile/edit" options={{ href: null }} />
       <Tabs.Screen name="session/[id]" options={{ href: null }} />
     </Tabs>
