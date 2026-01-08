@@ -7,20 +7,34 @@ Dự án phát triển ứng dụng quản lý phòng Gym (Mobile App & Admin We
 - **Framework:** React Native (Expo SDK 54)
 - **Routing:** Expo Router (File-based routing)
 - **Styling:** NativeWind v4 (Tailwind CSS)
-- **Database & Auth:** Supabase
-- **Language:** TypeScript
+- **Database & Auth:** Supabase (PostgreSQL + Edge Functions + Realtime)
+- **AI Engine:** Google Gemini (`@google/genai` SDK)
+  - **Member AI:** `gemini-2.0-flash-exp` (Personalized class recommendations)
+  - **Trainer AI:** `gemini-2.0-flash-exp` (Performance analysis & retention alerts)
+- **Language:** TypeScript (Strict Mode)
 - **External OAuth:** Google Sign-In
-- **Payment:** Stripe (Native Payment Sheet)
+- **Payment:** Stripe (Native Payment Sheet v0.57.2)
 - **i18n:** React-i18next (English/Vietnamese)
 
 ## Tính năng Chính (Đã hoàn thiện)
 
+### Cho Hội viên (Member)
+
 - **Authentication:** Đăng nhập/Đăng ký, Google OAuth, Quên mật khẩu.
+- **AI Personal Trainer:** Gợi ý 3 lớp học phù hợp với mục tiêu (Tăng cơ/Giảm mỡ) và lịch trình sử dụng Gemini 2.5 Flash.
+- **Gym Traffic Heatmap:** Biểu đồ nhiệt theo dõi lưu lượng khách hàng theo giờ và ngày trong tuần.
 - **Membership:** Xem gói tập, Thanh toán qua Stripe, Nâng cấp gói.
-- **Classes:** Xem lịch tập, Đặt chỗ (Booking).
+- **Classes:** Xem lịch tập, Đặt chỗ (Booking), Hủy lớp.
 - **Profile:** Theo dõi chỉ số cơ thể (BMI/BMR), Lịch sử tập luyện.
 - **Home:** Dashboard tổng quan, Barcode thành viên, Tin tức.
 - **Setting:** Chuyển đổi ngôn ngữ, Dark Mode (Giao diện cao cấp).
+
+### Cho Huấn luyện viên (Trainer)
+
+- **AI Coach Assistant:** Phân tích hiệu suất lớp học, đưa ra gợi ý cải thiện dựa trên dữ liệu check-out thực tế.
+- **Trainer Dashboard:** Hiển thị số liệu KPI (classes taught, total students, avg attendance), quản lý lịch dạy theo tuần.
+- **Enhanced Profile:** Hiển thị kinh nghiệm (experience years), chuyên môn (specialties as hashtag chips), liên kết mạng xã hội (Zalo/Facebook/Messenger).
+- **Session Management:** Quản lý danh sách học viên trong lớp, QR check-out verification.
 
 ---
 
