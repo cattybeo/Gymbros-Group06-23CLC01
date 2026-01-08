@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { z } from "zod";
 import { supabase } from "./supabase";
+import { Profile } from "./types";
 
 /**
  * Zod Schema for AI Response validation
@@ -18,18 +19,73 @@ export const AISuggestionSchema = z.object({
 
 export type AISuggestion = z.infer<typeof AISuggestionSchema>;
 
+export const TrainerInsightsSchema = z.object({
+  recap: z.object({
+    summary: z.string(),
+    attendance_rate: z.number(),
+    trend: z.string(),
+  }),
+  retention_alerts: z.array(
+    z.object({
+      student_name: z.string(),
+      reason: z.string(),
+      action_suggestion: z.string(),
+    })
+  ),
+  smart_broadcasts: z.array(
+    z.object({
+      type: z.enum(["friendly", "urgent", "motivational"]),
+      message: z.string(),
+    })
+  ),
+  vibe_type: z.enum(["success", "warning", "info"]),
+});
+
+export type TrainerInsights = z.infer<typeof TrainerInsightsSchema>;
+
 const AI_CACHE_KEY = "gymbros_ai_cache";
 const CACHE_TTL = 1000 * 60 * 60 * 4; // 4 hours
 
 /**
- * Gymbros AI Engine
- * Calls Supabase Edge Function to process AI logic securely.
- * Features:
- * - Persistent Caching (AsyncStorage)
- * - Consistency Context (Passing previous suggestions)
+ * Gymbros AI Engine - Trainer Assistant
+ * Provides insights for PTs about their classes and students.
+ */
+export const getTrainerAIInsights = async (
+  trainerProfile: Profile,
+  context: {
+    classSessions: any[];
+    studentAttendance: any[];
+    language?: string;
+  }
+): Promise<TrainerInsights | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke(
+      "gymbros-coach-ai",
+      {
+        body: {
+          trainerProfile,
+          classSessions: context.classSessions,
+          studentAttendance: context.studentAttendance,
+          language: context.language || "vi",
+        },
+      }
+    );
+
+    if (error) throw error;
+    if (!data) return null;
+
+    return TrainerInsightsSchema.parse(data);
+  } catch (error) {
+    console.error("Trainer AI Engine Error:", error);
+    return null;
+  }
+};
+
+/**
+ * Gymbros AI Engine - Member Suggestions
  */
 export const getAISmartSuggestion = async (
-  userProfile: any,
+  userProfile: Profile,
   gymContext: {
     availableClasses: any[];
     userBookings: string[];
@@ -42,7 +98,7 @@ export const getAISmartSuggestion = async (
     // 1. Prepare Context Key (to detect if bookings/profile changed significantly)
     const contextHash = JSON.stringify({
       bookings: gymContext.userBookings.sort(),
-      goal: userProfile?.goal_label,
+      goal: userProfile?.goal,
       lang: gymContext.language,
     });
 
