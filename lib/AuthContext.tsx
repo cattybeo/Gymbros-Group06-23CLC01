@@ -46,37 +46,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!error && data) {
         setProfile(data);
       }
+      return data;
     } catch (e) {
       console.error("Error fetching profile:", e);
+      return null;
     }
   };
 
   useEffect(() => {
-    // Check session on app start
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+    let mounted = true;
+
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+
+          if (session?.user) {
+            await fetchProfile(session.user.id);
+          }
+        }
+      } catch (e) {
+        console.error("Auth init error:", e);
+      } finally {
+        if (mounted) setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    };
+
+    initializeAuth();
 
     // Listen for auth changes (login, logout, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
-        setProfile(null);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (mounted) {
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          setIsLoading(true);
+          await fetchProfile(session.user.id);
+          setIsLoading(false);
+        } else {
+          setProfile(null);
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
     });
 
     return () => {
+      mounted = false;
       subscription.unsubscribe(); // Cleanup on unmount
     };
   }, []);

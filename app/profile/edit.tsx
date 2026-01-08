@@ -28,7 +28,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DateTimePicker, { DateType } from "react-native-ui-datepicker";
 
 export default function EditProfileScreen() {
-  const { user } = useAuthContext();
+  const { user, profile } = useAuthContext();
   const { t, i18n } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
@@ -36,60 +36,42 @@ export default function EditProfileScreen() {
 
   const { showAlert, CustomAlertComponent } = useCustomAlert();
 
-  const [fullName, setFullName] = useState(
-    user?.user_metadata?.full_name || ""
-  );
-  const [avatarUrl, setAvatarUrl] = useState(
-    user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ""
-  );
+  const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Profile 2.0 State
-  const [goal, setGoal] = useState<string>(
-    user?.user_metadata?.goal || "maintain"
-  );
-  const [gender, setGender] = useState<string>(
-    user?.user_metadata?.gender || "male"
-  );
+  const [goal, setGoal] = useState<string>(profile?.goal || "maintain");
+  const [gender, setGender] = useState<string>(profile?.gender || "male");
   const [birthday, setBirthday] = useState<Date | null>(
-    user?.user_metadata?.birthday ? new Date(user.user_metadata.birthday) : null
+    profile?.birthday ? new Date(profile.birthday) : null
   );
   const [activityLevel, setActivityLevel] = useState<string>(
-    user?.user_metadata?.activity_level || "sedentary"
+    profile?.activity_level || "sedentary"
   );
   const [experienceLevel, setExperienceLevel] = useState<string>(
-    user?.user_metadata?.experience_level || "beginner"
+    profile?.experience_level || "beginner"
   );
   const [weeklyAvailability, setWeeklyAvailability] = useState<string>(
-    user?.user_metadata?.weekly_availability || "1_2"
+    profile?.weekly_availability || "1_2"
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [tempDate, setTempDate] = useState<DateType>(dayjs());
 
+  // We sync local state if context profile updates (e.g. after refresh)
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (data && !error) {
-        setFullName(data.full_name || "");
-        setAvatarUrl(data.avatar_url || "");
-        setGoal(data.goal || "maintain");
-        setGender(data.gender || "male");
-        setBirthday(data.birthday ? new Date(data.birthday) : null);
-        setActivityLevel(data.activity_level || "sedentary");
-        setExperienceLevel(data.experience_level || "beginner");
-        setWeeklyAvailability(data.weekly_availability || "1_2");
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
+    if (profile) {
+      setFullName(profile.full_name || "");
+      setAvatarUrl(profile.avatar_url || "");
+      setGoal(profile.goal || "maintain");
+      setGender(profile.gender || "male");
+      setBirthday(profile.birthday ? new Date(profile.birthday) : null);
+      setActivityLevel(profile.activity_level || "sedentary");
+      setExperienceLevel(profile.experience_level || "beginner");
+      setWeeklyAvailability(profile.weekly_availability || "1_2");
+    }
+  }, [profile]);
 
   const GOAL_OPTIONS = [
     "lose_weight",
