@@ -6,17 +6,50 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 
 ### Thêm mới (Added)
 
+- **AI Coach Assistant (Trainer Dashboard)**:
+  - Tích hợp trợ lý AI cho PT sử dụng Gemini 2.0 Flash để phân tích hiệu suất lớp học.
+  - Phân tích dữ liệu từ `bookings` với trạng thái `completed` (check-out thực tế) thay vì `access_logs`.
+  - Đưa ra gợi ý cải thiện retention và chất lượng giảng dạy dựa trên attendance patterns.
+  - Hiển thị insights trực tiếp trên Trainer Dashboard với loading state chuyên nghiệp.
+- **Enhanced Trainer Profile**:
+  - Thêm badge hiển thị số năm kinh nghiệm (`experience_years`).
+  - Chuyển đổi specialties từ text thường sang hashtag chips có styling gradient.
+  - Tích hợp social links section với deep linking:
+    - **Zalo**: Mở app Zalo trực tiếp qua `zalo.me/{phone}`.
+    - **Messenger**: Mở app Messenger qua `m.me/{username}`.
+    - **Facebook**: Mở profile Facebook trong browser.
+  - Tự động ẩn social links nếu không có dữ liệu (clean UI).
+- **Smart Heatmap Bot Filtering**:
+  - Triển khai logic lọc thông minh trong `get_weekly_traffic()` RPC function.
+  - Tự động ẩn bookings từ `heatmap_bot@gymbros.io` trong Student Roster và Trainer Dashboard.
+  - **Fallback logic**: Nếu có ít hơn 10 booking thực tế, hiển thị dữ liệu bot để demo; khi vượt ngưỡng, tự động chuyển sang dữ liệu thật.
+  - Cập nhật filter trong `app/(trainer)/session/[id].tsx` với join `profiles` table.
 - **Trainer QR Check-out**: Triển khai tính năng quét mã QR để xác nhận hoàn thành buổi tập (Check-out). PT quét mã từ Dashboard của học viên để đánh dấu `completed`.
 - **Custom Alert Integration**: Thay thế hoàn toàn `Alert.alert` của hệ thống bằng `CustomAlertModal` trên toàn bộ phân hệ Trainer và các thành phần chung như nút đăng nhập Google.
 
 ### Thay đổi (Changed)
 
+- **AI Edge Function Optimization**:
+  - Chuyển model từ `gemini-2.5-flash-lite` (deprecated) sang `gemini-2.0-flash-exp` (stable).
+  - Giảm payload size bằng cách giới hạn `availableClasses` xuống 20 items thay vì toàn bộ catalog.
+  - Loại bỏ `thinkingConfig` để tăng tốc độ response và giảm latency.
+  - Xử lý multiple SDK response formats (`response.text()` và `response.candidates[0].content.parts[0].text`).
+- **Trainer Data Source Migration**:
+  - Thay đổi nguồn dữ liệu AI Coach từ `access_logs` sang `bookings` table với `status='completed'`.
+  - Lý do: `access_logs` chỉ ghi nhận check-in (Staff), trong khi `completed` bookings phản ánh chính xác học viên đã hoàn thành buổi tập (PT check-out).
 - **Unified Profiles Data Flow**: Loại bỏ cơ chế tự động chèn thông tin vào `user_metadata` của Supabase Auth. Toàn bộ thông tin cá nhân hiện được quản lý tập trung và duy nhất tại bảng `public.profiles`.
 - **Attendance Logic Correction**: Phân định rõ vai trò: Nhân viên (Staff) thực hiện Check-in (`arrived`), PT thực hiện Check-out (`completed`) và lưu dấu `checkout_at`.
 - **i18n Standardization**: Cập nhật bộ thuật ngữ "Hoàn thành" (Completed) thay cho "Hiện diện" (Attended) để phù hợp với quy trình chứng nhận buổi tập của PT.
 
 ### Sửa lỗi (Fixed)
 
+- **Navigation Warnings**: Loại bỏ references đến các route không tồn tại (`students`, `profile/index`) trong `app/(trainer)/_layout.tsx`.
+- **AI Function 500 Error**: 
+  - Root cause: Model `gemini-2.5-flash-lite` không còn available và payload 20KB+ vượt giới hạn.
+  - Solution: Chuyển sang `gemini-2.0-flash-exp` và tối ưu payload size.
+- **Empty Crowd Meter**: Sau khi filter bot data, heatmap trống hoàn toàn. Fixed bằng smart fallback logic trong `heatmap_migration.sql`.
+- **Duplicate Classes Tab**: Xóa file duplicate `app/(tabs)/classes.tsx` và thư mục `app/(tabs)/` rỗng sau refactoring.
+- **Heatmap Bot Pollution**: Student roster hiển thị 100+ bot users. Fixed bằng cách thêm `.neq("profiles.email", "heatmap_bot@gymbros.io")` filter.
 - Khắc phục lỗi đồng bộ hóa dữ liệu Avatar khi cập nhật hồ sơ, đảm bảo thay đổi phản chiếu ngay lập tức trên UI.
 
 ## [v1.7.0] - 2026-01-11
