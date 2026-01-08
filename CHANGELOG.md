@@ -7,7 +7,7 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 ### Thêm mới (Added)
 
 - **AI Coach Assistant (Trainer Dashboard)**:
-  - Tích hợp trợ lý AI cho PT sử dụng Gemini 2.0 Flash để phân tích hiệu suất lớp học.
+  - Tích hợp trợ lý AI cho PT sử dụng Gemini 2.5 Flash để phân tích hiệu suất lớp học.
   - Phân tích dữ liệu từ `bookings` với trạng thái `completed` (check-out thực tế) thay vì `access_logs`.
   - Đưa ra gợi ý cải thiện retention và chất lượng giảng dạy dựa trên attendance patterns.
   - Hiển thị insights trực tiếp trên Trainer Dashboard với loading state chuyên nghiệp.
@@ -30,8 +30,7 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 ### Thay đổi (Changed)
 
 - **AI Edge Function Optimization**:
-  - Chuyển model từ `gemini-2.5-flash-lite` (deprecated) sang `gemini-2.0-flash-exp` (stable).
-  - Giảm payload size bằng cách giới hạn `availableClasses` xuống 20 items thay vì toàn bộ catalog.
+  - Giảm payload size bằng cách giới hạn `availableClasses` xuống 50 items thay vì toàn bộ catalog.
   - Loại bỏ `thinkingConfig` để tăng tốc độ response và giảm latency.
   - Xử lý multiple SDK response formats (`response.text()` và `response.candidates[0].content.parts[0].text`).
 - **Trainer Data Source Migration**:
@@ -44,9 +43,9 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 ### Sửa lỗi (Fixed)
 
 - **Navigation Warnings**: Loại bỏ references đến các route không tồn tại (`students`, `profile/index`) trong `app/(trainer)/_layout.tsx`.
-- **AI Function 500 Error**: 
-  - Root cause: Model `gemini-2.5-flash-lite` không còn available và payload 20KB+ vượt giới hạn.
-  - Solution: Chuyển sang `gemini-2.0-flash-exp` và tối ưu payload size.
+- **AI Function 500 Error**:
+  - Root cause: Model `gemini-2.5-flash` không còn available và payload 20KB+ vượt giới hạn.
+  - Solution: Tối ưu payload size.
 - **Empty Crowd Meter**: Sau khi filter bot data, heatmap trống hoàn toàn. Fixed bằng smart fallback logic trong `heatmap_migration.sql`.
 - **Duplicate Classes Tab**: Xóa file duplicate `app/(tabs)/classes.tsx` và thư mục `app/(tabs)/` rỗng sau refactoring.
 - **Heatmap Bot Pollution**: Student roster hiển thị 100+ bot users. Fixed bằng cách thêm `.neq("profiles.email", "heatmap_bot@gymbros.io")` filter.
