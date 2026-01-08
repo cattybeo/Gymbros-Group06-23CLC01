@@ -124,7 +124,9 @@ export default function TrainerSchedule() {
           <Text
             style={[
               styles.statusText,
-              { color: isFinished ? colors.foreground_muted : colors.primary },
+              {
+                color: isFinished ? colors.foreground_muted : colors.foreground,
+              },
             ]}
           >
             {isFinished

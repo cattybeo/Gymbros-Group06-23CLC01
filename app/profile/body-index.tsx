@@ -1,3 +1,4 @@
+import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { BodyIndex } from "@/lib/types";
@@ -16,20 +17,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // Screen for viewing body index history
 export default function BodyIndexHistoryScreen() {
+  const { user } = useAuthContext();
   const [data, setData] = useState<BodyIndex[]>([]);
   const [loading, setLoading] = useState(false);
   const { t } = useTranslation();
   const { colorScheme } = useThemeContext();
 
   const fetchHistory = async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) return;
-
       const { data: records, error } = await supabase
         .from("body_indices")
         .select("*")
