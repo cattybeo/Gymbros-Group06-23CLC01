@@ -166,7 +166,12 @@
       "sign_out": "Đăng xuất",
       "save_success": "Cập nhật hồ sơ thành công!",
       "no_specialties": "Chưa cập nhật chuyên môn",
-      "no_bio": "Chưa có giới thiệu tiểu sử."
+      "no_bio": "Chưa có giới thiệu tiểu sử.",
+      "experience": "Số năm kinh nghiệm",
+      "messenger": "Link Messenger",
+      "zalo": "Số điện thoại Zalo",
+      "facebook": "Link Facebook Cá nhân",
+      "social_links_title": "Liên kết mạng xã hội"
     },
     "schedule": {
       "title": "Lịch dạy của tôi",

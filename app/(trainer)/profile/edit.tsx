@@ -1,4 +1,5 @@
 import Button from "@/components/ui/Button";
+import InputField from "@/components/ui/InputField"; // Using InputField for better consistency
 import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
 import { useAuthContext } from "@/lib/AuthContext";
@@ -11,9 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -30,6 +29,19 @@ export default function TrainerProfileEdit() {
   const [specialties, setSpecialties] = useState(
     profile?.specialties?.join(", ") || ""
   );
+  const [experienceYears, setExperienceYears] = useState(
+    profile?.experience_years?.toString() || ""
+  );
+
+  // Social Links state
+  const [messenger, setMessenger] = useState(
+    profile?.social_links?.messenger || ""
+  );
+  const [zalo, setZalo] = useState(profile?.social_links?.zalo || "");
+  const [facebook, setFacebook] = useState(
+    profile?.social_links?.facebook || ""
+  );
+
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
@@ -45,6 +57,12 @@ export default function TrainerProfileEdit() {
             .split(",")
             .map((s: string) => s.trim())
             .filter((s: string) => s !== ""),
+          experience_years: experienceYears ? parseInt(experienceYears) : null,
+          social_links: {
+            messenger,
+            zalo,
+            facebook,
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", profile.id);
@@ -67,99 +85,88 @@ export default function TrainerProfileEdit() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView className="flex-1 bg-background">
       <CustomAlertComponent />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ padding: 20 }}>
-          <View style={styles.header}>
-            <Text style={[styles.title, { color: colors.text }]}>
+        <ScrollView className="flex-1 px-4 pt-2">
+          <View className="mb-8">
+            <Text className="text-3xl font-black text-foreground">
               {t("trainer.profile.edit_btn")}
             </Text>
           </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.foreground_muted }]}>
-              {t("trainer.profile.full_name") || "Full Name"}
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                },
-              ]}
+          <View className="space-y-4">
+            <InputField
+              label={t("trainer.profile.full_name")}
               value={fullName}
               onChangeText={setFullName}
               placeholder="e.g. John Doe"
-              placeholderTextColor={colors.foreground_muted}
             />
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.foreground_muted }]}>
-              {t("trainer.profile.bio") || "Bio"}
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                styles.textArea,
-                {
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                },
-              ]}
+            <InputField
+              label={t("trainer.profile.bio")}
               value={bio}
               onChangeText={setBio}
               placeholder="Tell about yourself..."
-              placeholderTextColor={colors.foreground_muted}
               multiline
               numberOfLines={4}
             />
-          </View>
 
-          <View style={styles.inputGroup}>
-            <Text style={[styles.label, { color: colors.foreground_muted }]}>
-              {t("trainer.profile.specialty") || "Specialties"}
-            </Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  color: colors.text,
-                  backgroundColor: colors.card,
-                  borderColor: colors.border,
-                },
-              ]}
+            <InputField
+              label={t("trainer.profile.specialty")}
               value={specialties}
               onChangeText={setSpecialties}
               placeholder="Yoga, HIIT, Cardio..."
-              placeholderTextColor={colors.foreground_muted}
+              helperText="* Separate with commas"
             />
-            <Text
-              style={{
-                fontSize: 12,
-                color: colors.foreground_muted,
-                marginTop: 4,
-              }}
-            >
-              * Separate with commas
-            </Text>
+
+            <InputField
+              label={t("trainer.profile.experience")}
+              value={experienceYears}
+              onChangeText={setExperienceYears}
+              placeholder="e.g. 5"
+              keyboardType="numeric"
+            />
+
+            <View className="mt-6">
+              <Text className="text-foreground-secondary text-sm font-bold uppercase mb-4">
+                {t("trainer.profile.social_links_title")}
+              </Text>
+
+              <InputField
+                label={t("trainer.profile.zalo")}
+                value={zalo}
+                onChangeText={setZalo}
+                placeholder="Phone number or Zalo ID"
+              />
+
+              <InputField
+                label={t("trainer.profile.messenger")}
+                value={messenger}
+                onChangeText={setMessenger}
+                placeholder="Messenger profile link"
+              />
+
+              <InputField
+                label={t("trainer.profile.facebook")}
+                value={facebook}
+                onChangeText={setFacebook}
+                placeholder="Facebook profile link"
+              />
+            </View>
           </View>
 
-          <View style={{ marginTop: 20, gap: 12 }}>
+          <View className="mt-10 mb-20 space-y-3">
             <Button
-              title={t("common.save") || "Save Changes"}
+              title={t("common.save")}
               onPress={handleSave}
               isLoading={loading}
             />
             <Button
-              title={t("common.cancel") || "Cancel"}
+              title={t("common.cancel")}
               onPress={() => router.back()}
               variant="secondary"
             />
@@ -170,20 +177,4 @@ export default function TrainerProfileEdit() {
   );
 }
 
-const styles = StyleSheet.create({
-  header: { marginBottom: 30 },
-  title: { fontSize: 28, fontWeight: "bold" },
-  inputGroup: { marginBottom: 20 },
-  label: { fontSize: 14, marginBottom: 8, fontWeight: "600" },
-  input: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 120,
-    textAlignVertical: "top",
-  },
-});
+// Removing styles as we use NativeWind now
