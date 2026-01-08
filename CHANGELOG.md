@@ -239,3 +239,77 @@ Mọi thay đổi đáng chú ý của dự án "Gymbros" sẽ được lưu l�
 - **Bản dịch Tiếng Việt**: Dịch thuật 100% tên và mô tả 25 khoá học sang Tiếng Việt chuyên nghiệp.
 
 ## [v0.9.1] - 2026-01-07
+
+### Sửa lỗi (Fixed)
+
+- **Lỗi Navigation Context**: Khắc phục triệt để lỗi "Couldn't find a navigation context" gây crash ứng dụng khi khởi động bằng cách sử dụng `useRootNavigationState` và đưa logic điều hướng vào `AuthGuard` component. Đã hỗ trợ xử lý độ trễ trên Android.
+- **Sửa lỗi Privacy Policy**: Khắc phục lỗi crash trên Android khi tương tác với các mục trong Chính sách bảo mật do xung đột giữa NativeWind (`ring` classes) và `LayoutAnimation`.
+- **Khôi phục Dark Mode**: Sửa lỗi Dark Mode không hoạt động sau khi refactor root layout. Đã thêm lại container theme và tối ưu hóa màn hình loading.
+- **Cập nhật SafeAreaView**: Thay thế toàn bộ các import `SafeAreaView` từ `react-native` sang `react-native-safe-area-context` để loại bỏ các cảnh báo (warnings) không còn được hỗ trợ.
+
+### Cải thiện (Changed)
+
+- **Đa ngôn ngữ Profile**: Hoàn tất việc quốc tế hóa (i18n) cho toàn bộ phần Profile, đảm bảo không còn văn bản tiếng Anh mã cứng trong UI Tiếng Việt.
+- **Cấu trúc Root Layout**: Refactor lại `app/_layout.tsx` để tách biệt rõ ràng giữa logic giao diện (UI) và logic bảo mật/điều hướng (AuthGuard).
+
+### Đã thêm (Added)
+
+- **AuthGuard Component**: Thành phần mới giúp quản lý luồng điều hướng dựa trên trạng thái xác thực và onboarding của người dùng một cách ổn định hơn.
+
+## [v0.9.0] - 2026-01-07
+
+### Tính năng mới (Added)
+
+- **Hỗ trợ Dark Mode**: Hoàn thiện chế độ tối với dual-mode control (System + Manual).
+  - Phát hiện theme hệ thống (auto-follow device settings).
+  - Toggle thủ công trong màn hình Settings (Light/Dark/System options).
+  - Lưu trữ preference qua AsyncStorage (tồn tại qua app restarts).
+  - Hệ thống semantic token cho consistent theming trên toàn bộ screens.
+  - Hỗ trợ cả React Native's Appearance API và manual override.
+- **Skeleton Loading System**: Shimmer effect loaders tái sử dụng cho UX tốt hơn.
+  - Component Skeleton cho single elements.
+  - Component SkeletonCard cho card-based layouts.
+  - Mượt mà 60fps sử dụng react-native-reanimated.
+  - Dark mode support với semantic tokens.
+  - Optimized cleanup on unmount (Rule 15 compliance).
+- **Cải thiện Profile Screen**:
+  - Loading state với Skeleton UI.
+  - Fade-in animation khi content load.
+  - Đơn giản hóa dual loading state (loại bỏ ActivityIndicator confusion).
+
+### Thay đổi (Changed)
+
+- **Kiến trúc Theme System**:
+  - Refactor từ system-only sang dual-mode control (system + manual).
+  - Thêm ThemeContext với useThemeContext hook.
+  - Tích hợp NativeWind v4's useColorScheme và setColorScheme.
+  - Tất cả components giờ sử dụng theme context thay vì direct hooks.
+- **Styling Consistency**:
+  - Áp dụng semantic tokens throughout app.
+  - Thay hardcoded colors bằng design system tokens.
+  - Fix icon colors để sử dụng colors.foreground thay vì hardcoded values.
+
+### Sửa lỗi (Fixed)
+
+- **Hardcoded gender trong add-body-index.tsx**:
+  - Fetch gender từ user metadata với fallback "male".
+  - Fetch age từ birthday metadata nếu có.
+- **Kích hoạt NativeWind dark: className variants** bằng cách gọi setColorScheme.
+- **Khôi phục darkMode 'class' config** để enable manual theme toggle.
+- **Update version number** sang 0.9.0 trong settings screen.
+
+### Chi tiết kỹ thuật (Technical Details)
+
+- **Files Modified**: 15+ files across app/, components/, lib/
+- **Theme Tokens**: 50+ semantic color tokens defined trong global.css
+- **Design System**: 7 border radius levels, 6 shadow levels, spacing tokens
+- **Breaking Changes**: None - backward compatible
+
+## [v0.8.0] - 2026-01-06
+
+### Tính năng mới (Added)
+
+- **Stripe React Native v0.57.2**: Tích hợp StripeProvider ở cấp độ root layout (app/\_layout.tsx) theo best practices.
+  - Di chuyển StripeProvider từ tabs layout lên root layout để đảm bảo toàn bộ ứng dụng có thể truy cập Stripe SDK.
+  - Stripe SDK v0.57.2 bao gồm các bản sửa lỗi cho Android PaymentSheet crashes có trong v0.50.x.
+  - Cấu trúc Provider: RootLayout → StripeProvider → AuthProvider → RootLayoutNav → Stack.

@@ -14,7 +14,7 @@ import {
 } from "react-native-barcode-creator";
 
 export default function HomeScreen() {
-  const { user } = useAuthContext();
+  const { user, profile } = useAuthContext();
   const { t, i18n } = useTranslation();
   const { colorScheme } = useThemeContext();
   const colors = Colors[colorScheme];
@@ -134,7 +134,9 @@ export default function HomeScreen() {
           {t("home.welcome")}
         </Text>
         <Text className="text-foreground text-2xl font-bold">
-          {user?.email?.split("@")[0] || t("common.default_user_name")}
+          {profile?.full_name ||
+            user?.email?.split("@")[0] ||
+            t("common.default_user_name")}
         </Text>
       </View>
 

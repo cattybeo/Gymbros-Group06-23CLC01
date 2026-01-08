@@ -19,7 +19,7 @@ import {
 } from "react-native";
 
 export default function ProfileScreen() {
-  const { user } = useAuthContext();
+  const { user, profile } = useAuthContext();
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
   const { colorScheme } = useThemeContext();
@@ -210,8 +210,7 @@ export default function ProfileScreen() {
   ];
 
   const displayName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
+    profile?.full_name ||
     user?.email?.split("@")[0] ||
     t("common.default_user_name");
 
@@ -371,22 +370,16 @@ export default function ProfileScreen() {
             <View className="mb-4 relative">
               <View className="shadow-lg shadow-black/20 bg-background rounded-full">
                 <View className="w-24 h-24 rounded-full bg-card items-center justify-center border-4 border-background overflow-hidden relative shadow-md">
-                  {user?.user_metadata?.avatar_url ||
-                  user?.user_metadata?.picture ? (
+                  {profile?.avatar_url ? (
                     <Image
-                      source={{
-                        uri:
-                          user?.user_metadata?.avatar_url ||
-                          user?.user_metadata?.picture,
-                      }}
+                      source={{ uri: profile.avatar_url }}
                       className="w-full h-full"
                       resizeMode="cover"
                     />
                   ) : (
                     <Text className="text-3xl font-bold text-muted_foreground">
-                      {user?.user_metadata?.full_name
-                        ? user.user_metadata.full_name.charAt(0).toUpperCase()
-                        : user?.email?.charAt(0).toUpperCase()}
+                      {displayName?.charAt(0).toUpperCase() ||
+                        user?.email?.charAt(0).toUpperCase()}
                     </Text>
                   )}
                 </View>
@@ -410,8 +403,8 @@ export default function ProfileScreen() {
                   {t("profile.goal_label")}
                 </Text>
                 <Text className="text-foreground text-lg font-bold flex-wrap">
-                  {user?.user_metadata?.goal
-                    ? t(`profile.goals.${user.user_metadata.goal}`)
+                  {profile?.goal
+                    ? t(`profile.goals.${profile.goal}`)
                     : t("profile.not_set")}
                 </Text>
               </View>

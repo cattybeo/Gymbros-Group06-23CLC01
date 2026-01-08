@@ -87,6 +87,12 @@ export default function PersonalSpecsScreen() {
           goal,
           activity_level: activityLevel,
           experience_level: experienceLevel,
+          metadata: {
+            height: parseFloat(height),
+            weight: parseFloat(weight),
+            age: parseInt(age),
+            setup_completed: true,
+          },
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
