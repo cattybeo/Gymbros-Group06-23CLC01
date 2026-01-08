@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -37,6 +38,7 @@ export default function PersonalSpecsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
+  const { user } = useAuthContext();
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -57,10 +59,6 @@ export default function PersonalSpecsScreen() {
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         showAlert(t("common.error"), t("auth.user_not_found"), "error");
         return;
@@ -79,24 +77,28 @@ export default function PersonalSpecsScreen() {
 
       if (dbError) throw dbError;
 
-      // 2. Update user_metadata (Profile Snapshot)
-      const { error: authError } = await supabase.auth.updateUser({
-        data: {
+      // 2. Update Profiles Table (Canonical Source)
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
           gender,
           goal,
           activity_level: activityLevel,
           experience_level: experienceLevel,
-          height: parseFloat(height),
-          weight: parseFloat(weight),
-          age: parseInt(age),
-          setup_completed: true,
-        },
-      });
+          metadata: {
+            height: parseFloat(height),
+            weight: parseFloat(weight),
+            age: parseInt(age),
+            setup_completed: true,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
 
-      if (authError) throw authError;
+      if (profileError) throw profileError;
 
-      // Navigate to Home
-      router.replace("/(tabs)");
+      // Navigate to Home (Root determines role-based path)
+      router.replace("/");
     } catch (error: any) {
       showAlert(t("common.error"), error.message, "error");
     } finally {
@@ -144,7 +146,9 @@ export default function PersonalSpecsScreen() {
               >
                 <Text
                   className={`font-bold capitalize ${
-                    gender === g ? "text-on_primary" : "text-foreground-secondary"
+                    gender === g
+                      ? "text-on_primary"
+                      : "text-foreground-secondary"
                   }`}
                 >
                   {t(`profile.genders.${g}`)}

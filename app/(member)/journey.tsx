@@ -89,7 +89,7 @@ export default function JourneyScreen() {
 
       if (error) throw error;
       setBookings((data as BookingWithClass[]) || []);
-    } catch (error) {
+    } catch {
       // Rule 11: Silence in failure (unless critical)
     } finally {
       setIsLoading(false);
@@ -273,7 +273,7 @@ export default function JourneyScreen() {
               </Text>
               {activeTab === "upcoming" && (
                 <TouchableOpacity
-                  onPress={() => router.push("/(tabs)/classes")}
+                  onPress={() => router.push("/(member)/classes")}
                   className="mt-8 bg-primary px-10 py-4 rounded-full shadow-lg shadow-primary/30"
                 >
                   <Text

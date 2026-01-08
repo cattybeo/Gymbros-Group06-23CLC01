@@ -3,48 +3,50 @@
 ## Goal
 
 - Build a robust gym management mobile app (Gymbros) using Expo, Supabase, and Stripe.
-- Current Sprint: EPIC v1.4 - Class Detail View & Refinements.
+- Current Sprint: Phase 6 - Logic Cleanup & UI Standardization.
+- Objective: Implement Trainer QR Check-out, unify data flow to `profiles` table, and standardize UI notifications with `CustomAlertModal`.
 
 ## Constraints/Assumptions
 
 - Framework: Expo SDK 54 (React Native 0.81.5).
 - Styling: NativeWind (Tailwind).
-- Stripe: Must work on Android (requires returnURL and specific init).
-- i18n: Strict usage of `t()` without hardcoded fallbacks or `defaultValue`.
+- Database: Supabase (`profiles` is canonical, `bookings.status` moves `arrived` -> `completed`).
+- AI Standard: Use dedicated Edge Function `gymbros-coach-ai` for Trainer logic.
+- i18n: All new strings MUST use `t()` from `trainer` namespace.
 
 ## Key decisions
 
-- Use `initStripe` hook in `membership.tsx`.
-- Standardized AI pattern: `@google/genai` (Gemini 3 Flash).
-- EPIC v1.4: Use dynamic routing `/class/[id]` for detailed views.
-- **Rule of Data Safety**: All mock data scripts must use `status = 'completed'` and be scoped to mock IDs to avoid polluting real user journeys.
-- **Rule of Payload Optimization**: Always deduplicate and trim UUID lists before calling AI services.
+- **QR check-out**: Trainers mark students as `completed` (Check-out) via QR scan. Staff handle Check-in (`arrived`).
+- **Metadata Removal**: Stop using `raw_user_meta_data` for application logic to avoid sync issues. Favor `public.profiles`.
+- **UI Consistency**: Migrated away from Native `Alert.alert` to `CustomAlertModal` using `useCustomAlert` hook for brand consistency.
+- **Onboarding Check**: Simplified `AuthGuard` to verify `body_indices` existence for onboarding status.
 
 ## State
 
 - Done:
-  - Fixed TS/ESLint errors and released v1.3.2.
-  - Implemented Class Detail UI & Navigation.
-  - Resolved "Booking Pollutant" bug by cleaning up 390+ junk bookings.
-  - Fixed Heatmap rendering (timezone & scoring adjustment).
-  - Optimized AI Token usage via Unique ID filtering.
-  - Implemented `profiles` and `locations` database schema and mock migration.
-  - Updated `ClassDetailScreen` to fetch dynamic trainer and location data.
-  - Implemented unified roles (`Admin`, `Staff`, `PT`, `Member`) and localized HCMC locations.
-  - Fixed `PGRST200` relation error by updating Supabase join syntax to `location:locations(*)`.
-  - UI: Enhanced `ClassCard` with location information.
+  - Phase 1-5: Folder structure, Trainer basics, AI integration, Localization.
+  - Phase 6:
+    - QR Scanning & `completed` status logic.
+    - Full migration to `CustomAlertModal` in Trainer and Auth (Google Sign-In).
+    - Syncing `profiles` and removing Auth metadata updates.
+    - Version bump to 1.8.0 Diamond.
 - Now:
-  - EPIC v1.4: Refining UI animations and cross-platform consistency.
+  - Ready for final commit/PR.
 - Next:
-  - Shared Element Transitions between `ClassCard` and `ClassDetail`.
-  - Verify trainer/location rendering on physical devices.
+  - Phase 7: Final Demo Production & Test Report.
 
 ## Open questions
 
-- Should we add a share button to the class detail view?
+- (None)
 
 ## Working set
 
-- [app/class/[id].tsx](app/class/[id].tsx)
-- [components/ClassCard.tsx](components/ClassCard.tsx)
-- [app/\_layout.tsx](app/_layout.tsx)
+- [app/(trainer)/session/[id].tsx](<app/(trainer)/session/[id].tsx>)
+- [app/profile/edit.tsx](app/profile/edit.tsx)
+- [app/(onboarding)/personal-specs.tsx](<app/(onboarding)/personal-specs.tsx>)
+- [components/ui/GoogleSignInButton.tsx](components/ui/GoogleSignInButton.tsx)
+- [lib/i18n/locales/vi.json](lib/i18n/locales/vi.json)
+- [lib/i18n/locales/en.json](lib/i18n/locales/en.json)
+- [package.json](package.json)
+- [CHANGELOG.md](CHANGELOG.md)
+- [app/profile/settings.tsx](app/profile/settings.tsx)

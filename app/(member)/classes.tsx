@@ -94,7 +94,7 @@ export default function ClassesScreen() {
         if (user && profile) {
           setAiLoading(true);
           getAISmartSuggestion(
-            profile,
+            profile, // Use full profile with goals/metrics instead of user_metadata
             {
               availableClasses: classesData,
               userBookings: userBookedIds,
@@ -103,7 +103,7 @@ export default function ClassesScreen() {
             },
             forceRefreshAI
           )
-            .then((res: AISuggestion | null) => setSuggestion(res))
+            .then((res) => setSuggestion(res))
             .finally(() => setAiLoading(false));
         }
 
@@ -118,7 +118,7 @@ export default function ClassesScreen() {
           }
           setDataReady(true);
         }
-      } catch (_error) {
+      } catch {
         if (!silent)
           showAlert(t("common.error"), t("classes.fetch_error"), "error");
       } finally {

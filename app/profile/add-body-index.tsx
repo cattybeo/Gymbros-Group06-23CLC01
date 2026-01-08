@@ -2,6 +2,7 @@ import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
 import Colors from "@/constants/Colors";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useThemeContext } from "@/lib/theme";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // Screen for adding new body index record
 export default function AddBodyIndexScreen() {
+  const { user, profile } = useAuthContext();
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
   const { colorScheme } = useThemeContext();
@@ -38,21 +40,18 @@ export default function AddBodyIndexScreen() {
 
     setLoading(true);
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) return;
 
-      // Fetch gender from user metadata with fallback
-      const userGender = user?.user_metadata?.gender || "male";
+      // Fetch gender from profile with fallback
+      const userGender = profile?.gender || "male";
 
-      // Fetch age from user metadata if not provided
+      // Fetch age from profile if not provided
       const userAge =
-        age || user?.user_metadata?.birthday
+        age ||
+        (profile?.birthday
           ? new Date().getFullYear() -
-            new Date(user.user_metadata.birthday).getFullYear()
-          : 25;
+            new Date(profile.birthday as string).getFullYear()
+          : 25);
 
       const { error } = await supabase.from("body_indices").insert({
         user_id: user.id,
@@ -60,7 +59,7 @@ export default function AddBodyIndexScreen() {
         height: parseFloat(height),
         age: userAge,
         gender: userGender,
-        goal: "Maintain",
+        goal: profile?.goal || "Maintain",
         record_day: new Date().toISOString().split("T")[0],
       });
 

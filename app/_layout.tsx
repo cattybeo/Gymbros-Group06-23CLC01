@@ -36,7 +36,7 @@ TaskManager.defineTask("StripeKeepJsAwakeTask", async () => {
 export { ErrorBoundary } from "expo-router";
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  initialRouteName: "index",
 };
 
 // Prevent auto-hide before fonts load
@@ -163,7 +163,8 @@ function RootLayoutNav() {
         >
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="(member)" options={{ headerShown: false }} />
+          <Stack.Screen name="(trainer)" options={{ headerShown: false }} />
           <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
           <Stack.Screen
             name="profile/change-password"
@@ -198,7 +199,7 @@ function RootLayoutNav() {
 }
 
 function AuthGuard() {
-  const { session, isLoading } = useAuthContext();
+  const { session, isLoading, isTrainer } = useAuthContext();
   const segments = useSegments();
   const rootNavigationState = useRootNavigationState();
 
@@ -219,6 +220,14 @@ function AuthGuard() {
           return;
         }
 
+        // Trainer bypasses onboarding check
+        if (isTrainer) {
+          if (inAuthGroup || inOnboardingGroup) {
+            router.replace("/");
+          }
+          return;
+        }
+
         // Session exists -> check onboarding status
         const { data, error } = await supabase
           .from("body_indices")
@@ -235,9 +244,9 @@ function AuthGuard() {
             router.replace("/(onboarding)/welcome");
           }
         } else {
-          // Fully onboarded -> force tabs if trying to go back to auth/onboarding
+          // Fully onboarded -> force home if trying to go back to auth/onboarding
           if (inAuthGroup || inOnboardingGroup) {
-            router.replace("/(tabs)");
+            router.replace("/");
           }
         }
       } catch (e) {
@@ -246,7 +255,7 @@ function AuthGuard() {
     };
 
     checkOnboarding();
-  }, [session, isLoading, segments, rootNavigationState?.key]);
+  }, [session, isLoading, isTrainer, segments, rootNavigationState?.key]);
 
   return null;
 }
