@@ -1,6 +1,7 @@
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
 import { useCustomAlert } from "@/hooks/useCustomAlert";
+import { useAuthContext } from "@/lib/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "expo-router";
 import { useState } from "react";
@@ -37,6 +38,7 @@ export default function PersonalSpecsScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { showAlert, CustomAlertComponent } = useCustomAlert();
+  const { user } = useAuthContext();
 
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -57,10 +59,6 @@ export default function PersonalSpecsScreen() {
     setLoading(true);
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
       if (!user) {
         showAlert(t("common.error"), t("auth.user_not_found"), "error");
         return;
