@@ -21,9 +21,15 @@ BEGIN
         -- Avg 7.5 people/class => 50% Moderate (Yellow).
         -- Avg <5 people/class => Not Busy (Green).
         LEAST(COUNT(id)::FLOAT / 60.0, 1.0) as traffic_score
-    FROM public.bookings
-    WHERE status IN ('confirmed', 'checked_in', 'completed')
-    AND booking_date >= (NOW() - INTERVAL '30 days')
+    FROM public.bookings b
+    WHERE b.status IN ('confirmed', 'checked_in', 'completed')
+    AND b.booking_date >= (NOW() - INTERVAL '30 days')
+    -- EXCLUDE HEATMAP BOT DATA (Mock data for demo purposes only)
+    AND NOT EXISTS (
+        SELECT 1 FROM auth.users u 
+        WHERE u.id = b.user_id 
+        AND u.email = 'heatmap_bot@gymbros.io'
+    )
     GROUP BY 1, 2
     ORDER BY 1, 2;
 END;
