@@ -51,6 +51,7 @@ export default function ClassSessionScreen() {
 
       // 2. Fetch Bookings (Students)
       // We join 'profiles' to get student names
+      // EXCLUDE HEATMAP BOT from student roster
       const { data: bData, error: bError } = await supabase
         .from("bookings")
         .select(
@@ -61,7 +62,8 @@ export default function ClassSessionScreen() {
           profiles:user_id (id, full_name, email, avatar_url)
         `
         )
-        .eq("class_id", id);
+        .eq("class_id", id)
+        .neq("profiles.email", "heatmap_bot@gymbros.io");
 
       if (bError) throw bError;
       setStudents(bData || []);
