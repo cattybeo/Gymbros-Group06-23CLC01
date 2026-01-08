@@ -3,35 +3,52 @@
 -- ==========================================
 
 -- 1. Create RPC to get Weekly Traffic Heatmap (Aggregated 30 Days)
+-- Strategy: Show REAL data if exists, otherwise fallback to MOCK data for demo
 CREATE OR REPLACE FUNCTION get_weekly_traffic()
 RETURNS TABLE (
     day_of_week INT,
     hour_of_day INT,
     traffic_score FLOAT
 ) AS $$
+DECLARE
+    real_data_count INT;
 BEGIN
-    RETURN QUERY
-    SELECT 
-        EXTRACT(DOW FROM (booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as day_of_week,
-        EXTRACT(HOUR FROM (booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as hour_of_day,
-        -- Scoring Adjustment:
-        -- Data is aggregated over 30 days (approx 4.2 weeks).
-        -- Class capacity ~20. Total capacity over 30 days ~ 20 * 4.2 = ~85.
-        -- We set denominator to 60.0 means: Avg 15 people/class => 100% Busy (Red).
-        -- Avg 7.5 people/class => 50% Moderate (Yellow).
-        -- Avg <5 people/class => Not Busy (Green).
-        LEAST(COUNT(id)::FLOAT / 60.0, 1.0) as traffic_score
+    -- Check if we have real user bookings in last 30 days
+    SELECT COUNT(*) INTO real_data_count
     FROM public.bookings b
+    INNER JOIN auth.users u ON u.id = b.user_id
     WHERE b.status IN ('confirmed', 'checked_in', 'completed')
     AND b.booking_date >= (NOW() - INTERVAL '30 days')
-    -- EXCLUDE HEATMAP BOT DATA (Mock data for demo purposes only)
-    AND NOT EXISTS (
-        SELECT 1 FROM auth.users u 
-        WHERE u.id = b.user_id 
-        AND u.email = 'heatmap_bot@gymbros.io'
-    )
-    GROUP BY 1, 2
-    ORDER BY 1, 2;
+    AND u.email != 'heatmap_bot@gymbros.io';
+
+    -- If we have real data (>10 bookings), use ONLY real data
+    -- Otherwise, include bot data for demo purposes
+    IF real_data_count > 10 THEN
+        RETURN QUERY
+        SELECT 
+            EXTRACT(DOW FROM (b.booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as day_of_week,
+            EXTRACT(HOUR FROM (b.booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as hour_of_day,
+            LEAST(COUNT(b.id)::FLOAT / 60.0, 1.0) as traffic_score
+        FROM public.bookings b
+        INNER JOIN auth.users u ON u.id = b.user_id
+        WHERE b.status IN ('confirmed', 'checked_in', 'completed')
+        AND b.booking_date >= (NOW() - INTERVAL '30 days')
+        AND u.email != 'heatmap_bot@gymbros.io'
+        GROUP BY 1, 2
+        ORDER BY 1, 2;
+    ELSE
+        -- Fallback: Include bot data for demo
+        RETURN QUERY
+        SELECT 
+            EXTRACT(DOW FROM (booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as day_of_week,
+            EXTRACT(HOUR FROM (booking_date AT TIME ZONE 'Asia/Ho_Chi_Minh'))::INT as hour_of_day,
+            LEAST(COUNT(id)::FLOAT / 60.0, 1.0) as traffic_score
+        FROM public.bookings
+        WHERE status IN ('confirmed', 'checked_in', 'completed')
+        AND booking_date >= (NOW() - INTERVAL '30 days')
+        GROUP BY 1, 2
+        ORDER BY 1, 2;
+    END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
