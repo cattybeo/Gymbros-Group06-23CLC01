@@ -123,8 +123,13 @@ export const getAISmartSuggestion = async (
     // 3. Invoke Edge Function with context
     const { data, error } = await supabase.functions.invoke("gymbros-ai", {
       body: {
-        userProfile,
-        availableClasses: gymContext.availableClasses,
+        userProfile: {
+          id: userProfile?.id,
+          goal: userProfile?.goal,
+          experience_level: userProfile?.experience_level,
+          activity_level: userProfile?.activity_level,
+        },
+        availableClasses: gymContext.availableClasses.slice(0, 50),
         userBookings: gymContext.userBookings,
         currentTime: gymContext.currentTime,
         language: gymContext.language || "vi",

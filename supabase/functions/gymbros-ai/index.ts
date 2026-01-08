@@ -125,20 +125,16 @@ Deno.serve(async (req: Request) => {
       4. DO NOT include classes not in the list.
     `;
 
-    console.log("[gymbros-ai] Calling Gemini 2.5 Flash Lite...");
+    console.log("[gymbros-ai] Calling Gemini 2.5 Flash...");
 
-    // Gemini 2.5 Series (2025-2026 Production Model)
     let result;
     try {
       result = await ai.models.generateContent({
-        model: "gemini-2.5-flash-lite",
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
         config: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
-          thinkingConfig: {
-            thinkingBudget: -1,
-          },
         },
       });
     } catch (aiError: any) {
