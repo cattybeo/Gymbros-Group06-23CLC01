@@ -70,12 +70,9 @@ yarn install
 
 ### 3. Cấu hình biến môi trường
 
-1. Copy file `.env.example` thành `.env`.
-2. Liên hệ Leader để lấy các API Key và điền vào file `.env`:
-   - `EXPO_PUBLIC_SUPABASE_URL`
-   - `EXPO_PUBLIC_SUPABASE_KEY`
-   - `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
-
+1. Tải các file cấu hình quan trọng tại đây: https://drive.google.com/drive/folders/1kgWIpDLRmtBnG90cdJIqHN7Xza7Bk2j-?usp=drive_link
+2. Copy hết các file con vào folder `credentials`
+3. Tìm lệnh ở tab NPM Scripts để chạy
 ---
 
 ## Cách chạy dự án
